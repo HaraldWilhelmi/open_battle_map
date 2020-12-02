@@ -26,6 +26,7 @@ TAGS_META_DATA = [
 ]
 
 ctx = get_context()
+ctx.start()
 ctx.register(get_config_for_production())
 
 ctx.register(MapSetIO())

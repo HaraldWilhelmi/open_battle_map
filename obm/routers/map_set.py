@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import Depends, APIRouter, status
 from pydantic import BaseModel, validator
 
-from obm.common.dep_context import DepContext, get_context
+from obm.dependencies import get_map_set_manager, get_map_set_directory
 from obm.common.validators import name_validator
 from obm.data.map_set import MapSet
 from obm.model.admin import check_admin_secret
@@ -36,9 +36,8 @@ class CreateRequest(BaseModel):
             )
 async def create_map_set(
         data: CreateRequest,
-        ctx: DepContext = Depends(get_context),
+        manager: MapSetManager = Depends(get_map_set_manager),
 ) -> MapSet:
-    manager = ctx.get(MapSetManager)
     return manager.create(data.name)
 
 
@@ -49,9 +48,8 @@ class DeleteRequest(BaseModel):
 @router.delete('/', description='Deletes a map set permanently.')
 async def delete_map_set(
         data: DeleteRequest,
-        ctx: DepContext = Depends(get_context),
+        manager: MapSetManager = Depends(get_map_set_manager),
 ):
-    manager = ctx.get(MapSetManager)
     map_set = manager.get_by_uuid(data.uuid)
     manager.delete(map_set)
 
@@ -65,9 +63,8 @@ class UpdateRequest(BaseModel):
 @router.post('/', description='Update map set.')
 async def update_map_set(
         data: UpdateRequest,
-        ctx: DepContext = Depends(get_context),
+        manager: MapSetManager = Depends(get_map_set_manager),
 ):
-    manager = ctx.get(MapSetManager)
     map_set = manager.get_by_uuid(data.uuid)
     map_set.name = data.name
     map_set.touch()
@@ -78,7 +75,6 @@ async def update_map_set(
             response_model=Dict[UUID, str]
             )
 async def list_all(
-        ctx: DepContext = Depends(get_context)
+        directory: MapSetDirectory = Depends(get_map_set_directory)
 ):
-    directory: MapSetDirectory = ctx.get(MapSetDirectory)
     return directory.get_uuid_to_name_mapping()

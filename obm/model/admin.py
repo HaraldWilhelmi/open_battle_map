@@ -1,6 +1,7 @@
 from fastapi import Depends, Header, status, HTTPException
 
-from obm.data.config import Config, get_config
+from obm.data.config import Config
+from obm.dependencies import get_config
 
 
 def check_admin_secret(
