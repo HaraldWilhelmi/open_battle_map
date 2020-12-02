@@ -3,14 +3,15 @@ from uuid import UUID
 from fastapi import Depends, APIRouter, status
 from pydantic import BaseModel, validator
 
-from obm.common.error import name_validator
+from obm.common.dep_context import DepContext, get_context
+from obm.common.validators import name_validator
 from obm.data.map_set import MapSet
-from obm.model.admin import check_admin_token
-from obm.model.map_set_directory import MapSetDirectory, get_map_set_directory
-from obm.model.map_set_manager import MapSetManager, get_map_set_manager
+from obm.model.admin import check_admin_secret
+from obm.model.map_set_directory import MapSetDirectory
+from obm.model.map_set_manager import MapSetManager
 
 router = APIRouter(
-    dependencies=[Depends(check_admin_token)],
+    dependencies=[Depends(check_admin_secret)],
     responses={
         status.HTTP_401_UNAUTHORIZED: {
             'description': 'Wrong admin token was sent.'
@@ -24,7 +25,6 @@ router = APIRouter(
 
 class CreateRequest(BaseModel):
     name: str
-
     _check_name = validator('name', allow_reuse=True)(name_validator)
 
 
@@ -36,8 +36,9 @@ class CreateRequest(BaseModel):
             )
 async def create_map_set(
         data: CreateRequest,
-        manager: MapSetManager = Depends(get_map_set_manager),
+        ctx: DepContext = Depends(get_context),
 ) -> MapSet:
+    manager = ctx.get(MapSetManager)
     return manager.create(data.name)
 
 
@@ -45,13 +46,12 @@ class DeleteRequest(BaseModel):
     uuid: UUID
 
 
-@router.delete('/',
-               description='Deletes a map set permanently.',
-               )
+@router.delete('/', description='Deletes a map set permanently.')
 async def delete_map_set(
         data: DeleteRequest,
-        manager: MapSetManager = Depends(get_map_set_manager),
+        ctx: DepContext = Depends(get_context),
 ):
+    manager = ctx.get(MapSetManager)
     map_set = manager.get_by_uuid(data.uuid)
     manager.delete(map_set)
 
@@ -59,17 +59,15 @@ async def delete_map_set(
 class UpdateRequest(BaseModel):
     uuid: UUID
     name: str
-
     _check_name = validator('name', allow_reuse=True)(name_validator)
 
 
-@router.post('/',
-             dependencies='Update map set.'
-             )
+@router.post('/', description='Update map set.')
 async def update_map_set(
         data: UpdateRequest,
-        manager: MapSetManager = Depends(get_map_set_manager),
+        ctx: DepContext = Depends(get_context),
 ):
+    manager = ctx.get(MapSetManager)
     map_set = manager.get_by_uuid(data.uuid)
     map_set.name = data.name
     map_set.touch()
@@ -80,6 +78,7 @@ async def update_map_set(
             response_model=Dict[UUID, str]
             )
 async def list_all(
-        directory: MapSetDirectory = Depends(get_map_set_directory)
+        ctx: DepContext = Depends(get_context)
 ):
+    directory: MapSetDirectory = ctx.get(MapSetDirectory)
     return directory.get_uuid_to_name_mapping()

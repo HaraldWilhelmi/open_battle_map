@@ -5,10 +5,9 @@ from uuid import UUID
 from typing import List, Optional
 import json
 import re
-from fastapi import Depends
 
-from obm.common.error import check_dependency
-from obm.data.config import Config, get_config
+from obm.common.dep_context import DepContext, get_context
+from obm.data.config import Config
 from obm.data.map_set import MapSet, MapSetEntry
 from obm.data.battle_map import BattleMap
 
@@ -21,11 +20,8 @@ class MapSetLoadError(Exception):
 
 
 class MapSetIO:
-    def __init__(
-            self,
-            config: Config = Depends(get_config),
-    ):
-        self._config = config
+    def __init__(self, ctx: DepContext = get_context()):
+        self._config: Config = ctx.get(Config)
 
     def get_map_set_dir(self, uuid: UUID) -> str:
         return join(self._config.data_dir, uuid.__str__())
@@ -60,7 +56,7 @@ class MapSetIO:
         makedirs(self.get_map_set_dir(uuid), 0o700, exist_ok=True)
         with open(self.get_map_set_path(uuid), 'w') as fp:
             fp.write(
-                map_set.json(include={'name', 'uuid'})
+                map_set.json(include={'name', 'uuid'}, indent=4)
             )
         for battle_map in map_set.battle_maps_by_uuid.values():
             self.save_battle_map(battle_map)
@@ -70,7 +66,7 @@ class MapSetIO:
         map_set_uuid = battle_map.map_set_uuid
         with open(self.get_battle_map_path(map_set_uuid, battle_map.uuid), 'w') as fp:
             fp.write(
-                battle_map.json(exclude={'background.image_data'})
+                battle_map.json(exclude={'background.image_data'}, indent=4)
             )
 
         image_path = self.get_background_path(map_set_uuid, battle_map.uuid)
@@ -141,16 +137,3 @@ class MapSetIO:
                 unlink(background_path)
         unlink(self.get_map_set_path(map_set.uuid))
         rmdir(self.get_map_set_dir(map_set.uuid))
-
-
-map_set_io: Optional[MapSetIO] = None
-
-
-def get_map_set_io() -> MapSetIO:
-    check_dependency(map_set_io, 'map_set_io')
-    return map_set_io
-
-
-def setup_map_set_io_for_production():
-    global map_set_io
-    map_set_io = MapSetIO()

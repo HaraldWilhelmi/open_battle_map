@@ -2,6 +2,7 @@ from pytest import fixture
 from pytest_mock import MockerFixture
 from uuid import UUID
 
+from obm.common.dep_context import DepContext
 from obm.data.config import Config
 from obm.data.map_set import MapSet
 from obm.fileio.map_set_io import MapSetIO
@@ -20,9 +21,11 @@ def uuids():
 
 
 @fixture
-def map_set_directory(mocker: MockerFixture, uuids):
-    config = Config(admin_secret='bla')
-    map_set_io = MapSetIO(config=config)
+def ctx(mocker, uuids):
+    ctx = DepContext()
+    ctx.register(Config(admin_secret='bla'))
+
+    map_set_io = MapSetIO(ctx=ctx)
     mocker.patch.object(
         map_set_io,
         'get_map_set_uuid_to_name_mapping',
@@ -34,11 +37,13 @@ def map_set_directory(mocker: MockerFixture, uuids):
             uuids[4]: 'x',
         }
     )
-    map_set_directory = MapSetDirectory(map_set_io=map_set_io)
-    yield map_set_directory
+    ctx.register(map_set_io)
+    ctx.register(MapSetDirectory(ctx=ctx))
+    yield ctx
 
 
-def test_simple_init(map_set_directory: MapSetDirectory, uuids):
+def test_simple_init(ctx: DepContext, uuids):
+    map_set_directory: MapSetDirectory = ctx.get(MapSetDirectory)
     result = map_set_directory.get_uuid_to_name_mapping()
     assert result == {
         uuids[3]: 'a',
@@ -49,7 +54,8 @@ def test_simple_init(map_set_directory: MapSetDirectory, uuids):
     }
 
 
-def test_add(map_set_directory: MapSetDirectory, uuids):
+def test_add(ctx: DepContext, uuids):
+    map_set_directory: MapSetDirectory = ctx.get(MapSetDirectory)
     map_set = MapSet(
         name='k',
         uuid=UUID('3e8dbd20-7659-4c29-8309-2e9289496c22')
@@ -66,12 +72,13 @@ def test_add(map_set_directory: MapSetDirectory, uuids):
     }
 
 
-def test_remove(map_set_directory: MapSetDirectory, uuids):
+def test_remove(ctx: DepContext, uuids):
+    map_set_directory: MapSetDirectory = ctx.get(MapSetDirectory)
     map_set = MapSet(
         name='c',
         uuid=uuids[0]
     )
-    map_set_directory.remove(map_set)
+    map_set_directory.delete(map_set)
     result = map_set_directory.get_uuid_to_name_mapping()
     assert result == {
         uuids[3]: 'a',

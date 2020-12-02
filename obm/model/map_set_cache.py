@@ -1,39 +1,33 @@
-from typing import Optional, Dict, ValuesView
+from typing import Dict, ValuesView
 from uuid import UUID
 
-from obm.common.error import check_dependency
+from obm.common.dep_context import get_context, DepContext
+from obm.fileio.map_set_io import MapSetIO
 from obm.data.map_set import MapSet
 
 
 class MapSetCache:
-    def __init__(self):
+    def __init__(self, ctx: DepContext = get_context()):
+        self._map_set_io: MapSetIO = ctx.get(MapSetIO)
         self._data: Dict[UUID, MapSet] = {}
 
-    def __getitem__(self, uuid: UUID):
+    def get_by_uuid(self, uuid: UUID):
+        if uuid not in self._data:
+            map_set = self._map_set_io.load_map_set(uuid)
+            map_set.touch(changed=False)
+            map_set.saved_flag = True
+            self._data[uuid] = map_set
         return self._data[uuid]
 
-    def __setitem__(self, key: UUID, value: MapSet):
-        assert key == value.uuid
-        self._data[key] = value
+    def add(self, map_set: MapSet):
+        self._data[map_set.uuid] = map_set
 
-    def __delitem__(self, key: UUID):
-        del self._data[key]
+    def delete(self, map_set: MapSet):
+        if map_set.uuid in self._data:
+            del self._data[map_set.uuid]
 
-    def __contains__(self, key: UUID) -> bool:
+    def has(self, key: UUID) -> bool:
         return key in self._data
 
     def values(self) -> ValuesView[MapSet]:
         return self._data.values()
-
-
-map_set_cache: Optional[MapSetCache] = None
-
-
-def get_map_set_cache() -> MapSetCache:
-    check_dependency(map_set_cache, 'map_set_cache')
-    return map_set_cache
-
-
-def setup_map_set_cache_for_production():
-    global map_set_cache
-    map_set_cache = MapSetCache()
