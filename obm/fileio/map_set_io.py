@@ -85,14 +85,15 @@ class MapSetIO:
                 battle_map = self.load_battle_map(map_set, battle_map_uuid)
                 map_set.battle_maps_by_uuid[battle_map.uuid] = battle_map
         except Exception as e:
-            raise MapSetLoadError(f"Failed to load map set {uuid}: {str(e)}")
+            raise MapSetLoadError(f"Failed to load map set {uuid}: {type(e).__name__}({str(e)})")
         return map_set
 
     def load_map_set_core_data(self, uuid: UUID) -> MapSet:
-        with open(self.get_map_set_path(uuid), 'r') as fp:
+        map_set_file = self.get_map_set_path(uuid);
+        with open(map_set_file, 'r') as fp:
             raw_data = json.load(fp)
         map_set = MapSet(**raw_data)
-        assert uuid == map_set.uuid
+        assert uuid == map_set.uuid, f"UUID in {map_set_file} does not match file name!"
         map_set.saved_flag = True
         return map_set
 
@@ -110,7 +111,7 @@ class MapSetIO:
             raw_data = json.load(fp)
         image_data = self.load_image_data(map_set, battle_map_uuid)
         battle_map = self.create_battle_map_from_raw_data(raw_data, image_data)
-        assert battle_map_uuid == battle_map.uuid
+        assert battle_map_uuid == battle_map.uuid, f"UUID in {battle_map_path} does not match file name!"
         return battle_map
 
     def load_image_data(self, map_set: MapSet, battle_map_uuid: UUID) -> Optional[bytes]:
@@ -123,12 +124,13 @@ class MapSetIO:
 
     @staticmethod
     def create_battle_map_from_raw_data(raw_data, image_data) -> BattleMap:
+        battle_map = BattleMap(**raw_data)
         if image_data is None:
-            assert 'background' not in raw_data
+            assert battle_map.background is None, f"Battle map {battle_map.uuid} has missing image data!"
         else:
-            raw_data['background']['image_data'] = image_data
-            assert raw_data['background']['media_type'] is not None
-        return BattleMap(**raw_data)
+            assert battle_map.background is not None, f"Battle map {battle_map.uuid} has image data but no media type!"
+            battle_map.background.image_data = image_data
+        return battle_map
 
     def delete_map_set(self, map_set: MapSet):
         for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):

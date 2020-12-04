@@ -47,7 +47,7 @@ export class Admin extends Component<AdminProps, AdminState> {
                     <table className="Admin">
                         <tbody>
                             <tr>
-                                <td><MapSetCreateForm globalActionDirectory={this.props.globalActionDirectory} /></td>
+                                <td colSpan={2}><MapSetCreateForm globalActionDirectory={this.props.globalActionDirectory} /></td>
                                 <td><AdminLogout globalActionDirectory={this.props.globalActionDirectory} /></td>
                             </tr>
                             {mapSetList}

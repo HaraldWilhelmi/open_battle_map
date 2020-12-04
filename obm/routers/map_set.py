@@ -67,7 +67,7 @@ async def update_map_set(
 ):
     map_set = manager.get_by_uuid(data.uuid)
     map_set.name = data.name
-    map_set.touch()
+    manager.save(map_set)
 
 
 class MapSetItem(BaseModel):
