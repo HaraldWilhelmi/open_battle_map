@@ -15,7 +15,6 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,8 +23,40 @@
   color: white;
 }
 
+.App-message {
+  background-color: #ff0000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-login {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+label.App-login {
+  margin: 20px;
+}
+
+button.App-login {
+  margin: 20px;
+}
+
 .App-link {
   color: #61dafb;
+}
+
+.help {
+  color: #a0a0a0;
+  font-size: 10px;
+  padding: 2vmin;
 }
 
 @keyframes App-logo-spin {

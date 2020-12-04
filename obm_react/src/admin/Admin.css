@@ -1,0 +1,23 @@
+.AdminLogin {
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+label.AdminLogin {
+  margin: 20px;
+}
+
+button.AdminLogin {
+  margin: 20px;
+}
+
+.Admin {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

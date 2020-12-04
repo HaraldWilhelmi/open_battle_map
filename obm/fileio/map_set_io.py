@@ -46,7 +46,8 @@ class MapSetIO:
         result = {}
         glob_str = join(self._config.data_dir, '*', 'map_set.json')
         for map_set_path in glob(glob_str):
-            raw_data = json.load(map_set_path)
+            with open(map_set_path, 'r') as fp:
+                raw_data = json.load(fp)
             entry = MapSetEntry(**raw_data)
             result[entry.uuid] = entry.name
         return result

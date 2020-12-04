@@ -8,6 +8,7 @@ from obm.model.map_set_cache import MapSetCache
 from obm.model.map_set_manager import MapSetManager
 
 from obm.routers.map_set import router as map_set_router
+from obm.routers.redirect import router as redirect_router
 
 
 TAGS_META_DATA = [
@@ -23,6 +24,12 @@ TAGS_META_DATA = [
             + 'and changed in the configuration file '
             + get_config_file_name() + '.'
     },
+    {
+        'name': 'Redirects',
+        'description':
+            'A few redirects simply the use of the application. They are mostly '
+            'useful to set some cookies for new users.'
+    },
 ]
 
 ctx = get_context()
@@ -37,3 +44,4 @@ ctx.register(MapSetManager())
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
 app.include_router(map_set_router, prefix='/map_set', tags=['Map Set'])
+app.include_router(redirect_router, tags=['Redirects'])

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import List
 from uuid import UUID
 from fastapi import Depends, APIRouter, status
 from pydantic import BaseModel, validator
@@ -70,11 +70,19 @@ async def update_map_set(
     map_set.touch()
 
 
+class MapSetItem(BaseModel):
+    uuid: UUID
+    name: str
+
+
 @router.get('/list_all',
             description='List the existing map sets, mapping the UUID to the name, sorted by name.',
-            response_model=Dict[UUID, str]
+            response_model=List[MapSetItem]
             )
 async def list_all(
         directory: MapSetDirectory = Depends(get_map_set_directory)
 ):
-    return directory.get_uuid_to_name_mapping()
+    return [
+        MapSetItem(uuid=uuid, name=name)
+        for uuid, name in directory.get_uuid_to_name_mapping().items()
+    ]
