@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {GlobalActionDirectory} from '../common/Types';
+import {GlobalActionDirectory, Mode} from '../common/Types';
 import './Admin.css';
 
 
@@ -21,6 +21,7 @@ export class AdminLogin extends Component<AdminLoginProps, AdminLoginState> {
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
     }
 
     handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -30,6 +31,10 @@ export class AdminLogin extends Component<AdminLoginProps, AdminLoginState> {
     handleSubmit(event: React.FormEvent) {
         this.props.globalActionDirectory.loginAdmin(this.state.adminSecret);
         event.preventDefault();
+    }
+
+    handleCancel() {
+        this.props.globalActionDirectory.setMode(Mode.User);
     }
 
     render() {
@@ -48,6 +53,7 @@ export class AdminLogin extends Component<AdminLoginProps, AdminLoginState> {
                         <div className="help">
                             (In doubt check .open_battle_map_rc in the application users home ...)
                         </div>
+                        <button className="AdminLogin" onClick={this.handleCancel}>Cancel</button>
                     </div>
                 </form>
             </div>
