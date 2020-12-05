@@ -2,6 +2,8 @@ import {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {ReduxDispatch} from '../redux/Store';
 import {MapSetItem} from '../redux/MapSets';
+import {setMode, Mode, setSelectedMapSet} from '../redux/Cookies';
+import {resetMessages} from '../redux/Messages';
 import {renameMapSet, deleteMapSet} from './Tools';
 
 interface Props {
@@ -23,11 +25,17 @@ export function MapSetItemRow(props: Props) {
     };
 
     let myDelete = () => {
-        deleteMapSet(dispatch, props.item.uuid);
+        let warning = 'Really delete Map Set "' + item.name + '" ('
+            + item.uuid + ')?'
+        if (window.confirm(warning)) {
+            deleteMapSet(dispatch, props.item.uuid);
+        }
     };
 
     let myOpen = () => {
-        // Todo
+        dispatch(resetMessages());
+        dispatch(setSelectedMapSet(item.uuid));
+        dispatch(setMode(Mode.User));
     }
 
     return (

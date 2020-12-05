@@ -15,8 +15,8 @@ function cssForCategory(category: MessageCategory) {
 const Messages = (props: Props) => {
     let items = useSelector((state: RootState) => state.messages);
     let messages = items.map(
-        (item) => (
-            <div className={cssForCategory(item.category)}>
+        (item, index) => (
+            <div className={cssForCategory(item.category)} key={index}>
                 {item.content}
             </div>
         )
