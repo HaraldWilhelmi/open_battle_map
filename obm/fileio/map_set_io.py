@@ -19,6 +19,14 @@ class MapSetLoadError(Exception):
     pass
 
 
+class NoSuchMapSet(MapSetLoadError):
+    pass
+
+
+class NoSuchBattleMap(MapSetLoadError):
+    pass
+
+
 class MapSetIO:
     def __init__(self, ctx: DepContext = get_context()):
         self._config: Config = ctx.get(Config)
@@ -84,12 +92,16 @@ class MapSetIO:
             for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):
                 battle_map = self.load_battle_map(map_set, battle_map_uuid)
                 map_set.battle_maps_by_uuid[battle_map.uuid] = battle_map
+        except MapSetLoadError as e:
+            raise e
         except Exception as e:
             raise MapSetLoadError(f"Failed to load map set {uuid}: {type(e).__name__}({str(e)})")
         return map_set
 
     def load_map_set_core_data(self, uuid: UUID) -> MapSet:
-        map_set_file = self.get_map_set_path(uuid);
+        map_set_file = self.get_map_set_path(uuid)
+        if not isfile(map_set_file):
+            raise NoSuchMapSet(f"No map set found at path '{map_set_file}'")
         with open(map_set_file, 'r') as fp:
             raw_data = json.load(fp)
         map_set = MapSet(**raw_data)
@@ -107,6 +119,8 @@ class MapSetIO:
 
     def load_battle_map(self, map_set: MapSet, battle_map_uuid: UUID) -> BattleMap:
         battle_map_path = self.get_battle_map_path(map_set.uuid, battle_map_uuid)
+        if not isfile(battle_map_path):
+            raise NoSuchBattleMap(f"No battle map found aft path '{battle_map_path}'")
         with open(battle_map_path, 'r') as fp:
             raw_data = json.load(fp)
         image_data = self.load_image_data(map_set, battle_map_uuid)
