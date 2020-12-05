@@ -1,64 +1,53 @@
-import React, {Component} from 'react';
-import {GlobalActionDirectory, Mode} from '../common/Types';
+import React, {useState} from 'react';
+import {useDispatch} from 'react-redux';
+import Cookies from 'universal-cookie';
+import {ReduxDispatch} from '../redux/Store';
+import {setAdminSecret, setMode, CookieNames, Mode} from '../redux/Cookies';
+import {resetMessages} from '../redux/Messages';
 import './Admin.css';
 
+const cookies = new Cookies();
 
-export interface AdminLoginProps {
-    globalActionDirectory: GlobalActionDirectory,
-}
+export function AdminLogin() {
+    let [secret, setSecret] = useState('');
+    const dispatch: ReduxDispatch = useDispatch();
 
-interface AdminLoginState {
-    adminSecret: string,
-}
+    let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSecret(event.target.value);
+    };
 
-
-export class AdminLogin extends Component<AdminLoginProps, AdminLoginState> {
-    constructor(props: AdminLoginProps) {
-        super(props);
-        this.state = {
-            adminSecret: '',
-        };
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleCancel = this.handleCancel.bind(this);
-    }
-
-    handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({adminSecret: event.target.value});
-    }
-
-    handleSubmit(event: React.FormEvent) {
-        this.props.globalActionDirectory.loginAdmin(this.state.adminSecret);
+    let myLogin = (event: React.FormEvent) => {
+        dispatch(resetMessages());
+        cookies.set(CookieNames.obm_admin_secret, secret);
+        dispatch(setAdminSecret(secret));
+        dispatch(setMode(Mode.Admin));
         event.preventDefault();
-    }
+    };
 
-    handleCancel() {
-        this.props.globalActionDirectory.setMode(Mode.User);
-    }
+    let myCancel = () => {
+        dispatch(setMode(Mode.User));
+    };
 
-    render() {
-        return (
-            <div>
-                <div className="App-header">
-                    <header className="App-header">
-                        <h1>Open Battle Map</h1>
-                    </header>
-                </div>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="AdminLogin">
-                        <label className="AdminLogin">Please enter admin secret:</label>
-                        <input maxLength={128} value={this.state.adminSecret} onChange={this.handleChange} />
-                        <button className="AdminLogin" type="submit">Login</button>
-                        <div className="help">
-                            (In doubt check .open_battle_map_rc in the application users home ...)
-                        </div>
-                        <button className="AdminLogin" onClick={this.handleCancel}>Cancel</button>
-                    </div>
-                </form>
+    return (
+        <div>
+            <div className="App-header">
+                <header className="App-header">
+                    <h1>Open Battle Map</h1>
+                </header>
             </div>
-        );
-    }
+            <form onSubmit={myLogin}>
+                <div className="AdminLogin">
+                    <label className="AdminLogin">Please enter admin secret:</label>
+                    <input maxLength={128} value={secret} onChange={onChange} />
+                    <button className="AdminLogin" type="submit">Login</button>
+                    <div className="help">
+                        (In doubt check .open_battle_map_rc in the application users home ...)
+                    </div>
+                    <button className="AdminLogin" onClick={myCancel}>Cancel</button>
+                </div>
+            </form>
+        </div>
+    );
 }
 
 export default AdminLogin;

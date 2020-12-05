@@ -1,28 +1,21 @@
-import React, {Component} from 'react';
-import {GlobalActionDirectory} from '../common/Types';
+import {useDispatch} from 'react-redux';
+import Cookies from 'universal-cookie';
+import {Mode, CookieNames, setMode, setAdminSecret} from '../redux/Cookies';
 import './Admin.css';
 
+const cookies = new Cookies();
 
-export interface AdminLogoutProps {
-    globalActionDirectory: GlobalActionDirectory,
-}
+export function AdminLogout() {
+    const dispatch = useDispatch();
 
-export class AdminLogout extends Component<AdminLogoutProps> {
-    constructor(props: AdminLogoutProps) {
-        super(props);
-
-        this.logout = this.logout.bind(this);
-    }
-
-    render() {
-        return (
-            <button onClick={this.logout}>Logout</button>
-        );
-    }
-
-    logout() {
-        this.props.globalActionDirectory.logoutAdmin();
-    }
+    let myLogout = () => {
+        dispatch(setMode(Mode.User));
+        dispatch(setAdminSecret(undefined));
+        cookies.remove(CookieNames.obm_admin_secret);
+    };
+    return (
+        <button onClick={myLogout}>Logout</button>
+    );
 }
 
 export default AdminLogout;

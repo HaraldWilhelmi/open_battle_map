@@ -1,27 +1,16 @@
-import React, {Component} from 'react';
-import {GlobalActionDirectory, Mode} from '../common/Types';
+import {useDispatch} from 'react-redux';
+import {Mode,setMode} from '../redux/Cookies';
 
+export function AdminButton() {
+    const dispatch = useDispatch();
 
-export interface AdminButtonProps {
-    globalActionDirectory: GlobalActionDirectory,
-}
-
-export class AdminButton extends Component<AdminButtonProps> {
-    constructor(props: AdminButtonProps) {
-        super(props);
-
-        this.login = this.login.bind(this);
+    let switchAdmin = () => {
+        dispatch(setMode(Mode.Admin));
     }
 
-    render() {
-        return (
-            <button onClick={this.login}>Administrator</button>
-        );
-    }
-
-    login() {
-        this.props.globalActionDirectory.setMode(Mode.Admin);
-    }
+    return (
+        <button onClick={switchAdmin}>Administrator</button>
+    );
 }
 
 export default AdminButton;

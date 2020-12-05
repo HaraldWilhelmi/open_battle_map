@@ -1,93 +1,52 @@
-import React, {Component} from 'react';
-import {MapSetItem, GlobalActionDirectory} from '../common/Types';
+import {useState} from 'react';
+import {useDispatch} from 'react-redux';
+import {ReduxDispatch} from '../redux/Store';
+import {MapSetItem} from '../redux/MapSets';
+import {renameMapSet, deleteMapSet} from './Tools';
 
-
-export interface MapSetItemRowProps {
+interface Props {
     item: MapSetItem,
-    globalActionDirectory: GlobalActionDirectory,
 }
 
-interface State {
-    name: string,
-}
+export function MapSetItemRow(props: Props) {
+    let item: MapSetItem = props.item;
+    let [name, setName] = useState(item.name);
+    const dispatch: ReduxDispatch = useDispatch();
 
-interface UpdateRequest {
-    uuid: string,
-    name: string,
-}
+    let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setName(event.target.value);
+    };
 
-interface DeleteRequest {
-    uuid: string,
-}
-
-export class MapSetItemRow extends Component<MapSetItemRowProps, State> {
-    constructor(props: MapSetItemRowProps) {
-        super(props);
-        this.state = { name: props.item.name }
-        this.open = this.open.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.rename = this.rename.bind(this);
-        this.delete = this.delete.bind(this);
-    }
-
-    render() {
-        let item: MapSetItem = this.props.item;
-        return (
-            <tr>
-                <td>
-                    <form onSubmit={this.rename}>
-                        <input value={this.state.name} onChange={this.handleChange} />
-                        <button type="submit">Rename</button>
-                    </form>
-                </td>
-                <td>
-                    <button onClick={this.open}>Open</button>
-                    <button onClick={this.delete}>Delete</button>
-                </td>
-                <td className="help">
-                    ({item.uuid})
-                </td>
-            </tr>
-        );
-    }
-
-    handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({name: event.target.value});
-    }
-
-    async rename(event: React.FormEvent) {
-        let body: UpdateRequest = {
-            uuid: this.props.item.uuid,
-            name: this.state.name,
-        }
-        let response = await(
-            fetch('/map_set/', {
-                method:'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body),
-            })
-        );
-        this.props.globalActionDirectory.handleResponse(response);
+    let myRename = (event: React.FormEvent) => {
+        renameMapSet(dispatch, props.item.uuid, name);
         event.preventDefault();
+    };
+
+    let myDelete = () => {
+        deleteMapSet(dispatch, props.item.uuid);
+    };
+
+    let myOpen = () => {
+        // Todo
     }
 
-    open() {
-        this.props.globalActionDirectory.selectMapSet(this.props.item.uuid);
-    }
-
-    async delete() {
-        let body: DeleteRequest = {
-            uuid: this.props.item.uuid,
-        }
-        let response = await(
-            fetch('/map_set/', {
-                method:'DELETE',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body),
-            })
-        );
-        this.props.globalActionDirectory.handleResponse(response);
-    }
+    return (
+        <tr>
+            <td>
+                <form onSubmit={myRename}>
+                    <input value={name} onChange={onChange} />
+                    <button type="submit">Rename</button>
+                </form>
+            </td>
+            <td>
+                <button onClick={myOpen}>Open</button>
+                <button onClick={myDelete}>Delete</button>
+            </td>
+            <td className="help">
+                ({item.uuid})
+            </td>
+        </tr>
+    );
 }
 
 export default MapSetItemRow;
