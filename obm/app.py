@@ -58,7 +58,7 @@ ctx.register(MapSetManager())
 
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
-app.include_router(admin_map_set_router, prefix='/map_set', tags=['Admin Map Set'])
-app.include_router(map_set_router, prefix='/map_set', tags=['Map Set'])
-app.include_router(battle_map_router, prefix='/battle_map', tags=['Battle Map'])
+app.include_router(admin_map_set_router, prefix='/api/map_set', tags=['Admin Map Set'])
+app.include_router(map_set_router, prefix='/api/map_set', tags=['Map Set'])
+app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Map'])
 app.include_router(redirect_router, tags=['Redirects'])
