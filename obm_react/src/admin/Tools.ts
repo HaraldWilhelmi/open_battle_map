@@ -1,7 +1,7 @@
 import {ReduxDispatch} from '../redux/Store';
 import {MapSetList, loadMapSets} from '../redux/MapSets';
 import {handleResponse} from '../common/Tools';
-import {setMode, Mode} from '../redux/Cookies';
+import {setMode, Mode} from '../redux/Mode';
 
 export async function updateMapSets(dispatch: ReduxDispatch) {
     let response = await(fetch('/api/map_set/list_all'));

@@ -1,0 +1,10 @@
+.user-screen { display: flex }
+.map-box { flex: 1 1 auto }
+.menu-box {
+    flex: 0 0 200px;
+    flex-direction: column;
+}
+.menu-item{
+    width: 20em;
+    flex-direction: row;
+}

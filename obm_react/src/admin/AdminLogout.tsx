@@ -1,6 +1,7 @@
 import {useDispatch} from 'react-redux';
 import Cookies from 'universal-cookie';
-import {Mode, CookieNames, setMode, setAdminSecret} from '../redux/Cookies';
+import {CookieNames, setAdminSecret} from '../redux/Cookies';
+import {Mode, setMode} from '../redux/Mode';
 import './Admin.css';
 
 const cookies = new Cookies();

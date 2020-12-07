@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {ReduxDispatch} from '../redux/Store';
 import {MapSetItem} from '../redux/MapSets';
-import {setMode, Mode, setSelectedMapSet} from '../redux/Cookies';
+import {setMode, Mode} from '../redux/Mode';
 import {resetMessages} from '../redux/Messages';
 import {renameMapSet, deleteMapSet} from './Tools';
 
@@ -34,8 +34,8 @@ export function MapSetItemRow(props: Props) {
 
     let myOpen = () => {
         dispatch(resetMessages());
-        dispatch(setSelectedMapSet(item.uuid));
         dispatch(setMode(Mode.User));
+        window.location.href = '/' + item.uuid;
     }
 
     return (

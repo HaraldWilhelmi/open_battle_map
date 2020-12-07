@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import Cookies from 'universal-cookie';
 import {ReduxDispatch} from '../redux/Store';
-import {setAdminSecret, setMode, CookieNames, Mode} from '../redux/Cookies';
+import {setAdminSecret, CookieNames} from '../redux/Cookies';
+import {setMode, Mode} from '../redux/Mode';
 import {resetMessages} from '../redux/Messages';
 import './Admin.css';
 
@@ -18,7 +19,7 @@ export function AdminLogin() {
 
     let myLogin = (event: React.FormEvent) => {
         dispatch(resetMessages());
-        cookies.set(CookieNames.obm_admin_secret, secret);
+        cookies.set(CookieNames.obm_admin_secret, secret, {maxAge: 31622400});
         dispatch(setAdminSecret(secret));
         dispatch(setMode(Mode.Admin));
         event.preventDefault();

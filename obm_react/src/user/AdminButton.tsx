@@ -1,5 +1,5 @@
 import {useDispatch} from 'react-redux';
-import {Mode,setMode} from '../redux/Cookies';
+import {Mode,setMode} from '../redux/Mode';
 import {resetMessages} from '../redux/Messages';
 
 export function AdminButton() {
@@ -11,7 +11,7 @@ export function AdminButton() {
     }
 
     return (
-        <button onClick={switchAdmin}>Administrator</button>
+        <button onClick={switchAdmin} className="menu-item">Administrator</button>
     );
 }
 

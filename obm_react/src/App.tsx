@@ -1,5 +1,5 @@
 import {useSelector} from 'react-redux';
-import {Mode} from './redux/Cookies';
+import {Mode} from './redux/Mode';
 import Messages from './common/Messages';
 import {RootState} from './redux/Types';
 import Admin from './admin/Admin';
@@ -10,7 +10,7 @@ import './App.css';
 
 export function App()  {
     const mode: Mode = useSelector(
-        (state: RootState) => state.cookies.mode
+        (state: RootState) => state.mode
     );
 
     switch (mode) {

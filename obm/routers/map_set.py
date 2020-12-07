@@ -10,10 +10,6 @@ from obm.model.map_set_manager import MapSetManager
 router = APIRouter()
 
 
-class MapSetInfoRequest(BaseModel):
-    uuid: UUID
-
-
 class BattleMapItem(BaseModel):
     uuid: UUID
     name: str
@@ -25,16 +21,16 @@ class MapSetInfoResponse(BaseModel):
     battle_maps: List[BattleMapItem]
 
 
-@router.get('/',
+@router.get('/{uuid}',
             description='Get information about a map set. The battle map items are sorted by name.',
             response_model=MapSetInfoResponse,
             responses=RESPONSE_MAP_SET_NOT_FOUND,
             )
 async def create_map_set(
-        data: MapSetInfoRequest,
+        uuid: UUID,
         manager: MapSetManager = Depends(get_map_set_manager),
 ) -> MapSetInfoResponse:
-    map_set = get_map_set(manager, data.uuid)
+    map_set = get_map_set(manager, uuid)
     battle_maps = [
         BattleMapItem(uuid=uuid, name=battle_map.name)
         for uuid, battle_map in map_set.battle_maps_by_uuid.items()
