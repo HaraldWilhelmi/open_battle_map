@@ -1,25 +1,41 @@
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import MapSetItemRow from './MapSetItemRow';
 import {MapSetCreateForm} from './MapSetCreateForm';
 import AdminLogout from './AdminLogout';
 import {ReduxDispatch} from '../redux/Store';
 import {RootState} from '../redux/Types';
-import {MapSetList} from '../redux/MapSets';
-import {updateMapSets} from './Tools';
+import {fetchAllMapSets} from './Tools';
+import {MapSetList} from './Types';
 import './Admin.css';
 
 
+const INITIAL_MAP_SET_LIST: MapSetList = [];
+
+
 function Admin() {
-    const mapSets: MapSetList = useSelector(
-        (state: RootState) => state.mapSets
-    );
+    const [mapSets, setMapSets] = useState(INITIAL_MAP_SET_LIST);
+    const mapSetUpdateCount = useSelector((state: RootState) => state.mapSetUpdateCount);
     const dispatch: ReduxDispatch = useDispatch();
 
-    useEffect(() => {
-        updateMapSets(dispatch);
-        return undefined;
-    });
+    useEffect(
+        () => {
+            let timer: any;
+
+            async function updateMapSets() {
+                try {
+                    setMapSets(await fetchAllMapSets(dispatch));
+                }
+                finally {
+                    timer = setTimeout(updateMapSets, 60000);
+                }
+            }
+
+            updateMapSets();
+            return () => clearTimeout(timer);
+        },
+        [mapSetUpdateCount, dispatch]
+    );
 
     const mapSetItems = mapSets.map(
         (item) => ( <MapSetItemRow

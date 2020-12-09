@@ -1,3 +1,6 @@
-export interface AdminActionDirectory {
-    updateMapSetList: () => void,
+export interface MapSetItem {
+    uuid: string,
+    name: string,
 }
+
+export type MapSetList = MapSetItem[];

@@ -1,19 +1,20 @@
 import {ReduxDispatch} from '../redux/Store';
-import {MapSetList, loadMapSets} from '../redux/MapSets';
+import {increaseMapSetUpdateCount} from '../redux/MapSetUpdateCount';
 import {handleResponse} from '../common/Tools';
 import {setMode, Mode} from '../redux/Mode';
+import {MapSetList} from './Types';
 
-export async function updateMapSets(dispatch: ReduxDispatch) {
+export async function fetchAllMapSets(dispatch: ReduxDispatch): Promise<MapSetList> {
     let response = await(fetch('/api/map_set/list_all'));
     if (response.ok) {
-        let mapSetList: MapSetList = await(response.json());
-        dispatch(loadMapSets(mapSetList));
+        return await(response.json());
     } else {
         if (response.status === 401) {
             dispatch(setMode(Mode.AdminLogin));
         }
     }
     handleResponse(dispatch, response, '', false);
+    return [];
 }
 
 interface UpdateRequest {
@@ -31,7 +32,7 @@ export async function renameMapSet(dispatch: ReduxDispatch, uuid: string, name: 
         })
     );
     handleResponse(dispatch, response, 'to rename Map Set');
-    updateMapSets(dispatch);
+    dispatch(increaseMapSetUpdateCount());
 }
 
 interface DeleteRequest {
@@ -48,7 +49,7 @@ export async function deleteMapSet(dispatch: ReduxDispatch, uuid: string) {
         })
     );
     handleResponse(dispatch, response, 'to delete Map Set');
-    updateMapSets(dispatch);
+    dispatch(increaseMapSetUpdateCount());
 }
 
 interface CreateRequest {
@@ -65,5 +66,5 @@ export async function createMapSet(dispatch: ReduxDispatch, name: string) {
         })
     );
     handleResponse(dispatch, response, 'to create Map Set');
-    updateMapSets(dispatch);
+    dispatch(increaseMapSetUpdateCount());
 }

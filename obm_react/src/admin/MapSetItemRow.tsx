@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {ReduxDispatch} from '../redux/Store';
-import {MapSetItem} from '../redux/MapSets';
+import {MapSetItem} from './Types';
 import {setMode, Mode} from '../redux/Mode';
 import {resetMessages} from '../redux/Messages';
 import {renameMapSet, deleteMapSet} from './Tools';

@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux';
 import {configureStore} from '@reduxjs/toolkit';
 import messagesReducer from './Messages';
-import mapSetsReducer from './MapSets';
+import mapSetUpdateCountReducer from './MapSetUpdateCount';
 import cookiesReducer from './Cookies';
 import modeReducer from './Mode';
 import selectedMapSetReducer from './SelectedMapSet';
@@ -9,7 +9,7 @@ import selectedMapSetReducer from './SelectedMapSet';
 export const store = configureStore({
     reducer: combineReducers({
         messages: messagesReducer,
-        mapSets: mapSetsReducer,
+        mapSetUpdateCount: mapSetUpdateCountReducer,
         cookies: cookiesReducer,
         mode: modeReducer,
         selectedMapSet: selectedMapSetReducer,

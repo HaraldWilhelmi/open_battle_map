@@ -6,7 +6,7 @@ import {SelectedMapSet} from './SelectedMapSet'
 
 export interface RootState {
     messages: Message[],
-    mapSets: MapSetList,
+    mapSetUpdateCount: number,
     cookies: CookieData,
     mode: Mode,
     selectedMapSet: SelectedMapSet,
