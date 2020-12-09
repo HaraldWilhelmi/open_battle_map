@@ -5,6 +5,7 @@ import mapSetUpdateCountReducer from './MapSetUpdateCount';
 import cookiesReducer from './Cookies';
 import modeReducer from './Mode';
 import selectedMapSetReducer from './SelectedMapSet';
+import selectedBattleMapReducer from './SelectedBattleMap';
 
 export const store = configureStore({
     reducer: combineReducers({
@@ -13,6 +14,7 @@ export const store = configureStore({
         cookies: cookiesReducer,
         mode: modeReducer,
         selectedMapSet: selectedMapSetReducer,
+        selectedBattleMap: selectedBattleMapReducer,
     })
 });
 

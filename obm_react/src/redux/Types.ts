@@ -1,13 +1,14 @@
-import {Message} from './Messages'
-import {MapSetList} from './MapSets'
-import {CookieData} from './Cookies'
-import {Mode} from './Mode'
-import {SelectedMapSet} from './SelectedMapSet'
+import {Message} from './Messages';
+import {CookieData} from './Cookies';
+import {Mode} from './Mode';
+import {MapSet} from './SelectedMapSet';
+import {BattleMap} from './SelectedBattleMap';
 
 export interface RootState {
     messages: Message[],
     mapSetUpdateCount: number,
     cookies: CookieData,
     mode: Mode,
-    selectedMapSet: SelectedMapSet,
+    selectedMapSet: MapSet,
+    selectedBattleMap: BattleMap,
 }

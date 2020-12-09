@@ -5,6 +5,30 @@
     flex-direction: column;
 }
 .menu-item{
-    width: 20em;
+    width: 200px;
+    display: flex;
     flex-direction: row;
+}
+.menu-field {
+    vertical-align: middle;
+    flex: 1 1 auto;
+    padding-left: 1em;
+    margin: auto;
+}
+.menu-label {
+    flex: 0 0 auto;
+    margin: auto;
+}
+.section {
+    padding-bottom: 3ex;
+}
+
+h3 {
+    padding-top: 1ex;
+    padding-bottom: 1ex;
+}
+
+h4 {
+    padding-top: 1.5ex;
+    padding-bottom: 0.5ex;
 }

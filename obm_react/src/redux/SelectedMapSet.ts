@@ -6,23 +6,23 @@ export interface BattleMapItem {
     name: string,
 }
 
-export interface SelectedMapSet {
+export interface MapSet {
     uuid: string,
     name: string,
-    battleMaps: BattleMapItem[],
+    battle_maps: BattleMapItem[],
 }
 
-export const NO_SUCH_MAP_SET: SelectedMapSet = {
+export const NO_SUCH_MAP_SET: MapSet = {
     uuid: 'NO_SUCH_MAP_SET',
     name: 'NO_SUCH_MAP_SET',
-    battleMaps: [],
+    battle_maps: [],
 };
 
 export const slice = createSlice({
     name: 'selectedMapSet',
     initialState: NO_SUCH_MAP_SET,
     reducers: {
-        setSelectedMapSet: (state, action: PayloadAction<SelectedMapSet>) => action.payload,
+        setSelectedMapSet: (state, action: PayloadAction<MapSet>) => action.payload,
     },
 })
 
