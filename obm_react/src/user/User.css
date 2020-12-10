@@ -10,13 +10,16 @@
     flex-direction: row;
 }
 .menu-field {
-    vertical-align: middle;
     flex: 1 1 auto;
-    padding-left: 1em;
+    vertical-align: middle;
     margin: auto;
 }
+input.menu-field {
+    width: 100%;
+}
 .menu-label {
-    flex: 0 0 auto;
+    flex: 0 0 40%;
+    vertical-align: middle;
     margin: auto;
 }
 .section {
