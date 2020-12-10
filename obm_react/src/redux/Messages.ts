@@ -18,28 +18,25 @@ export interface RequestResult {
 
 type State = Message[];
 
+function mergeMessage(state: State, category: MessageCategory, content: string): State {
+    let message: Message = { category, content };
+    let newState: State = state.concat([message]);
+    if ( newState.length > 5 ) {
+        newState = newState.slice(-5);
+    }
+    return newState;
+}
+
 const initialState: State = [];
 
 export const slice = createSlice({
     name: 'messages',
     initialState: initialState,
     reducers: {
-        reportError: (state, action: PayloadAction<string>) => state.concat([
-            {category: MessageCategory.Error, content: action.payload}
-        ]),
-        reportSuccess: (state, action: PayloadAction<string>) => state.concat([
-            {category: MessageCategory.Success, content: action.payload}
-        ]),
-        reportRequestResult: (state, action: PayloadAction<RequestResult>) => {
-            let oldMessages: Message[] = [];
-            if ( ! action.payload.resetMessages ) {
-                oldMessages = state;
-            }
-            let newMessage = action.payload.message;
-            return newMessage == null
-                ? oldMessages
-                : oldMessages.concat([newMessage]);
-        },
+        reportError: (state, action: PayloadAction<string>) =>
+            mergeMessage(state, MessageCategory.Error, action.payload),
+        reportSuccess: (state, action: PayloadAction<string>) =>
+            mergeMessage(state, MessageCategory.Success, action.payload),
         resetMessages: () => [],
     },
 })
@@ -47,7 +44,6 @@ export const slice = createSlice({
 export const {
     reportError,
     reportSuccess,
-    reportRequestResult,
     resetMessages,
 } = slice.actions;
 
