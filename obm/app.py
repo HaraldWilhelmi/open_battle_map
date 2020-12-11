@@ -9,8 +9,8 @@ from obm.model.map_set_manager import MapSetManager
 
 from obm.routers.admin_map_set import router as admin_map_set_router
 from obm.routers.map_set import router as map_set_router
-from obm.routers.redirect import router as redirect_router
 from obm.routers.battle_map import router as battle_map_router
+from obm.routers.image_data import router as image_data_router
 
 
 TAGS_META_DATA = [
@@ -40,10 +40,10 @@ TAGS_META_DATA = [
             + 'and a number of parameters, e.g. the scale of the map.'
     },
     {
-        'name': 'Redirects',
+        'name': 'Image Data',
         'description':
-            'A few redirects simply the use of the application. They are mostly '
-            'useful to set some cookies for new users.'
+            'This calls allow to access the image data used as background image '
+            + 'of a Battle Map.'
     },
 ]
 
@@ -61,4 +61,4 @@ app = FastAPI(openapi_tags=TAGS_META_DATA)
 app.include_router(admin_map_set_router, prefix='/api/map_set', tags=['Admin Map Set'])
 app.include_router(map_set_router, prefix='/api/map_set', tags=['Map Set'])
 app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Map'])
-app.include_router(redirect_router, tags=['Redirects'])
+app.include_router(image_data_router, prefix='/api/image_data', tags=['Image Data'])

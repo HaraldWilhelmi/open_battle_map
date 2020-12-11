@@ -3,7 +3,8 @@ import {ReduxDispatch} from '../redux/Store';
 import {RootState} from '../redux/Types';
 import {MapSet} from '../redux/SelectedMapSet';
 import {BattleMap} from '../redux/SelectedBattleMap';
-import {updateSelectedBattleMap} from './Tools';
+import {resetMessages} from '../redux/Messages';
+import {loadSelectedBattleMap} from './Tools';
 
 
 export function BattleMapSelector() {
@@ -17,21 +18,20 @@ export function BattleMapSelector() {
 
     let options = mapSet.battle_maps.map(
         (item) => (
-            item.uuid === battleMap.uuid ?
-            <option value={item.uuid} selected key={item.uuid}>{item.name}</option> :
             <option value={item.uuid} key={item.uuid}>{item.name}</option>
         )
     );
     let changeBattleMap = (event: React.ChangeEvent<HTMLSelectElement>) => {
         event.preventDefault();
-        updateSelectedBattleMap(dispatch, mapSet.uuid, event.target.value)
+        loadSelectedBattleMap(dispatch, mapSet.uuid, event.target.value);
+        dispatch(resetMessages());
     };
 
     return (
         <div>
             <label className="menu-item">Battle Map:</label>
             <div className="menu-item">
-                <select className="custom-select" onChange={changeBattleMap}>
+                <select className="custom-select" onChange={changeBattleMap} value={battleMap.uuid}>
                     {options}
                 </select>
             </div>

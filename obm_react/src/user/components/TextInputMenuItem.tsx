@@ -1,4 +1,8 @@
 import {useState, useEffect} from 'react';
+import Button from 'react-bootstrap/Button';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import Form from 'react-bootstrap/Form';
 
 
 interface Props {
@@ -6,6 +10,7 @@ interface Props {
     doIt: (value: string) => void,
     initialValue?: string,
     placeholder?: string,
+    disabled?: boolean,
 }
 
 
@@ -31,17 +36,28 @@ export function TextInputMenuItem(props: Props) {
     };
 
     return (
-        <form className="menu-item" onSubmit={onSubmit}>
-            <button type="submit" className="menu-label">{props.label}</button>
-            <div className="menu-field">
-                <input
-                    className="menu-field"
+        <Form className="menu-item" onSubmit={onSubmit}>
+            <InputGroup>
+                <FormControl
+                    value={value}
                     onChange={onChange}
                     placeholder={props.placeholder === undefined ? 'input' : props.placeholder}
-                    value={value}
+                    disabled={props.disabled}
+                    size="sm"
                 />
-            </div>
-        </form>
+                <InputGroup.Append>
+                    <Button
+                        type="submit"
+                        className="menu-label"
+                        variant="secondary"
+                        disabled={props.disabled === true}
+                        size="sm"
+                    >
+                        {props.label}
+                    </Button>
+                </InputGroup.Append>
+            </InputGroup>
+        </Form>
     );
 }
 

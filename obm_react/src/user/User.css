@@ -8,6 +8,7 @@
     width: 200px;
     display: flex;
     flex-direction: row;
+    margin-bottom: 2px;
 }
 .menu-field {
     flex: 1 1 auto;
@@ -18,9 +19,7 @@ input.menu-field {
     width: 100%;
 }
 .menu-label {
-    flex: 0 0 40%;
-    vertical-align: middle;
-    margin: auto;
+    width: 80px;
 }
 .section {
     padding-bottom: 3ex;
@@ -34,4 +33,8 @@ h3 {
 h4 {
     padding-top: 1.5ex;
     padding-bottom: 0.5ex;
+}
+
+input[type="file"] {
+    display: none;
 }

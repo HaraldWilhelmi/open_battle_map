@@ -22,7 +22,7 @@ class BattleMapCreateRequest(BaseModel):
             description='Get a Battle Map.',
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
             response_model=BattleMap,
-            response_model_include={'name', 'uuid', 'map_set_uuid'}
+            response_model_include={'name', 'uuid', 'map_set_uuid', 'background_revision'}
             )
 def battle_map_info(
         map_set_uuid: UUID, uuid: UUID,

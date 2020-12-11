@@ -21,3 +21,21 @@ button.AdminLogin {
   align-items: center;
   justify-content: center;
 }
+
+.item-box {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.box-item {
+    flex: 0 0 600px;
+    vertical-align: middle;
+    margin: 4px;
+}
+
+.logout {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}

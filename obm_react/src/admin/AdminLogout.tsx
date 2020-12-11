@@ -1,5 +1,6 @@
 import {useDispatch} from 'react-redux';
 import Cookies from 'universal-cookie';
+import Button from 'react-bootstrap/Button'
 import {CookieNames, setAdminSecret} from '../redux/Cookies';
 import {Mode, setMode} from '../redux/Mode';
 import './Admin.css';
@@ -15,7 +16,9 @@ export function AdminLogout() {
         cookies.remove(CookieNames.obm_admin_secret);
     };
     return (
-        <button onClick={myLogout}>Logout</button>
+        <div className="logout">
+            <Button onClick={myLogout}>Logout</Button>
+        </div>
     );
 }
 

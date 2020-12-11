@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import Cookies from 'universal-cookie';
+import Button from 'react-bootstrap/Button'
 import {ReduxDispatch} from '../redux/Store';
 import {setAdminSecret, CookieNames} from '../redux/Cookies';
 import {setMode, Mode} from '../redux/Mode';
@@ -40,11 +41,11 @@ export function AdminLogin() {
                 <div className="AdminLogin">
                     <label className="AdminLogin">Please enter admin secret:</label>
                     <input maxLength={128} value={secret} onChange={onChange} />
-                    <button className="AdminLogin" type="submit">Login</button>
+                    <Button className="AdminLogin" type="submit">Login</Button>
                     <div className="help">
-                        (In doubt check .open_battle_map_rc in the application users home ...)
+                        (In doubt check .open_battle_map_rc in the home directory of the application user ...)
                     </div>
-                    <button className="AdminLogin" onClick={myCancel}>Cancel</button>
+                    <Button className="AdminLogin" onClick={myCancel}>Cancel</Button>
                 </div>
             </form>
         </div>

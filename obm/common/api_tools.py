@@ -18,6 +18,12 @@ RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND = {
     }
 }
 
+RESPONSE_CANT_MAP_NAME_TO_MEDIA_TYPE = {
+    status.HTTP_415_UNSUPPORTED_MEDIA_TYPE: {
+        'description': 'The file_path ended in a extension of an unsupported/unknown image format.'
+    }
+}
+
 
 def get_map_set(manager: MapSetManager, uuid: UUID) -> MapSet:
     try:

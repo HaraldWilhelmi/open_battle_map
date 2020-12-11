@@ -12,6 +12,8 @@ class Config(BaseModel, ):
     data_dir: str = join(expanduser('~'), 'open_battle_map_data')
     cache_expire: timedelta = timedelta(days=1)
     auto_save_interval: timedelta = timedelta(minutes=5)
+    admin_secret_cookie_max_age = timedelta(days=365)
+    known_map_sets_cookie_max_age = timedelta(days=365)
 
 
 def get_config_file_name() -> str:

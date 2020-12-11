@@ -1,5 +1,9 @@
 import {useState} from 'react';
 import {useDispatch} from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import InputGroup from 'react-bootstrap/InputGroup';
+import FormControl from 'react-bootstrap/FormControl';
+import Form from 'react-bootstrap/Form';
 import {ReduxDispatch} from '../redux/Store';
 import {MapSetItem} from './Types';
 import {setMode, Mode} from '../redux/Mode';
@@ -39,21 +43,17 @@ export function MapSetItemRow(props: Props) {
     }
 
     return (
-        <tr>
-            <td>
-                <form onSubmit={myRename}>
-                    <input value={name} onChange={onChange} />
-                    <button type="submit">Rename</button>
-                </form>
-            </td>
-            <td>
-                <button onClick={myOpen}>Open</button>
-                <button onClick={myDelete}>Delete</button>
-            </td>
-            <td className="help">
-                ({item.uuid})
-            </td>
-        </tr>
+        <Form onSubmit={myRename}>
+        <InputGroup size="sm" className="mb-3">
+            <FormControl value={name} onChange={onChange} size="sm" />
+            <InputGroup.Append>
+                <Button type="submit" variant="outline-secondary" size="sm">Rename</Button>
+                <Button onClick={myOpen} variant="outline-secondary" size="sm">Open</Button>
+                <Button onClick={myDelete} variant="outline-secondary" size="sm">Delete</Button>
+                <span className="input-group-text" id="basic-addon1">{item.uuid}</span>
+            </InputGroup.Append>
+        </InputGroup>
+        </Form>
     );
 }
 

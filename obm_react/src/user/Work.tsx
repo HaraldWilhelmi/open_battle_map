@@ -2,54 +2,58 @@ import {useDispatch, useSelector} from 'react-redux';
 import {ReduxDispatch} from '../redux/Store';
 import {RootState} from '../redux/Types';
 import {MapSet} from '../redux/SelectedMapSet';
-import {BattleMap} from '../redux/SelectedBattleMap';
-import {switchAdmin, refreshSelectedData, refreshSelectedDataAfterDelete} from './Tools';
+import {BattleMap, setSelectedBattleMap, NO_SUCH_BATTLE_MAP} from '../redux/SelectedBattleMap';
+import {
+    switchAdmin, loadSelectedMapSet, loadSelectedBattleMap, uploadBackgroundImage
+} from './Tools';
 import {createBattleMap, updateBattleMap, deleteBattleMap} from './api/BattleMap';
 import ClickMenuItem from './components/ClickMenuItem';
 import TextInputMenuItem from './components/TextInputMenuItem';
-
-
-function copyBattleMap(old: BattleMap): BattleMap {
-    return {
-        uuid: old.uuid,
-        map_set_uuid: old.map_set_uuid,
-        name: old.name,
-    }
-}
+import UploadMenuItem from './components/UploadMenuItem';
 
 
 export function Work() {
     const dispatch: ReduxDispatch = useDispatch();
     let mapSet: MapSet = useSelector((state: RootState) => state.selectedMapSet);
     let battleMap: BattleMap = useSelector((state: RootState) => state.selectedBattleMap);
+    let noBattleMap: boolean = battleMap === NO_SUCH_BATTLE_MAP;
 
     let mySwitchAdmin = () => switchAdmin(dispatch);
 
     let myDownloadMapSet = () => {};
     let myUploadMapSet = () => {};
 
-    let myUploadBackground = () => {};
+    let myUploadBackground = (file: File) => {
+        uploadBackgroundImage(dispatch, battleMap, file);
+    };
 
     let myCreateBattleMap = async (name: string) => {
-        let newMap = await createBattleMap(dispatch, battleMap.map_set_uuid, name);
+        let newMap = await createBattleMap(dispatch, mapSet.uuid, name);
         if ( newMap !== undefined ) {
-            refreshSelectedData(dispatch, mapSet, newMap);
+            dispatch(setSelectedBattleMap(newMap));
+            await loadSelectedMapSet(dispatch, mapSet.uuid);
+            await loadSelectedBattleMap(dispatch, newMap.map_set_uuid, newMap.uuid);
         }
     };
 
-    let myRenameBattleMap = (name: string) => {
-        let changedMap = copyBattleMap(battleMap);
-        changedMap.name = name;
-        updateBattleMap(dispatch, changedMap);
-        refreshSelectedData(dispatch, mapSet, battleMap);
+    let myRenameBattleMap = async (name: string) => {
+        let changedMap: BattleMap = {...battleMap, name: name};
+        await updateBattleMap(dispatch, changedMap);
+        await loadSelectedMapSet(dispatch, mapSet.uuid);
+        await loadSelectedBattleMap(dispatch, battleMap.map_set_uuid, battleMap.uuid);
     };
 
-    let myDeleteBattleMap = () => {
+    let myDeleteBattleMap = async () => {
         let warning = 'Really delete Battle Map "' + battleMap.name + '" ('
             + battleMap.uuid + ')?'
         if (window.confirm(warning)) {
-            deleteBattleMap(dispatch, battleMap);
-            refreshSelectedDataAfterDelete(dispatch, mapSet);
+            await deleteBattleMap(dispatch, battleMap);
+            let newMapSet = await loadSelectedMapSet(dispatch, mapSet.uuid);
+            if ( newMapSet.battle_maps.length > 0 ) {
+                await loadSelectedBattleMap(dispatch, newMapSet.uuid, newMapSet.battle_maps[0].uuid);
+            } else {
+                dispatch(setSelectedBattleMap(NO_SUCH_BATTLE_MAP));
+            }
         }
     };
 
@@ -62,10 +66,10 @@ export function Work() {
             <ClickMenuItem label="Upload Map Set" doIt={myUploadMapSet} />
 
             <h4 className="menu-item">Battle Map</h4>
-            <ClickMenuItem label="Upload Map Image" doIt={myUploadBackground} />
             <TextInputMenuItem label="Create" placeholder="new map name" doIt={myCreateBattleMap} />
-            <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} />
-            <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} />
+            <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} disabled={noBattleMap} />
+            <UploadMenuItem label="Upload Map Image" doIt={myUploadBackground} accept="image/*" disabled={noBattleMap} />
+            <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} disabled={noBattleMap} />
         </div>
     );
 }

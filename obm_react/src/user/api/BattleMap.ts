@@ -78,3 +78,17 @@ export async function deleteBattleMap(dispatch: ReduxDispatch, battleMap: Battle
     );
     handleResponse(dispatch, response, 'to delete Battle Map "' + battleMap.name + '"');
 }
+
+export async function postImageData(dispatch: ReduxDispatch, battleMap: BattleMap, file: File) {
+    let body = new FormData();
+    body.append('image_data', file);
+    body.append('uuid', battleMap.uuid);
+    body.append('map_set_uuid', battleMap.map_set_uuid);
+    let response = await(
+        fetch('/api/image_data/', {
+            method:'POST',
+            body: body,
+        })
+    )
+    handleResponse(dispatch, response, 'to upload background image for "' + battleMap.name + '"');
+}

@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import MapSetItemRow from './MapSetItemRow';
-import {MapSetCreateForm} from './MapSetCreateForm';
+import MapSetItemForm from './MapSetItemForm';
+import MapSetCreateForm from './MapSetCreateForm';
 import AdminLogout from './AdminLogout';
 import {ReduxDispatch} from '../redux/Store';
 import {RootState} from '../redux/Types';
@@ -38,10 +38,13 @@ function Admin() {
     );
 
     const mapSetItems = mapSets.map(
-        (item) => ( <MapSetItemRow
-                        key={item.uuid}
+        (item) => (
+            <div className="box-item" key={item.uuid}>
+                <MapSetItemForm
                         item={item}
-        /> )
+                />
+            </div>
+        )
     )
     return (
         <div>
@@ -50,16 +53,12 @@ function Admin() {
                     <h1>Open Battle Map</h1>
                 </header>
             </div>
-            <div className="Admin">
-                <table className="Admin">
-                    <tbody>
-                        <tr>
-                            <td colSpan={2}><MapSetCreateForm /></td>
-                            <td><AdminLogout /></td>
-                        </tr>
-                        {mapSetItems}
-                    </tbody>
-                </table>
+            <AdminLogout />
+            <div className="item-box">
+                <div className="box-item">
+                    <MapSetCreateForm />
+                </div>
+                {mapSetItems}
             </div>
         </div>
     );
