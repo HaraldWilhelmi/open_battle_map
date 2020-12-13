@@ -6,6 +6,7 @@ import {BattleMap, setSelectedBattleMap, NO_SUCH_BATTLE_MAP} from '../redux/Sele
 import {
     switchAdmin, loadSelectedMapSet, loadSelectedBattleMap, uploadBackgroundImage
 } from './Tools';
+import {uploadMapSetArchive} from './api/MapSet';
 import {createBattleMap, updateBattleMap, deleteBattleMap} from './api/BattleMap';
 import ClickMenuItem from './components/ClickMenuItem';
 import TextInputMenuItem from './components/TextInputMenuItem';
@@ -20,8 +21,12 @@ export function Work() {
 
     let mySwitchAdmin = () => switchAdmin(dispatch);
 
-    let myDownloadMapSet = () => {};
-    let myUploadMapSet = () => {};
+    let myDownloadMapSet = () => {
+        window.location.assign('/api/map_set/download/' + mapSet.uuid);
+    };
+    let myUploadMapSet = (file: File) => {
+        uploadMapSetArchive(dispatch, mapSet.uuid, file)
+    };
 
     let myUploadBackground = (file: File) => {
         uploadBackgroundImage(dispatch, battleMap, file);
@@ -62,8 +67,8 @@ export function Work() {
             <ClickMenuItem label="Administration" doIt={mySwitchAdmin} />
 
             <h4 className="menu-item">Map Set</h4>
-            <ClickMenuItem label="Download Map Set" doIt={myDownloadMapSet} />
-            <ClickMenuItem label="Upload Map Set" doIt={myUploadMapSet} />
+            <ClickMenuItem label="Export Map Set" doIt={myDownloadMapSet} />
+            <UploadMenuItem label="Import Map Set" doIt={myUploadMapSet} accept=".obm"/>
 
             <h4 className="menu-item">Battle Map</h4>
             <TextInputMenuItem label="Create" placeholder="new map name" doIt={myCreateBattleMap} />

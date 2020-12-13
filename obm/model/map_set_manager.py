@@ -57,3 +57,9 @@ class MapSetManager:
         self._map_set_cache.delete(map_set)
         self._map_set_io.delete_map_set(map_set)
         self._map_set_directory.delete(map_set)
+
+    def reload_map_set_from_disk(self, old_map_set: MapSet):
+        self._map_set_cache.delete(old_map_set)
+        self._map_set_directory.delete(old_map_set)
+        new_map_set = self.get_by_uuid(old_map_set.uuid)
+        self._map_set_directory.add(new_map_set)

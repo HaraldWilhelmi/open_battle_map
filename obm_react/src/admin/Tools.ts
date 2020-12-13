@@ -5,7 +5,7 @@ import {setMode, Mode} from '../redux/Mode';
 import {MapSetList} from './Types';
 
 export async function fetchAllMapSets(dispatch: ReduxDispatch): Promise<MapSetList> {
-    let response = await(fetch('/api/map_set/list_all'));
+    let response = await(fetch('/api/admin_map_set/list_all'));
     if (response.ok) {
         return await(response.json());
     } else {
@@ -25,7 +25,7 @@ interface UpdateRequest {
 export async function renameMapSet(dispatch: ReduxDispatch, uuid: string, name: string) {
     let body: UpdateRequest = { uuid, name };
     let response = await(
-        fetch('/api/map_set/', {
+        fetch('/api/admin_map_set/', {
             method:'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -42,7 +42,7 @@ interface DeleteRequest {
 export async function deleteMapSet(dispatch: ReduxDispatch, uuid: string) {
     let body: DeleteRequest = { uuid };
     let response = await(
-        fetch('/api/map_set/', {
+        fetch('/api/admin_map_set/', {
             method:'DELETE',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -59,7 +59,7 @@ interface CreateRequest {
 export async function createMapSet(dispatch: ReduxDispatch, name: string) {
     let body: CreateRequest = { name };
     let response = await(
-        fetch('/api/map_set/', {
+        fetch('/api/admin_map_set/', {
             method:'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body),

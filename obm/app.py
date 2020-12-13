@@ -2,7 +2,9 @@ from fastapi import FastAPI
 
 from obm.common.dep_context import get_context
 from obm.data.config import get_config_for_production, get_config_file_name
+from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.map_set_io import MapSetIO
+from obm.fileio.backup_io import BackupIo
 from obm.fileio.static_data import get_default_token
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.map_set_cache import MapSetCache
@@ -58,7 +60,9 @@ ctx = get_context()
 ctx.start()
 ctx.register(get_config_for_production())
 
+ctx.register(MapSetPaths())
 ctx.register(MapSetIO())
+ctx.register(BackupIo())
 ctx.register(MapSetCache())
 ctx.register(MapSetDirectory())
 ctx.register(MapSetManager())
@@ -68,7 +72,7 @@ magic_color_svg: MagicColorSvg = ctx.get(MagicColorSvg)
 magic_color_svg.register_svg('global/default_token', get_default_token())
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
-app.include_router(admin_map_set_router, prefix='/api/map_set', tags=['Admin Map Set'])
+app.include_router(admin_map_set_router, prefix='/api/admin_map_set', tags=['Admin Map Set'])
 app.include_router(map_set_router, prefix='/api/map_set', tags=['Map Set'])
 app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Map'])
 app.include_router(image_data_router, prefix='/api/image_data', tags=['Image Data'])

@@ -16,6 +16,6 @@ def check_admin_secret(
     response.set_cookie(
         'obm_admin_secret',
         obm_admin_secret,
-        max_age=config.admin_secret_cookie_max_age.total_seconds(),
+        max_age=int(config.admin_secret_cookie_max_age.total_seconds()),
         samesite='Strict'
     )
