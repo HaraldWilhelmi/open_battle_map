@@ -1,43 +1,43 @@
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import MapSetItemForm from './MapSetItemForm';
 import MapSetCreateForm from './MapSetCreateForm';
 import AdminLogout from './AdminLogout';
-import {ReduxDispatch} from '../redux/Store';
-import {RootState} from '../redux/Types';
-import {fetchAllMapSets} from './Tools';
-import {MapSetList} from './Types';
+import {MapSetList} from '../api/Types';
+import {RootState, GenericDispatch} from '../redux/Types';
+import {actions} from '../redux/Store';
 import './Admin.css';
 
 
-const INITIAL_MAP_SET_LIST: MapSetList = [];
-
-
 function Admin() {
-    const [mapSets, setMapSets] = useState(INITIAL_MAP_SET_LIST);
-    const mapSetUpdateCount = useSelector((state: RootState) => state.mapSetUpdateCount);
-    const dispatch: ReduxDispatch = useDispatch();
+    const dispatch: GenericDispatch = useDispatch();
+    const mapSetList: MapSetList | null = useSelector(
+        (state: RootState) => state.mapSetList
+    );
 
     useEffect(
         () => {
-            let timer: any;
-
-            async function updateMapSets() {
-                try {
-                    setMapSets(await fetchAllMapSets(dispatch));
-                }
-                finally {
-                    timer = setTimeout(updateMapSets, 60000);
-                }
-            }
-
-            updateMapSets();
-            return () => clearTimeout(timer);
-        },
-        [mapSetUpdateCount, dispatch]
+            dispatch(actions.mapSetList.startSync());
+            return () => {
+                dispatch(actions.mapSetList.stopSync());
+            };
+        }
     );
 
-    const mapSetItems = mapSets.map(
+    useEffect(
+        () => {
+            if ( mapSetList === null ) {
+                dispatch(actions.mapSetList.get());
+            }
+        },
+        [mapSetList, dispatch]
+    );
+
+    if ( mapSetList === null ) {
+        return <div>No Map Sets loaded yet.</div>
+    }
+
+    const mapSetItems = mapSetList.map(
         (item) => (
             <div className="box-item" key={item.uuid}>
                 <MapSetItemForm

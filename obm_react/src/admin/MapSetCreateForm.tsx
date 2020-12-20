@@ -4,19 +4,25 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
-import {createMapSet} from './Tools';
-import {ReduxDispatch} from '../redux/Store';
+import {MapSetCreate} from '../api/Types';
+import {mapSetApi} from '../api/MapSet';
+import {GenericDispatch} from '../redux/Types';
+import {actions} from '../redux/Store';
 
 export function MapSetCreateForm() {
     let [name, setName] = useState('');
-    const dispatch: ReduxDispatch = useDispatch();
+    const dispatch: GenericDispatch = useDispatch();
+
+    let updateMapSetList = () => dispatch(actions.mapSetList.get());
 
     let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     };
 
     let myCreate = (event: React.FormEvent) => {
-        createMapSet(dispatch, name);
+        let request: MapSetCreate = {name};
+        mapSetApi.create(request);
+        updateMapSetList();
         setName('');
         event.preventDefault();
     };

@@ -1,5 +1,5 @@
 import {useSelector} from 'react-redux';
-import {MessageCategory} from '../redux/Messages';
+import {MessageCategory} from '../redux/Types';
 import {RootState} from '../redux/Types';
 import './Messages.css';
 

@@ -1,33 +1,28 @@
 import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
-import Cookies from 'universal-cookie';
 import Button from 'react-bootstrap/Button'
-import {ReduxDispatch} from '../redux/Store';
-import {setAdminSecret, CookieNames} from '../redux/Cookies';
-import {setMode, Mode} from '../redux/Mode';
-import {resetMessages} from '../redux/Messages';
+import {GenericDispatch, Mode} from '../redux/Types';
+import {actions} from '../redux/Store';
 import './Admin.css';
 
-const cookies = new Cookies();
 
 export function AdminLogin() {
     let [secret, setSecret] = useState('');
-    const dispatch: ReduxDispatch = useDispatch();
+    const dispatch: GenericDispatch = useDispatch();
 
     let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSecret(event.target.value);
     };
 
     let myLogin = (event: React.FormEvent) => {
-        dispatch(resetMessages());
-        cookies.set(CookieNames.obm_admin_secret, secret, {maxAge: 31622400});
-        dispatch(setAdminSecret(secret));
-        dispatch(setMode(Mode.Admin));
+        dispatch(actions.messages.reset());
+        dispatch(actions.cookies.setAdminSecret(secret));
+        dispatch(actions.mode.set(Mode.Admin));
         event.preventDefault();
     };
 
     let myCancel = () => {
-        dispatch(setMode(Mode.User));
+        dispatch(actions.mode.set(Mode.User));
     };
 
     return (

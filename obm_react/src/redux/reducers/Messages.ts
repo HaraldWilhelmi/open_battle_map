@@ -1,20 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {Message, MessageCategory} from '../Types';
 
-
-export enum MessageCategory {
-    Error,
-    Success,
-}
-
-export interface Message {
-    category: MessageCategory,
-    content: string,
-}
-
-export interface RequestResult {
-    resetMessages: boolean,
-    message?: Message,
-}
 
 type State = Message[];
 
@@ -37,14 +23,10 @@ export const slice = createSlice({
             mergeMessage(state, MessageCategory.Error, action.payload),
         reportSuccess: (state, action: PayloadAction<string>) =>
             mergeMessage(state, MessageCategory.Success, action.payload),
-        resetMessages: () => [],
+        reset: () => [],
     },
-})
+});
 
-export const {
-    reportError,
-    reportSuccess,
-    resetMessages,
-} = slice.actions;
+export const messagesActions = slice.actions;
 
 export default slice.reducer;

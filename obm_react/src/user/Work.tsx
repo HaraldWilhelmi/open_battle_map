@@ -1,66 +1,77 @@
 import {useDispatch, useSelector} from 'react-redux';
-import {ReduxDispatch} from '../redux/Store';
-import {RootState} from '../redux/Types';
-import {MapSet} from '../redux/SelectedMapSet';
-import {BattleMap, setSelectedBattleMap, NO_SUCH_BATTLE_MAP} from '../redux/SelectedBattleMap';
-import {
-    switchAdmin, loadSelectedMapSet, loadSelectedBattleMap, uploadBackgroundImage
-} from './Tools';
-import {uploadMapSetArchive} from './api/MapSet';
-import {createBattleMap, updateBattleMap, deleteBattleMap} from './api/BattleMap';
+import {MapSet, BattleMap, BattleMapId, BattleMapCreate} from '../api/Types';
+import {NO_SUCH_BATTLE_MAP} from '../api/BattleMap';
+import {uploadMapSetArchive} from '../api/Backup';
+import {postImageData} from '../api/Background';
+import {RootState, GenericDispatch, MapProperties, Mode} from '../redux/Types';
+import {actions} from '../redux/Store';
 import ClickMenuItem from './components/ClickMenuItem';
 import TextInputMenuItem from './components/TextInputMenuItem';
 import UploadMenuItem from './components/UploadMenuItem';
 
 
 export function Work() {
-    const dispatch: ReduxDispatch = useDispatch();
-    let mapSet: MapSet = useSelector((state: RootState) => state.selectedMapSet);
-    let battleMap: BattleMap = useSelector((state: RootState) => state.selectedBattleMap);
-    let noBattleMap: boolean = battleMap === NO_SUCH_BATTLE_MAP;
+    const dispatch: GenericDispatch = useDispatch();
+    let mapSet: MapSet = useSelector((state: RootState) => state.mapSet);
+    let battleMap: BattleMap = useSelector((state: RootState) => state.battleMap);
+    let mapProperties: MapProperties = useSelector((state: RootState) => state.mapProperties);
 
-    let mySwitchAdmin = () => switchAdmin(dispatch);
+    let refreshBattleMapSelector = async () => await dispatch(actions.mapSet.get(mapSet));
 
-    let myDownloadMapSet = () => {
-        window.location.assign('/api/map_set/download/' + mapSet.uuid);
+    let refreshMapBackground = async () => await dispatch(actions.battleMap.get(battleMap));
+
+    let mySwitchAdmin = () => {
+        dispatch(actions.messages.reset());
+        dispatch(actions.mode.set(Mode.Admin));
     };
-    let myUploadMapSet = (file: File) => {
-        uploadMapSetArchive(dispatch, mapSet.uuid, file)
-    };
 
-    let myUploadBackground = (file: File) => {
-        uploadBackgroundImage(dispatch, battleMap, file);
+    let myDownloadMapSet = () => window.location.assign('/api/backup/' + mapSet.uuid);
+
+    let myUploadMapSet = async (file: File) => {
+        await uploadMapSetArchive(mapSet, file, dispatch);
+        await refreshBattleMapSelector();
+        await refreshMapBackground();
+    }
+
+    let myUploadBackground = async (file: File) => {
+        await postImageData(battleMap, file, dispatch);
+        refreshMapBackground();
     };
 
     let myCreateBattleMap = async (name: string) => {
-        let newMap = await createBattleMap(dispatch, mapSet.uuid, name);
-        if ( newMap !== undefined ) {
-            dispatch(setSelectedBattleMap(newMap));
-            await loadSelectedMapSet(dispatch, mapSet.uuid);
-            await loadSelectedBattleMap(dispatch, newMap.map_set_uuid, newMap.uuid);
+        const request: BattleMapCreate = {
+            name,
+            map_set_uuid: mapSet.uuid,
         }
+        dispatch(actions.battleMap.create(request));
+        refreshBattleMapSelector();
     };
 
     let myRenameBattleMap = async (name: string) => {
         let changedMap: BattleMap = {...battleMap, name: name};
-        await updateBattleMap(dispatch, changedMap);
-        await loadSelectedMapSet(dispatch, mapSet.uuid);
-        await loadSelectedBattleMap(dispatch, battleMap.map_set_uuid, battleMap.uuid);
+        dispatch(actions.battleMap.update(changedMap));
+        refreshBattleMapSelector();
     };
 
     let myDeleteBattleMap = async () => {
-        let warning = 'Really delete Battle Map "' + battleMap.name + '" ('
-            + battleMap.uuid + ')?'
+        let warning = 'Really delete Battle Map "' + battleMap.name + '" (' + battleMap.uuid + ')?'
         if (window.confirm(warning)) {
-            await deleteBattleMap(dispatch, battleMap);
-            let newMapSet = await loadSelectedMapSet(dispatch, mapSet.uuid);
-            if ( newMapSet.battle_maps.length > 0 ) {
-                await loadSelectedBattleMap(dispatch, newMapSet.uuid, newMapSet.battle_maps[0].uuid);
-            } else {
-                dispatch(setSelectedBattleMap(NO_SUCH_BATTLE_MAP));
+            dispatch(actions.battleMap.remove(battleMap));
+            for ( let item of mapSet.battle_maps ) {
+                if ( item.uuid !== battleMap.uuid ) {
+                    let id: BattleMapId = {uuid: item.uuid, map_set_uuid: mapSet.uuid};
+                    dispatch(actions.battleMap.get(id));
+                    break;
+                }
             }
+            refreshBattleMapSelector();
         }
     };
+
+    const noBattleMap = battleMap === null;
+    if ( noBattleMap ) {
+        battleMap = NO_SUCH_BATTLE_MAP;
+    }
 
     return (
         <div>
@@ -74,6 +85,7 @@ export function Work() {
             <TextInputMenuItem label="Create" placeholder="new map name" doIt={myCreateBattleMap} />
             <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} disabled={noBattleMap} />
             <UploadMenuItem label="Upload Map Image" doIt={myUploadBackground} accept="image/*" disabled={noBattleMap} />
+            <div className="menu-item-help">({mapProperties.width}x{mapProperties.height} Z:{mapProperties.scale.toFixed(1)})</div>
             <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} disabled={noBattleMap} />
         </div>
     );

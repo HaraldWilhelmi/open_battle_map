@@ -1,25 +1,24 @@
-import re
-from io import BytesIO
 from typing import List
 from uuid import UUID
-from fastapi import Depends, APIRouter, Response, Cookie, HTTPException, status, Form, UploadFile, File
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from fastapi import Depends, APIRouter, status, Response, Cookie
+from pydantic import BaseModel, validator
 
 from obm.data.config import Config
 from obm.common.api_tools import RESPONSE_MAP_SET_NOT_FOUND, get_map_set
-from obm.dependencies import get_map_set_manager, get_map_set_directory, get_config, get_backup_io
-from obm.fileio.backup_io import BackupIo, ImportValidationError
-from obm.model.map_set_manager import MapSetManager
+from obm.common.validators import name_validator
+from obm.dependencies import get_map_set_manager, get_map_set_directory, get_config
+from obm.data.map_set import MapSet
+from obm.model.admin import check_admin_secret
 from obm.model.map_set_directory import MapSetDirectory
+from obm.model.map_set_manager import MapSetManager
 
 
-RESPONSE_IMPORT_VALIDATION_ERROR = {
-    status.HTTP_400_BAD_REQUEST: {
-        'description': 'The import failed because the validation of the map set failed. '
-                       + 'This is a *good* thing because validation errors will prevent '
-                       + 'the deletion of existing data on the server. Automatic cleanup was '
-                       + 'successful. Otherwise you would have gotten HTTP status 500.'
+ADMIN_RESPONSES = {
+    status.HTTP_401_UNAUTHORIZED: {
+        'description': 'Wrong admin secret token was sent.'
+    },
+    status.HTTP_503_SERVICE_UNAVAILABLE: {
+        'description': 'No admin secret was found in the configuration - so admin access is disabled.'
     }
 }
 
@@ -36,58 +35,6 @@ class MapSetInfoResponse(BaseModel):
     name: str
     uuid: UUID
     battle_maps: List[BattleMapItem]
-
-
-@router.get('/download/{uuid}',
-            description='Download a complete Map Set, e.g. as backup or to migrate it to a different server instance.',
-            responses=RESPONSE_MAP_SET_NOT_FOUND,
-            )
-def download_map_set(
-        uuid: UUID,
-        manager: MapSetManager = Depends(get_map_set_manager),
-        backup_io: BackupIo = Depends(get_backup_io),
-) -> Response:
-    map_set = get_map_set(manager, uuid)
-    filename = _get_safe_file_name(map_set.name)
-    buffer = BytesIO()
-    backup_io.export_map_set_tar_gz(uuid, buffer)
-    buffer.seek(0)
-    response = StreamingResponse(buffer, media_type="application/open-battle-map")
-    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
-
-
-_UNSAFE_CHARACTERS = r'[^a-zA-Z0-9_-]'
-
-
-def _get_safe_file_name(raw_name: str) -> str:
-    name_without_spaces = raw_name.replace(' ', '_')
-    safe_name = re.sub(_UNSAFE_CHARACTERS, 'X', name_without_spaces)
-    return f"{safe_name}.obm"
-
-
-@router.post('/upload',
-             description='Upload a complete Map Set, e.g. to restore an backup or to migrate to a different server.',
-             responses={
-                 **RESPONSE_MAP_SET_NOT_FOUND,
-                 **RESPONSE_IMPORT_VALIDATION_ERROR,
-             }
-             )
-async def upload_map_set(
-        data: UploadFile = File(...),
-        uuid: UUID = Form(...),
-        manager: MapSetManager = Depends(get_map_set_manager),
-        backup_io: BackupIo = Depends(get_backup_io),
-):
-    old_map_set = manager.get_by_uuid(uuid)
-    buffer = BytesIO()
-    buffer.write(await data.read())
-    buffer.seek(0)
-    try:
-        backup_io.import_map_set_tar_gz(uuid, buffer)
-        manager.reload_map_set_from_disk(old_map_set)
-    except ImportValidationError as e:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
 
 @router.get('/{uuid}',
@@ -145,3 +92,65 @@ def _update_known_map_sets_cookie(
         max_age=int(config.known_map_sets_cookie_max_age.total_seconds()),
         samesite='Strict'
     )
+
+
+class MapSetCreateRequest(BaseModel):
+    name: str
+    _check_name = validator('name', allow_reuse=True)(name_validator)
+
+
+@router.put('/',
+            status_code=status.HTTP_201_CREATED,
+            description='Creates a new map set.',
+            responses=ADMIN_RESPONSES,
+            response_model=MapSet,
+            response_model_include={'name', 'uuid'}
+            )
+async def create_map_set(
+        data: MapSetCreateRequest,
+        manager: MapSetManager = Depends(get_map_set_manager),
+        _: None = Depends(check_admin_secret)
+) -> MapSet:
+    return manager.create(data.name)
+
+
+class MapSetDeleteRequest(BaseModel):
+    uuid: UUID
+
+
+@router.delete('/', description='Deletes a map set permanently.',
+               responses={
+                   **RESPONSE_MAP_SET_NOT_FOUND,
+                   **ADMIN_RESPONSES,
+               })
+async def delete_map_set(
+        data: MapSetDeleteRequest,
+        manager: MapSetManager = Depends(get_map_set_manager),
+        _: None = Depends(check_admin_secret)
+):
+    map_set = get_map_set(manager, data.uuid)
+    manager.delete(map_set)
+
+
+class MapSetUpdateRequest(BaseModel):
+    uuid: UUID
+    name: str
+    _check_name = validator('name', allow_reuse=True)(name_validator)
+
+
+@router.post('/', description='Update map set.',
+             responses={
+                 **RESPONSE_MAP_SET_NOT_FOUND,
+                 **ADMIN_RESPONSES,
+             })
+async def update_map_set(
+        data: MapSetUpdateRequest,
+        manager: MapSetManager = Depends(get_map_set_manager),
+        directory: MapSetDirectory = Depends(get_map_set_directory),
+        _: None = Depends(check_admin_secret)
+):
+    map_set = get_map_set(manager, data.uuid)
+    map_set.name = data.name
+    directory.delete(map_set)
+    directory.add(map_set)
+    manager.save(map_set)

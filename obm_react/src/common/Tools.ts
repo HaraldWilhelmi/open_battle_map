@@ -1,29 +1,26 @@
-import {ReduxDispatch} from '../redux/Store';
-import {reportError, reportSuccess, resetMessages} from '../redux/Messages';
+import {GenericDispatch} from '../redux/Types'
+import {actions} from '../redux/Store';
 
 export function handleResponse(
-    dispatch: ReduxDispatch,
+    dispatch: GenericDispatch,
     response: Response,
     whileDoingWhat: string = '',
     isUserTriggered: boolean = true,
 ): void {
     if ( isUserTriggered ) {
-        dispatch(resetMessages());
+        dispatch(actions.messages.reset());
     }
     if ( response.ok ) {
         if ( whileDoingWhat !== '' ) {
-            dispatch(reportSuccess('Succeeded ' + whileDoingWhat + '.'));
+            dispatch(actions.messages.reportSuccess('Succeeded ' + whileDoingWhat + '.'));
         }
     } else {
-        if ( whileDoingWhat === '' ) {
-            dispatch(reportError(response.status + ' ' + response.statusText));
-        } else {
-            dispatch(
-                reportError('Failed ' + whileDoingWhat + ': '
-                    + response.status + ' ' + response.statusText
-                )
-            );
+        let message = response.status + ' ' + response.statusText;
+        if ( whileDoingWhat !== '' ) {
+            message = 'Failed ' + whileDoingWhat + ': ' + response.status + ' ' + response.statusText
         }
+        dispatch(actions.messages.reportError(message));
+        throw new Error(message);
     }
 }
 

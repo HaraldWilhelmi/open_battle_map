@@ -1,7 +1,6 @@
 import {useSelector} from 'react-redux';
-import {Mode} from './redux/Mode';
+import {RootState, Mode} from './redux/Types';
 import Messages from './common/Messages';
-import {RootState} from './redux/Types';
 import Admin from './admin/Admin';
 import AdminLogin from './admin/AdminLogin';
 import User from './user/User';

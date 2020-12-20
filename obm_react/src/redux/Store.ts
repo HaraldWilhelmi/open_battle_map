@@ -1,23 +1,36 @@
 import {combineReducers} from 'redux';
 import {configureStore} from '@reduxjs/toolkit';
-import messagesReducer from './Messages';
-import mapSetUpdateCountReducer from './MapSetUpdateCount';
-import cookiesReducer from './Cookies';
-import modeReducer from './Mode';
-import selectedMapSetReducer from './SelectedMapSet';
-import selectedBattleMapReducer from './SelectedBattleMap';
+import messagesReducer, {messagesActions} from './reducers/Messages';
+import syncerReducer, {syncerActions} from './reducers/Syncer';
+import cookiesReducer, {cookiesActions} from './reducers/Cookies';
+import modeReducer, {modeActions} from './reducers/Mode';
+import mapSetReducer, {mapSetActions} from './reducers/MapSet';
+import battleMapReducer, {battleMapActions} from './reducers/BattleMap';
+import mapSetListReducer, {mapSetListActions} from './reducers/MapSetList';
+import mapPropertiesReducer, {mapPropertiesActions} from './reducers/MapProperties'
 
 export const store = configureStore({
     reducer: combineReducers({
         messages: messagesReducer,
-        mapSetUpdateCount: mapSetUpdateCountReducer,
+        syncer: syncerReducer,
         cookies: cookiesReducer,
         mode: modeReducer,
-        selectedMapSet: selectedMapSetReducer,
-        selectedBattleMap: selectedBattleMapReducer,
+        mapSet: mapSetReducer,
+        battleMap: battleMapReducer,
+        mapSetList: mapSetListReducer,
+        mapProperties: mapPropertiesReducer,
     })
 });
 
-export default store;
+export const actions = {
+    messages: messagesActions,
+    syncer: syncerActions,
+    cookies: cookiesActions,
+    mode: modeActions,
+    mapSet: mapSetActions,
+    battleMap: battleMapActions,
+    mapSetList: mapSetListActions,
+    mapProperties: mapPropertiesActions,
+};
 
-export type ReduxDispatch = typeof store.dispatch;
+export default store;

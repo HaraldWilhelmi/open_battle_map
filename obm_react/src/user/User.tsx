@@ -3,36 +3,80 @@ import {useDispatch, useSelector} from 'react-redux';
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 import Button from 'react-bootstrap/Button'
-import {ReduxDispatch} from '../redux/Store';
-import {RootState} from '../redux/Types';
-import {NO_SUCH_MAP_SET, MapSet} from '../redux/SelectedMapSet';
-import {switchAdmin, switchMapSet} from './Tools';
+import {BattleMapId} from '../api/Types';
+import {RootState, GenericDispatch, Mode} from '../redux/Types';
+import {actions} from '../redux/Store';
 import Map from './Map';
 import Work from './Work';
 import BattleMapSelector from './BattleMapSelector';
-import DataRefresher from './DataRefresher';
 import './User.css'
 
 
 export function User() {
-    const dispatch: ReduxDispatch = useDispatch();
+    const dispatch: GenericDispatch = useDispatch();
     const uuidFromPath = window.location.pathname.substr(1);
 
-    let mapSet: MapSet = useSelector(
-        (state: RootState) => state.selectedMapSet
+    let mapSet = useSelector(
+        (state: RootState) => state.mapSet
+    );
+    let battleMap = useSelector(
+        (state: RootState) => state.battleMap
     );
 
-    useEffect(
+    useEffect( // Initial load of MapSet
         () => {
-            switchMapSet(dispatch, uuidFromPath);
+            if ( uuidFromPath.length < 10 ) {
+                dispatch(actions.mapSet.invalidate());
+            } else {
+                dispatch(actions.mapSet.get({uuid: uuidFromPath}));
+            }
             return undefined;
         },
         [uuidFromPath, dispatch]
     );
 
-    let mySwitchAdmin = () => switchAdmin(dispatch);
+    useEffect( // Load Battle Map if needed and possible
+        () => {
+            if ( mapSet === null || mapSet.battle_maps.length === 0) {
+                if ( battleMap !== null ) {
+                    dispatch(actions.battleMap.invalidate());
+                }
+                return undefined;
+            }
 
-    if ( mapSet.uuid === NO_SUCH_MAP_SET.uuid ) {
+            if ( battleMap !== null ) {
+                for ( let battleMapItem of mapSet.battle_maps ) {
+                    if ( battleMap.uuid === battleMapItem.uuid && battleMap.map_set_uuid === mapSet.uuid ) {
+                        return undefined;
+                    }
+                }
+            }
+
+            const battleMapId: BattleMapId = {
+                uuid: mapSet.battle_maps[0].uuid,
+                map_set_uuid: mapSet.uuid,
+            }
+            dispatch(actions.battleMap.get(battleMapId));
+            return undefined;
+        },
+        [mapSet, battleMap, dispatch]
+    );
+
+    useEffect( () => {
+        dispatch(actions.mapSet.startSync());
+        dispatch(actions.battleMap.startSync());
+        return () => {
+            dispatch(actions.mapSet.stopSync());
+            dispatch(actions.battleMap.stopSync());
+        };
+    })
+
+    let mySwitchAdmin = () => {
+        dispatch(actions.messages.reset());
+        dispatch(actions.mode.set(Mode.Admin));
+    };
+
+    if ( mapSet === null ) {
         return (
             <div>
                 <h1>No such Map Set</h1>
@@ -45,7 +89,6 @@ export function User() {
     }
     return (
         <div className="user-screen">
-            <DataRefresher />
             <div className="map-box">
                 <Map />
             </div>

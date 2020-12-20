@@ -4,41 +4,49 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
 import Form from 'react-bootstrap/Form';
-import {ReduxDispatch} from '../redux/Store';
-import {MapSetItem} from './Types';
-import {setMode, Mode} from '../redux/Mode';
-import {resetMessages} from '../redux/Messages';
-import {renameMapSet, deleteMapSet} from './Tools';
+import {MapSet, MapSetId, MapSetListItem} from '../api/Types';
+import {mapSetApi} from '../api/MapSet';
+import {GenericDispatch, Mode} from '../redux/Types';
+import {actions} from '../redux/Store';
+
 
 interface Props {
-    item: MapSetItem,
+    item: MapSetListItem,
 }
 
 export function MapSetItemRow(props: Props) {
-    let item: MapSetItem = props.item;
+    let item: MapSetListItem = props.item;
     let [name, setName] = useState(item.name);
-    const dispatch: ReduxDispatch = useDispatch();
+    const dispatch: GenericDispatch = useDispatch();
+
+    let updateMapSetList = async () => await dispatch(actions.mapSetList.get());
 
     let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     };
 
-    let myRename = (event: React.FormEvent) => {
-        renameMapSet(dispatch, props.item.uuid, name);
+    let myRename = async (event: React.FormEvent) => {
         event.preventDefault();
+        const id: MapSetId = {uuid: props.item.uuid};
+        let mapSet: MapSet = await mapSetApi.get(id);
+        mapSet = {...mapSet, name};
+        await mapSetApi.update(mapSet);
+        updateMapSetList();
     };
 
-    let myDelete = () => {
+    let myDelete = async () => {
         let warning = 'Really delete Map Set "' + item.name + '" ('
             + item.uuid + ')?'
         if (window.confirm(warning)) {
-            deleteMapSet(dispatch, props.item.uuid);
+            const id: MapSetId = {uuid: props.item.uuid};
+            await mapSetApi.remove(id);
+            updateMapSetList();
         }
     };
 
     let myOpen = () => {
-        dispatch(resetMessages());
-        dispatch(setMode(Mode.User));
+        dispatch(actions.messages.reset());
+        dispatch(actions.mode.set(Mode.User));
         window.location.href = '/' + item.uuid;
     }
 
