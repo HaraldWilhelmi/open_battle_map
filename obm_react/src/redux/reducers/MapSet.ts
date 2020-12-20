@@ -20,7 +20,7 @@ const setup = createUpdatableSyncWithIdReducer<MapSetId, MapSetUpdate, MapSetCre
     api: mapSetApi,
     getMyOwnState: (state: RootState) => state.mapSet,
     errorHandler,
-    syncPeriodInMs: 3 * 1000,
+    syncPeriodInMs: 60 * 1000,
 });
 
 export const mapSetActions = setup.actions;
