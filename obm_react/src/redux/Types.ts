@@ -1,7 +1,7 @@
 import {AnyAction} from 'redux';
 import {ThunkDispatch} from 'redux-thunk';
 import {AsyncThunk} from '@reduxjs/toolkit';
-import {MapSet, BattleMap, MapSetList} from '../api/Types';
+import {MapSet, BattleMap, MapSetList, TokenId} from '../api/Types';
 
 
 // I really would like to write:
@@ -40,11 +40,52 @@ export enum Mode {
 }
 
 export interface MapProperties {
+    widthAvailable: number,
+    heightAvailable: number,
     width: number,
     height: number,
     naturalWidth: number,
     naturalHeight: number,
-    scale: number,
+    xOffset: number,
+    yOffset: number,
+    userZoomFactor: number,
+    totalZoomFactor: number,
+    naturalToDisplayRatio: number,
+}
+
+export interface GeometryUpdate {
+    widthAvailable: number,
+    heightAvailable: number,
+    naturalWidth: number,
+    naturalHeight: number,
+}
+
+export interface MapMove {
+    deltaX: number,
+    deltaY: number,
+}
+
+export interface Coordinate {
+    x: number,
+    y: number,
+}
+
+export interface MapZoom {
+    mousePosition: Coordinate,
+    zoomFactorRatio: number,
+}
+
+
+export enum MouseMode {
+    Default,
+    GrabToken,
+    TurnToken,
+    MoveMap,
+}
+
+export interface MouseState {
+    mouseMode: MouseMode,
+    token: TokenId | null,
 }
 
 export interface SyncStateItem {

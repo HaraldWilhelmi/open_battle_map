@@ -9,8 +9,8 @@ from obm.dependencies import get_magic_color_svg
 router = APIRouter()
 
 
-@router.get('/{_map_set_uuid}/{token_id}/{color}/{mark}',
-            description='Get a token image by ID. Token ID 0 is reserved for the default token. '
+@router.get('/{_map_set_uuid}/{token_type}/{color}/{mark}',
+            description='Get a token image by Type. Token Type 0 is reserved for the default token. '
                         + 'That is the only one implemented yet.',
             responses={
                 status.HTTP_200_OK: {
@@ -21,13 +21,15 @@ router = APIRouter()
             )
 def get_token_image(
         _map_set_uuid: UUID,
-        token_id: int,
+        token_type: int,
         color: Color,
         mark: str = '',
         magic_color_svg: MagicColorSvg = Depends(get_magic_color_svg)
 ) -> Response:
-    if token_id != 0:
+    if token_type != 0:
         raise NotImplemented()
+    if mark == '_':
+        mark = ''
     content = magic_color_svg.get_colored_svg('global/default_token', color, mark)
     media_type = 'image/svg+xml'
     response = Response(content=content, media_type=media_type)

@@ -26,7 +26,7 @@ export function App()  {
             </div>;
         }
         default: {
-            return <div>
+            return <div className="max-height">
                 <Messages />
                 <User />
             </div>;

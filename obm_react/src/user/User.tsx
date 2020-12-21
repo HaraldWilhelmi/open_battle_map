@@ -8,6 +8,7 @@ import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Map from './Map';
 import Work from './Work';
+import Play from './Play';
 import BattleMapSelector from './BattleMapSelector';
 import './User.css'
 
@@ -29,6 +30,7 @@ export function User() {
                 dispatch(actions.mapSet.invalidate());
             } else {
                 dispatch(actions.mapSet.get({uuid: uuidFromPath}));
+                dispatch(actions.mapProperties.reset());
             }
             return undefined;
         },
@@ -88,7 +90,7 @@ export function User() {
         );
     }
     return (
-        <div className="user-screen">
+        <div className="user-screen max-height">
             <Map />
             <div className="menu-box">
                 <div className="section">
@@ -98,7 +100,7 @@ export function User() {
                 <div className="section">
                     <Tabs defaultActiveKey="play">
                         <Tab eventKey="play" title="Play">
-                            <p className="menu-item">Todo</p>
+                            <Play />
                         </Tab>
                         <Tab eventKey="work" title="Work">
                             <Work />

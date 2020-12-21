@@ -78,6 +78,18 @@ export interface MapSetListItem {
 
 export type MapSetList = MapSetListItem[];
 
+export interface TokenId {
+    map_set_uuid: string,
+    token_type: string,
+    color: string,
+    mark: string,
+}
+
+export interface TokenState extends TokenId {
+    x: number,
+    y: number,
+    rotation: number,
+}
 
 export interface ReadonlyApiDescriptor {
     name: string,

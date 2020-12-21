@@ -85,7 +85,9 @@ export function Work() {
             <TextInputMenuItem label="Create" placeholder="new map name" doIt={myCreateBattleMap} />
             <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} disabled={noBattleMap} />
             <UploadMenuItem label="Upload Map Image" doIt={myUploadBackground} accept="image/*" disabled={noBattleMap} />
-            <div className="menu-item-help">({mapProperties.width}x{mapProperties.height} Z:{mapProperties.scale.toFixed(1)})</div>
+            <div className="menu-item-help">
+                ({mapProperties.naturalWidth}x{mapProperties.naturalHeight} M:{mapProperties.naturalToDisplayRatio.toFixed(1)})
+            </div>
             <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} disabled={noBattleMap} />
         </div>
     );

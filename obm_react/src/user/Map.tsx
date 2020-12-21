@@ -1,7 +1,8 @@
 import {useEffect, useRef} from 'react';
+import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
 import {BattleMap} from '../api/Types';
-import {RootState, MapProperties, GenericDispatch} from '../redux/Types';
+import {RootState, MapProperties, GenericDispatch, GeometryUpdate} from '../redux/Types';
 import {actions} from '../redux/Store';
 
 
@@ -10,43 +11,67 @@ export function Map() {
     const mapFrameRef = useRef<HTMLImageElement>(null);
     const mapRef = useRef<HTMLImageElement>(null);
 
-    let battleMap: BattleMap | undefined = useSelector(
+    const battleMap: BattleMap | null = useSelector(
         (state: RootState) => state.battleMap
     );
 
-    useEffect(
-        () => {
-            const map = mapRef.current;
-            const frame = mapFrameRef.current;
-            const mapProperties: MapProperties = {
-                width: frame?.clientWidth ?? 0,
-                height: frame?.clientHeight ?? 0,
-                naturalWidth: map?.width ?? 0,
-                naturalHeight: map?.height ?? 0,
-                scale: ( frame?.clientWidth ?? 1 )  / ( map?.naturalWidth ?? 1 ),
-            }
-            console.log("Map properties: " + JSON.stringify(mapProperties));
-            dispatch(actions.mapProperties.set(mapProperties));
-            return undefined;
-        },
-        [dispatch, battleMap]
+    const mapProperties: MapProperties = useSelector(
+        (state: RootState) => state.mapProperties
     );
+
+    console.log("Map Properties: " + JSON.stringify(mapProperties));
+
+    const detectGeometryChange = () => {
+        const map = mapRef.current;
+        const frame = mapFrameRef.current;
+        const widthAvailable = frame?.clientWidth ?? 0;
+        const heightAvailable = frame?.clientHeight ?? 0;
+        const naturalWidth = map?.naturalWidth ?? 0;
+        const naturalHeight = map?.naturalHeight ?? 0;
+
+        if ( widthAvailable === 0 || heightAvailable === 0 || naturalWidth === 0 || naturalHeight === 0 ) {
+            console.log('detectGeometryChange: Essential data not present!');
+            return;
+        }
+
+        if (
+            widthAvailable === mapProperties.widthAvailable && heightAvailable === mapProperties.heightAvailable &&
+            naturalWidth === mapProperties.naturalWidth && naturalHeight === mapProperties.naturalHeight
+        ) {
+            return;
+        }
+        const geometryUpdate: GeometryUpdate = {widthAvailable, heightAvailable, naturalWidth, naturalHeight};
+        console.log("Geometry Update: " + JSON.stringify(geometryUpdate));
+        dispatch(actions.mapProperties.updateGeometry(geometryUpdate));
+    }
 
     if ( battleMap === null ) {
         return ( <p>:-(</p> );
     }
 
+    const style: CSS.Properties = {
+        width: mapProperties.width + 'px',
+        height: mapProperties.height + 'px',
+        left: mapProperties.xOffset + 'px',
+        top: mapProperties.yOffset + 'px',
+    };
+
     // The query parameter is actually unused, but ensures a refresh/render of the image.
-    let url = '/api/image_data/'
+    const url = '/api/image_data/'
         + battleMap.map_set_uuid + '/'
         + battleMap.uuid
         + '?v=' + battleMap.background_revision;
 
     return (
-        <div className="map-outer-frame">
-            <div className="map-inner-frame" ref={mapFrameRef}>
-                <img src={url} alt="Battle Map Background" className="map" ref={mapRef}/>
-            </div>
+        <div className="map-frame" ref={mapFrameRef}>
+            <img
+                src={url}
+                style={style}
+                alt="Battle Map Background"
+                className="map-image"
+                ref={mapRef}
+                onLoad={detectGeometryChange
+            }/>
         </div>
     );
 }
