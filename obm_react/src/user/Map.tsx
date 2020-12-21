@@ -1,8 +1,10 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, WheelEvent} from 'react';
 import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
 import {BattleMap} from '../api/Types';
-import {RootState, MapProperties, GenericDispatch, GeometryUpdate} from '../redux/Types';
+import {
+    RootState, MapProperties, GenericDispatch, GeometryUpdate, MapZoom
+} from '../redux/Types';
 import {actions} from '../redux/Store';
 
 
@@ -45,6 +47,20 @@ export function Map() {
         dispatch(actions.mapProperties.updateGeometry(geometryUpdate));
     }
 
+    const doZoom = (event: WheelEvent) => {
+        const mapZoom: MapZoom = {
+            mousePosition: {x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY},
+            zoomFactorRatio: event.deltaY < 0 ? 1.2 : 1 / 1.2,
+        };
+        console.log("Map Zoom: " + JSON.stringify(mapZoom));
+        dispatch(actions.mapProperties.zoom(mapZoom));
+    }
+
+    useEffect(() => {
+        window.addEventListener("resize", detectGeometryChange);
+        return () => window.removeEventListener("resize", detectGeometryChange);
+    });
+
     if ( battleMap === null ) {
         return ( <p>:-(</p> );
     }
@@ -70,8 +86,9 @@ export function Map() {
                 alt="Battle Map Background"
                 className="map-image"
                 ref={mapRef}
-                onLoad={detectGeometryChange
-            }/>
+                onLoad={detectGeometryChange}
+                onWheel={doZoom}
+            />
         </div>
     );
 }
