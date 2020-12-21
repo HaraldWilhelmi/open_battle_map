@@ -7,6 +7,7 @@ import {actions} from '../redux/Store';
 
 export function Map() {
     const dispatch: GenericDispatch = useDispatch();
+    const mapFrameRef = useRef<HTMLImageElement>(null);
     const mapRef = useRef<HTMLImageElement>(null);
 
     let battleMap: BattleMap | undefined = useSelector(
@@ -16,12 +17,13 @@ export function Map() {
     useEffect(
         () => {
             const map = mapRef.current;
+            const frame = mapFrameRef.current;
             const mapProperties: MapProperties = {
-                width: map?.width ?? 0,
-                height: map?.height ?? 0,
-                naturalWidth: map?.naturalWidth ?? 0,
-                naturalHeight: map?.naturalHeight ?? 0,
-                scale: ( map?.width ?? 1 )  / ( map?.naturalWidth ?? 1 ),
+                width: frame?.clientWidth ?? 0,
+                height: frame?.clientHeight ?? 0,
+                naturalWidth: map?.width ?? 0,
+                naturalHeight: map?.height ?? 0,
+                scale: ( frame?.clientWidth ?? 1 )  / ( map?.naturalWidth ?? 1 ),
             }
             console.log("Map properties: " + JSON.stringify(mapProperties));
             dispatch(actions.mapProperties.set(mapProperties));
@@ -41,7 +43,11 @@ export function Map() {
         + '?v=' + battleMap.background_revision;
 
     return (
-        <img src={url} alt="Battle Map Background" className="map" ref={mapRef}/>
+        <div className="map-outer-frame">
+            <div className="map-inner-frame" ref={mapFrameRef}>
+                <img src={url} alt="Battle Map Background" className="map" ref={mapRef}/>
+            </div>
+        </div>
     );
 }
 

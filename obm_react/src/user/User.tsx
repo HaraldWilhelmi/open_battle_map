@@ -89,9 +89,7 @@ export function User() {
     }
     return (
         <div className="user-screen">
-            <div className="map-box">
-                <Map />
-            </div>
+            <Map />
             <div className="menu-box">
                 <div className="section">
                     <div className="menu-item"><h3>{mapSet.name}</h3></div>

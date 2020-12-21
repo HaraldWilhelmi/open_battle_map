@@ -1,8 +1,9 @@
 .user-screen { display: flex }
-.map-box { flex: 1 1 auto }
+
 .menu-box {
     flex: 0 0 200px;
     flex-direction: column;
+    margin: 1ex;
 }
 .menu-item{
     width: 200px;
@@ -26,7 +27,7 @@ input.menu-field {
 }
 
 .menu-item-help {
-  color: #a0a0a0;
+  color: #808080;
   font-size: 10px;
 }
 
@@ -44,7 +45,13 @@ input[type="file"] {
     display: none;
 }
 
-.map {
+.map-outer-frame {
+    flex: 1 1 auto;
     max-width: 100%;
     max-height: 100%;
+    background-color: #e0e0e0;
+}
+
+.map-inner-frame {
+    display: inline-block;
 }
