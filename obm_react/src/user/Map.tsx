@@ -8,6 +8,9 @@ import {
 import {actions} from '../redux/Store';
 
 
+const ZOOM_INCREMENT = Math.sqrt(2);
+
+
 export function Map() {
     const dispatch: GenericDispatch = useDispatch();
     const mapFrameRef = useRef<HTMLImageElement>(null);
@@ -50,7 +53,7 @@ export function Map() {
     const doZoom = (event: WheelEvent) => {
         const mapZoom: MapZoom = {
             mousePosition: {x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY},
-            zoomFactorRatio: event.deltaY < 0 ? 1.2 : 1 / 1.2,
+            zoomFactorRatio: event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT,
         };
         console.log("Map Zoom: " + JSON.stringify(mapZoom));
         dispatch(actions.mapProperties.zoom(mapZoom));

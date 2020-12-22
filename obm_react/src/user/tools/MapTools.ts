@@ -36,13 +36,14 @@ export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom)
     const minXOffset = mapProperties.widthAvailable - width;
     const minYOffset = mapProperties.heightAvailable - height;
 
-    const mouseMapPosition = getMapPositionFromDisplayPosition(mapProperties, mapZoom.mousePosition);
+    const mouseMapPosition = getMapPositionFromScaledPosition(mapProperties, mapZoom.mousePosition);
+    const mousePhysicalPosition = getPhysicalPositionFromScaledPosition(mapProperties, mapZoom.mousePosition);
 
-    let xOffset = mapZoom.mousePosition.x - mouseMapPosition.x * totalZoomFactor;
+    let xOffset = mousePhysicalPosition.x - mouseMapPosition.x * totalZoomFactor;
     xOffset = xOffset < minXOffset ? minXOffset : xOffset;
     xOffset = xOffset > 0          ? 0          : xOffset;
 
-    let yOffset = mapZoom.mousePosition.y - mouseMapPosition.y * totalZoomFactor;
+    let yOffset = mousePhysicalPosition.y - mouseMapPosition.y * totalZoomFactor;
     yOffset = yOffset < minYOffset ? minYOffset : yOffset;
     yOffset = yOffset > 0          ? 0          : yOffset;
 
@@ -51,10 +52,17 @@ export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom)
     };
 }
 
-export function getMapPositionFromDisplayPosition(mapProperties: MapProperties, displayPosition: Coordinate): Coordinate {
+export function getMapPositionFromScaledPosition(mapProperties: MapProperties, scaledPosition: Coordinate): Coordinate {
     return {
-        x: (displayPosition.x - mapProperties.xOffset) / mapProperties.totalZoomFactor,
-        y: (displayPosition.y - mapProperties.yOffset) / mapProperties.totalZoomFactor,
+        x: scaledPosition.x / mapProperties.totalZoomFactor,
+        y: scaledPosition.y / mapProperties.totalZoomFactor,
+    }
+}
+
+export function getPhysicalPositionFromScaledPosition(mapProperties: MapProperties, scaledPosition: Coordinate): Coordinate {
+    return {
+        x: scaledPosition.x + mapProperties.xOffset,
+        y: scaledPosition.y + mapProperties.yOffset,
     }
 }
 

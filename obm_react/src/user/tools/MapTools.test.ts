@@ -1,5 +1,8 @@
 import {MapProperties, GeometryUpdate, MapMove, MapZoom, Coordinate} from '../../redux/Types';
-import {calculateMapZoom, calculateGeometryUpdate} from './MapTools';
+import {
+    calculateMapZoom, calculateGeometryUpdate,
+    getMapPositionFromScaledPosition, getPhysicalPositionFromScaledPosition
+} from './MapTools';
 
 
 const SAMPLE: MapProperties = {
@@ -16,6 +19,74 @@ const SAMPLE: MapProperties = {
     naturalToDisplayRatio: 2.0,
 }
 
+const SAMPLE_ZOOMED: MapProperties = {
+    widthAvailable: 400,
+    heightAvailable: 300,
+    width: 800,
+    height: 500,
+    naturalWidth: 200,
+    naturalHeight: 125,
+    xOffset: -200, // Please note the slight asymmetry after the first zoom,
+    yOffset: -125, // due to 50px vertical space which were used before
+    userZoomFactor: 2.0,
+    totalZoomFactor: 4.0,
+    naturalToDisplayRatio: 2.0,
+}
+
+const SAMPLE_ZOOMED_CENTERED: MapProperties = {
+    widthAvailable: 400,
+    heightAvailable: 300,
+    width: 800,
+    height: 500,
+    naturalWidth: 200,
+    naturalHeight: 125,
+    xOffset: -200,
+    yOffset: -100,
+    userZoomFactor: 2.0,
+    totalZoomFactor: 4.0,
+    naturalToDisplayRatio: 2.0,
+}
+
+const SAMPLE_ZOOMED_TWICE: MapProperties = {
+    widthAvailable: 400,
+    heightAvailable: 300,
+    width: 1600,
+    height: 1000,
+    naturalWidth: 200,
+    naturalHeight: 125,
+    xOffset: -600,
+    yOffset: -350,
+    userZoomFactor: 4.0,
+    totalZoomFactor: 8.0,
+    naturalToDisplayRatio: 2.0,
+}
+
+const SAMPLE_ZOOMED_TRICE: MapProperties = {
+    widthAvailable: 400,
+    heightAvailable: 300,
+    width: 3200,
+    height: 2000,
+    naturalWidth: 200,
+    naturalHeight: 125,
+    xOffset: -1400,
+    yOffset: -850,
+    userZoomFactor: 8.0,
+    totalZoomFactor: 16.0,
+    naturalToDisplayRatio: 2.0,
+}
+
+
+test ('getMapPositionFromScaledPosition', () => {
+    const coordinate: Coordinate = {x: 400, y: 250}; // Middle of 800 x 500 scaled image
+    const result = getMapPositionFromScaledPosition(SAMPLE_ZOOMED, coordinate);
+    expect(result).toStrictEqual({x: 100, y: 62.5});
+});
+
+test ('getPhysicalPositionFromScaledPosition', () => {
+    const coordinate: Coordinate = {x: 400, y: 250}; // Middle of 800 x 500 scaled image
+    const result = getPhysicalPositionFromScaledPosition(SAMPLE_ZOOMED, coordinate);
+    expect(result).toStrictEqual({x: 200, y: 125});
+});
 
 test('calculateMapZoom - trivial', () => {
     const mapZoom: MapZoom = {
@@ -73,6 +144,35 @@ test('calculateMapZoom - over zoom', () => {
     expect(result).toStrictEqual(expectedResult);
 });
 
+test('calculateMapZoom - central zoom', () => {
+    const mapZoom: MapZoom = {
+        zoomFactorRatio: 2.0,
+        mousePosition: { x: 200, y: 125 }, // 100, 63 on the background map - the middle
+    }
+    const result = calculateMapZoom(SAMPLE, mapZoom);
+    expect(result).toStrictEqual(SAMPLE_ZOOMED);
+});
+
+test('calculateMapZoom - 2x central zoom', () => {
+    const mapZoom: MapZoom = {
+        zoomFactorRatio: 2.0,
+        mousePosition: { x: 400, y: 250 }, // 100, 63 on the background map - the middle
+    }
+    const result = calculateMapZoom(SAMPLE_ZOOMED_CENTERED, mapZoom);
+    expect(result).toStrictEqual(SAMPLE_ZOOMED_TWICE);
+});
+
+test('calculateMapZoom - 3x central zoom', () => {
+    const mapZoom: MapZoom = {
+        zoomFactorRatio: 2.0,
+        mousePosition: { x: 800, y: 500 }, // 100, 63 on the background map - the middle
+    }
+    const result = calculateMapZoom(SAMPLE_ZOOMED_TWICE, mapZoom);
+    expect(result).toStrictEqual(SAMPLE_ZOOMED_TRICE);
+});
+
+
+
 test('calculateGeometryUpdate - trivial', () => {
     const geometryUpdate: GeometryUpdate = { // No change!
         widthAvailable: 400,
@@ -85,9 +185,9 @@ test('calculateGeometryUpdate - trivial', () => {
 });
 
 test('calculateGeometryUpdate - change aspect ratio of frame', () => {
-    const geometryUpdate: GeometryUpdate = { // No change!
-        widthAvailable: 400,
-        heightAvailable: 200,
+    const geometryUpdate: GeometryUpdate = {
+        widthAvailable: 400,        // Before the change widthAvailable was the limiting factor
+        heightAvailable: 200,       // After it is heightAvailable. So wie expect naturalToDisplayRatio = 200 / 125 = 1.6
         naturalWidth: 200,
         naturalHeight: 125,
     }
