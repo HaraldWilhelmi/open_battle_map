@@ -1,4 +1,4 @@
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {BattleMap} from '../api/Types';
 import {RootState} from '../redux/Types';
 

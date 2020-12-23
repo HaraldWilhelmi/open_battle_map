@@ -71,10 +71,9 @@ export interface Coordinate {
 }
 
 export interface MapZoom {
-    mousePosition: Coordinate,
+    mousePosition?: Coordinate,
     zoomFactorRatio: number,
 }
-
 
 export enum MouseMode {
     Default,
@@ -84,7 +83,8 @@ export enum MouseMode {
 }
 
 export interface MouseState {
-    mouseMode: MouseMode,
+    mode: MouseMode,
+    lastSeen: Coordinate | null,
     token: TokenId | null,
 }
 
@@ -107,6 +107,7 @@ export interface RootState {
     battleMap: BattleMap,
     mapProperties: MapProperties,
     mapSetList: MapSetList,
+    mouse: MouseState,
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;

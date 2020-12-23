@@ -7,7 +7,8 @@ import modeReducer, {modeActions} from './reducers/Mode';
 import mapSetReducer, {mapSetActions} from './reducers/MapSet';
 import battleMapReducer, {battleMapActions} from './reducers/BattleMap';
 import mapSetListReducer, {mapSetListActions} from './reducers/MapSetList';
-import mapPropertiesReducer, {mapPropertiesActions} from './reducers/MapProperties'
+import mapPropertiesReducer, {mapPropertiesActions} from './reducers/MapProperties';
+import mouseReducer, {mouseActions} from './reducers/Mouse';
 
 export const store = configureStore({
     reducer: combineReducers({
@@ -19,6 +20,7 @@ export const store = configureStore({
         battleMap: battleMapReducer,
         mapSetList: mapSetListReducer,
         mapProperties: mapPropertiesReducer,
+        mouse: mouseReducer,
     })
 });
 
@@ -31,6 +33,7 @@ export const actions = {
     battleMap: battleMapActions,
     mapSetList: mapSetListActions,
     mapProperties: mapPropertiesActions,
+    mouse: mouseActions,
 };
 
 export default store;

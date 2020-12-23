@@ -1,9 +1,10 @@
-import {useEffect, useRef, WheelEvent} from 'react';
+import {useEffect, useRef, WheelEvent, MouseEvent} from 'react';
 import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
 import {BattleMap} from '../api/Types';
 import {
-    RootState, MapProperties, GenericDispatch, GeometryUpdate, MapZoom
+    RootState, MapProperties, GenericDispatch, GeometryUpdate, MapZoom, MapMove,
+    MouseMode, MouseState, Coordinate
 } from '../redux/Types';
 import {actions} from '../redux/Store';
 
@@ -22,6 +23,10 @@ export function Map() {
 
     const mapProperties: MapProperties = useSelector(
         (state: RootState) => state.mapProperties
+    );
+
+    const mouse: MouseState = useSelector(
+        (state: RootState) => state.mouse
     );
 
     console.log("Map Properties: " + JSON.stringify(mapProperties));
@@ -59,6 +64,45 @@ export function Map() {
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
+    const enterMapMove = (event: MouseEvent) => {
+        event.preventDefault();
+        if ( mouse.mode === MouseMode.Default ) {
+            const position: Coordinate = {
+                x: event.nativeEvent.offsetX,
+                y: event.nativeEvent.offsetY,
+            };
+            dispatch(actions.mouse.grabMap(position));
+            const map = mapRef.current;
+            if( map?.style?.cursor !== undefined ) {
+                map.style.cursor = "move";
+            }
+        }
+    }
+
+    const leaveMapMove = () => {
+        if ( mouse.mode === MouseMode.MoveMap ) {
+            dispatch(actions.mouse.releaseMap());
+            const map = mapRef.current;
+            if( map?.style?.cursor !== undefined ) {
+                map.style.cursor = "default";
+            }
+        }
+    }
+
+    const doMapMove = (event: MouseEvent) => {
+        if ( mouse.mode === MouseMode.MoveMap ) {
+            const oldX = mouse?.lastSeen?.x ?? -1;
+            const oldY = mouse?.lastSeen?.y ?? -1;
+            if ( oldX >= 0 && oldY >= 0 ) {
+                const mapMove: MapMove = {
+                    deltaX: event.nativeEvent.offsetX - oldX,
+                    deltaY: event.nativeEvent.offsetY - oldY,
+                };
+                dispatch(actions.mapProperties.move(mapMove));
+            }
+        }
+    }
+
     useEffect(() => {
         window.addEventListener("resize", detectGeometryChange);
         return () => window.removeEventListener("resize", detectGeometryChange);
@@ -91,6 +135,10 @@ export function Map() {
                 ref={mapRef}
                 onLoad={detectGeometryChange}
                 onWheel={doZoom}
+                onMouseDown={enterMapMove}
+                onMouseUp={leaveMapMove}
+                onMouseLeave={leaveMapMove}
+                onMouseMove={doMapMove}
             />
         </div>
     );

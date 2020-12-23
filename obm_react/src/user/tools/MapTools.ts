@@ -22,7 +22,17 @@ export function calculateGeometryUpdate(mapProperties: MapProperties, geometryUp
 }
 
 export function calculateMapMove(mapProperties: MapProperties, mapMove: MapMove): MapProperties {
-    return mapProperties;
+    const minXOffset = mapProperties.widthAvailable - mapProperties.width;
+    let xOffset = mapProperties.xOffset + mapMove.deltaX;
+    xOffset = xOffset < minXOffset ? minXOffset: xOffset;
+    xOffset = xOffset > 0          ? 0         : xOffset;
+
+    const minYOffset = mapProperties.heightAvailable - mapProperties.height;
+    let yOffset = mapProperties.yOffset + mapMove.deltaY;
+    yOffset = yOffset < minYOffset ? minYOffset: yOffset;
+    yOffset = yOffset > 0          ? 0         : yOffset;
+
+    return {...mapProperties, xOffset, yOffset};
 }
 
 export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom): MapProperties {
@@ -36,14 +46,21 @@ export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom)
     const minXOffset = mapProperties.widthAvailable - width;
     const minYOffset = mapProperties.heightAvailable - height;
 
-    const mouseMapPosition = getMapPositionFromScaledPosition(mapProperties, mapZoom.mousePosition);
-    const mousePhysicalPosition = getPhysicalPositionFromScaledPosition(mapProperties, mapZoom.mousePosition);
+    let focusPoint: Coordinate = {
+        x: mapProperties.widthAvailable / 2 - mapProperties.xOffset,
+        y: mapProperties.heightAvailable / 2 - mapProperties.yOffset,
+    };
+    if ( mapZoom.mousePosition !== undefined ) {
+        focusPoint = mapZoom.mousePosition;
+    }
+    const focusMapPosition = getMapPositionFromScaledPosition(mapProperties, focusPoint);
+    const focusPhysicalPosition = getPhysicalPositionFromScaledPosition(mapProperties, focusPoint);
 
-    let xOffset = mousePhysicalPosition.x - mouseMapPosition.x * totalZoomFactor;
+    let xOffset = focusPhysicalPosition.x - focusMapPosition.x * totalZoomFactor;
     xOffset = xOffset < minXOffset ? minXOffset : xOffset;
     xOffset = xOffset > 0          ? 0          : xOffset;
 
-    let yOffset = mousePhysicalPosition.y - mouseMapPosition.y * totalZoomFactor;
+    let yOffset = focusPhysicalPosition.y - focusMapPosition.y * totalZoomFactor;
     yOffset = yOffset < minYOffset ? minYOffset : yOffset;
     yOffset = yOffset > 0          ? 0          : yOffset;
 
