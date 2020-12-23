@@ -14,6 +14,7 @@ export function Play() {
 
     const tokens = tokenColors.map(
         (color) => <img
+            className="token-in-box"
             src={"/api/token_image/" + battleMap.map_set_uuid + "/0/" + color + "/_" }
             alt={color + " token"}
             key={color}
