@@ -47,10 +47,8 @@ export function User() {
             }
 
             if ( battleMap !== null ) {
-                for ( let battleMapItem of mapSet.battle_maps ) {
-                    if ( battleMap.uuid === battleMapItem.uuid && battleMap.map_set_uuid === mapSet.uuid ) {
-                        return undefined;
-                    }
+                if ( battleMap.map_set_uuid === mapSet.uuid ) {
+                    return undefined;
                 }
             }
 
