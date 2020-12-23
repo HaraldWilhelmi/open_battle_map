@@ -1,10 +1,10 @@
 import {useEffect, useRef, WheelEvent, MouseEvent} from 'react';
 import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
-import {BattleMap} from '../api/Types';
+import {BattleMap, Coordinate} from '../api/Types';
 import {
     RootState, MapProperties, GenericDispatch, GeometryUpdate, MapZoom, MapMove,
-    MouseMode, MouseState, Coordinate
+    MouseMode, MouseState
 } from '../redux/Types';
 import {actions} from '../redux/Store';
 

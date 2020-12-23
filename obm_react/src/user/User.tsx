@@ -10,6 +10,7 @@ import Map from './Map';
 import Work from './Work';
 import Play from './Play';
 import BattleMapSelector from './BattleMapSelector';
+import FlyingTokenLayer from './FlyingTokenLayer';
 import './User.css'
 
 
@@ -88,24 +89,29 @@ export function User() {
         );
     }
     return (
-        <div className="user-screen max-height">
-            <Map />
-            <div className="menu-box">
-                <div className="section">
-                    <div className="menu-item"><h3>{mapSet.name}</h3></div>
-                    <BattleMapSelector />
+        <div className="max-height">
+            <FlyingTokenLayer>
+                <div className="main-layer">
+                    <Map />
+                    <div className="menu-box-vertical-ruler" />
+                    <div className="menu-box">
+                        <div className="section">
+                            <div className="menu-item"><h3>{mapSet.name}</h3></div>
+                            <BattleMapSelector />
+                        </div>
+                        <div className="section">
+                            <Tabs defaultActiveKey="play">
+                                <Tab eventKey="play" title="Play">
+                                    <Play />
+                                </Tab>
+                                <Tab eventKey="work" title="Work">
+                                    <Work />
+                                </Tab>
+                            </Tabs>
+                        </div>
+                    </div>
                 </div>
-                <div className="section">
-                    <Tabs defaultActiveKey="play">
-                        <Tab eventKey="play" title="Play">
-                            <Play />
-                        </Tab>
-                        <Tab eventKey="work" title="Work">
-                            <Work />
-                        </Tab>
-                    </Tabs>
-                </div>
-            </div>
+            </FlyingTokenLayer>
         </div>
     );
 }

@@ -1,11 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {MouseState, MouseMode, Coordinate} from '../Types';
+import {TokenId, TokenState, Coordinate} from '../../api/Types';
+import {MouseState, MouseMode} from '../Types';
 import {mapPropertiesActions} from './MapProperties';
 
 const INITIAL_STATE: MouseState = {
     mode: MouseMode.Default,
     lastSeen: null,
-    token: null,
+    tokenId: null,
+    tokenRotation: 0.0,
 }
 
 export const slice = createSlice({
@@ -13,13 +15,38 @@ export const slice = createSlice({
     initialState: INITIAL_STATE,
     reducers: {
         grabMap: (state, action: PayloadAction<Coordinate>) => {
-            return {mode: MouseMode.MoveMap, token: null, lastSeen: action.payload}
+            return {
+                mode: MouseMode.MoveMap,
+                lastSeen: action.payload,
+                tokenId: null,
+                tokenRotation: 0.0,
+            };
         },
         releaseMap: (state) => {
-            return {mode: MouseMode.Default, token: null, lastSeen: null}
+            return {...state, mode: MouseMode.Default, lastSeen: null};
+        },
+        grabToken: (state, action: PayloadAction<TokenState>) => {
+            const tokenId: TokenId = {...action.payload};
+            return {...state,
+                mode: MouseMode.MoveToken,
+                lastSeen: action.payload.position,
+                tokenId,
+                tokenRotation: action.payload.rotation,
+            };
+        },
+        placeToken: (state, action: PayloadAction<Coordinate>) => {
+            return {...state,
+                mode: MouseMode.TurnToken,
+                lastSeen: action.payload,
+            };
+        },
+        releaseToken: (state) => {
+            return {...state,
+                mode: MouseMode.Default, tokenId: null, lastSeen: null
+            };
         },
     },
-   extraReducers: builder => {
+    extraReducers: builder => {
         builder.addCase(
             mapPropertiesActions.move, (state, action) => {
                 if ( state.mode === MouseMode.MoveMap && state.lastSeen !== null ) {
@@ -34,7 +61,7 @@ export const slice = createSlice({
                 }
             }
         )
-   },
+    },
 })
 
 export const mouseActions = slice.actions;

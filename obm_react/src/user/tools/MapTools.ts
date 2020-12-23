@@ -1,4 +1,5 @@
-import {MapProperties, GeometryUpdate, MapMove, MapZoom, Coordinate} from '../../redux/Types';
+import {Coordinate} from '../../api/Types';
+import {MapProperties, GeometryUpdate, MapMove, MapZoom} from '../../redux/Types';
 
 
 const ZOOM_NOOP: MapZoom = {
@@ -7,6 +8,8 @@ const ZOOM_NOOP: MapZoom = {
 }
 
 const MAX_ZOOM = 16.0;
+
+const OFFSET_TOLERANCE = 0.3;
 
 export function calculateGeometryUpdate(mapProperties: MapProperties, geometryUpdate: GeometryUpdate): MapProperties {
     const naturalToDisplayRatioX = geometryUpdate.widthAvailable / geometryUpdate.naturalWidth;
@@ -22,15 +25,25 @@ export function calculateGeometryUpdate(mapProperties: MapProperties, geometryUp
 }
 
 export function calculateMapMove(mapProperties: MapProperties, mapMove: MapMove): MapProperties {
-    const minXOffset = mapProperties.widthAvailable - mapProperties.width;
     let xOffset = mapProperties.xOffset + mapMove.deltaX;
-    xOffset = xOffset < minXOffset ? minXOffset: xOffset;
-    xOffset = xOffset > 0          ? 0         : xOffset;
-
-    const minYOffset = mapProperties.heightAvailable - mapProperties.height;
     let yOffset = mapProperties.yOffset + mapMove.deltaY;
-    yOffset = yOffset < minYOffset ? minYOffset: yOffset;
-    yOffset = yOffset > 0          ? 0         : yOffset;
+    const firstGuess = {...mapProperties, xOffset, yOffset};
+    return fixOffsets(firstGuess);
+}
+
+export function fixOffsets(mapProperties: MapProperties): MapProperties {
+    let xOffset = mapProperties.xOffset;
+    let yOffset = mapProperties.yOffset;
+
+    const minXOffset = (1 - OFFSET_TOLERANCE ) * mapProperties.widthAvailable - mapProperties.width;
+    const maxXOffset = OFFSET_TOLERANCE * mapProperties.widthAvailable;
+    const minYOffset = (1 - OFFSET_TOLERANCE ) * mapProperties.heightAvailable - mapProperties.height;
+    const maxYOffset = OFFSET_TOLERANCE * mapProperties.heightAvailable;
+
+    xOffset = xOffset < minXOffset ? minXOffset : xOffset;
+    xOffset = xOffset > maxXOffset ? maxXOffset : xOffset;
+    yOffset = yOffset < minYOffset ? minYOffset : yOffset;
+    yOffset = yOffset > maxYOffset ? maxYOffset : yOffset;
 
     return {...mapProperties, xOffset, yOffset};
 }
@@ -43,30 +56,22 @@ export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom)
     const totalZoomFactor = userZoomFactor * mapProperties.naturalToDisplayRatio;
     const width = totalZoomFactor * mapProperties.naturalWidth;
     const height = totalZoomFactor * mapProperties.naturalHeight;
-    const minXOffset = mapProperties.widthAvailable - width;
-    const minYOffset = mapProperties.heightAvailable - height;
 
-    let focusPoint: Coordinate = {
-        x: mapProperties.widthAvailable / 2 - mapProperties.xOffset,
-        y: mapProperties.heightAvailable / 2 - mapProperties.yOffset,
-    };
-    if ( mapZoom.mousePosition !== undefined ) {
-        focusPoint = mapZoom.mousePosition;
-    }
+    let focusPoint: Coordinate = mapZoom.mousePosition === undefined ?
+        {
+            x: mapProperties.widthAvailable / 2 - mapProperties.xOffset,
+            y: mapProperties.heightAvailable / 2 - mapProperties.yOffset,
+        } : mapZoom.mousePosition;
     const focusMapPosition = getMapPositionFromScaledPosition(mapProperties, focusPoint);
     const focusPhysicalPosition = getPhysicalPositionFromScaledPosition(mapProperties, focusPoint);
 
     let xOffset = focusPhysicalPosition.x - focusMapPosition.x * totalZoomFactor;
-    xOffset = xOffset < minXOffset ? minXOffset : xOffset;
-    xOffset = xOffset > 0          ? 0          : xOffset;
-
     let yOffset = focusPhysicalPosition.y - focusMapPosition.y * totalZoomFactor;
-    yOffset = yOffset < minYOffset ? minYOffset : yOffset;
-    yOffset = yOffset > 0          ? 0          : yOffset;
 
-    return {...mapProperties,
-        userZoomFactor, totalZoomFactor, width, height, xOffset, yOffset,
+    const firstGuess = {...mapProperties,
+        userZoomFactor, totalZoomFactor, width, height, xOffset, yOffset
     };
+    return fixOffsets(firstGuess);
 }
 
 export function getMapPositionFromScaledPosition(mapProperties: MapProperties, scaledPosition: Coordinate): Coordinate {

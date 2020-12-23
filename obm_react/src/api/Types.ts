@@ -80,14 +80,18 @@ export type MapSetList = MapSetListItem[];
 
 export interface TokenId {
     map_set_uuid: string,
-    token_type: string,
+    token_type: number,
     color: string,
     mark: string,
 }
 
-export interface TokenState extends TokenId {
+export interface Coordinate {
     x: number,
     y: number,
+}
+
+export interface TokenState extends TokenId {
+    position: Coordinate,
     rotation: number,
 }
 
