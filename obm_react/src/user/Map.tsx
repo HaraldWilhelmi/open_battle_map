@@ -29,8 +29,6 @@ export function Map() {
         (state: RootState) => state.mouse
     );
 
-    console.log("Map Properties: " + JSON.stringify(mapProperties));
-
     const detectGeometryChange = () => {
         const map = mapRef.current;
         const frame = mapFrameRef.current;
@@ -40,7 +38,6 @@ export function Map() {
         const naturalHeight = map?.naturalHeight ?? 0;
 
         if ( widthAvailable === 0 || heightAvailable === 0 || naturalWidth === 0 || naturalHeight === 0 ) {
-            console.log('detectGeometryChange: Essential data not present!');
             return;
         }
 
@@ -51,7 +48,6 @@ export function Map() {
             return;
         }
         const geometryUpdate: GeometryUpdate = {widthAvailable, heightAvailable, naturalWidth, naturalHeight};
-        console.log("Geometry Update: " + JSON.stringify(geometryUpdate));
         dispatch(actions.mapProperties.updateGeometry(geometryUpdate));
     }
 
@@ -60,7 +56,6 @@ export function Map() {
             mousePosition: {x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY},
             zoomFactorRatio: event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT,
         };
-        console.log("Map Zoom: " + JSON.stringify(mapZoom));
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 

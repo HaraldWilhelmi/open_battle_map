@@ -28,17 +28,20 @@ export function Work() {
     let myDownloadMapSet = () => window.location.assign('/api/backup/' + mapSet.uuid);
 
     let myUploadMapSet = async (file: File) => {
+        dispatch(actions.messages.reset());
         await uploadMapSetArchive(mapSet, file, dispatch);
         await refreshBattleMapSelector();
         await refreshMapBackground();
     }
 
     let myUploadBackground = async (file: File) => {
+        dispatch(actions.messages.reset());
         await postImageData(battleMap, file, dispatch);
         refreshMapBackground();
     };
 
     let myCreateBattleMap = async (name: string) => {
+        dispatch(actions.messages.reset());
         const request: BattleMapCreate = {
             name,
             map_set_uuid: mapSet.uuid,
@@ -48,12 +51,14 @@ export function Work() {
     };
 
     let myRenameBattleMap = async (name: string) => {
+        dispatch(actions.messages.reset());
         let changedMap: BattleMap = {...battleMap, name: name};
         dispatch(actions.battleMap.update(changedMap));
         refreshBattleMapSelector();
     };
 
     let myDeleteBattleMap = async () => {
+        dispatch(actions.messages.reset());
         let warning = 'Really delete Battle Map "' + battleMap.name + '" (' + battleMap.uuid + ')?'
         if (window.confirm(warning)) {
             dispatch(actions.battleMap.remove(battleMap));
