@@ -7,9 +7,7 @@ import {
     MouseMode, MouseState
 } from '../redux/Types';
 import {actions} from '../redux/Store';
-
-
-const ZOOM_INCREMENT = Math.sqrt(2);
+import {ZOOM_INCREMENT, getMapPositionFromScaledPosition} from './tools/Map';
 
 
 export function Map() {
@@ -52,10 +50,11 @@ export function Map() {
     }
 
     const doZoom = (event: WheelEvent) => {
-        const mapZoom: MapZoom = {
-            mousePosition: {x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY},
-            zoomFactorRatio: event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT,
-        };
+        const focusPoint = getMapPositionFromScaledPosition(
+            mapProperties, {x: event.nativeEvent.offsetX, y: event.nativeEvent.offsetY}
+        );
+        const zoomFactorRatio = event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT;
+        const mapZoom: MapZoom = {focusPoint, zoomFactorRatio};
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
@@ -63,24 +62,16 @@ export function Map() {
         event.preventDefault();
         if ( mouse.mode === MouseMode.Default ) {
             const position: Coordinate = {
-                x: event.nativeEvent.offsetX,
-                y: event.nativeEvent.offsetY,
+                x: event.nativeEvent.clientX,
+                y: event.nativeEvent.clientY,
             };
             dispatch(actions.mouse.grabMap(position));
-            const map = mapRef.current;
-            if( map?.style?.cursor !== undefined ) {
-                map.style.cursor = "move";
-            }
         }
     }
 
     const leaveMapMove = () => {
         if ( mouse.mode === MouseMode.MoveMap ) {
             dispatch(actions.mouse.releaseMap());
-            const map = mapRef.current;
-            if( map?.style?.cursor !== undefined ) {
-                map.style.cursor = "default";
-            }
         }
     }
 
@@ -90,10 +81,12 @@ export function Map() {
             const oldY = mouse?.lastSeen?.y ?? -1;
             if ( oldX >= 0 && oldY >= 0 ) {
                 const mapMove: MapMove = {
-                    deltaX: event.nativeEvent.offsetX - oldX,
-                    deltaY: event.nativeEvent.offsetY - oldY,
+                    deltaX: event.nativeEvent.clientX - oldX,
+                    deltaY: event.nativeEvent.clientY - oldY,
                 };
                 dispatch(actions.mapProperties.move(mapMove));
+            } else {
+                dispatch(actions.mouse.releaseMap());
             }
         }
     }

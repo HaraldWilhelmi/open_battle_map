@@ -6,6 +6,7 @@ type State = Message[];
 
 function mergeMessage(state: State, category: MessageCategory, content: string): State {
     let message: Message = { category, content };
+    console.log(category + ' ' + message);
     let newState: State = state.concat([message]);
     if ( newState.length > 5 ) {
         newState = newState.slice(-5);

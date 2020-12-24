@@ -84,6 +84,8 @@ export interface TokenId {
     mark: string,
 }
 
+export const NEW_TOKEN_MARK = '';
+
 export interface Coordinate {
     x: number,
     y: number,

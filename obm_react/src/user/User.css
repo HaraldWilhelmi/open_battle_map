@@ -49,21 +49,6 @@ input[type="file"] {
     display: none;
 }
 
-.map-frame {
-    flex: 1 1 auto;
-    height: 100%;
-    background-color: #e0e0e0;
-    overflow: hidden;
-}
-
-.map-image {
-    position: relative;
-    border-style: dashed;
-    width: 500px;
-    height: auto;
-    left: 200px;
-}
-
 .token-box {
     width: 200px;
     flex-direction: row;
@@ -79,7 +64,6 @@ input[type="file"] {
 }
 
 .flying-token-layer {
-    z-index: 1000;
     position:absolute;
     top: 0px;
     left: 0px;
@@ -89,12 +73,33 @@ input[type="file"] {
 }
 
 .main-layer {
-    z-index: 0;
     display: flex;
     position:absolute;
     top: 0px;
     left: 0px;
     width: 100%;
     height: 100%;
+}
+
+.placed-tokens-layer {
+    flex: 1 1 auto;
+    height: 100%;
+    overflow: hidden;
+}
+
+.placed-token-container {
+    width: 0;
+    height: 0;
+    overflow: visible;
+}
+
+.map-frame {
+    height: 100%;
+    background-color: #e0e0e0;
+}
+
+.map-image {
+    position: relative;
+    border-style: dashed;
 }
 

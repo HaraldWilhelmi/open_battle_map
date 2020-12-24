@@ -1,13 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {TokenId, TokenState, Coordinate} from '../../api/Types';
+import {TokenState, Coordinate} from '../../api/Types';
 import {MouseState, MouseMode} from '../Types';
 import {mapPropertiesActions} from './MapProperties';
 
 const INITIAL_STATE: MouseState = {
     mode: MouseMode.Default,
     lastSeen: null,
-    tokenId: null,
-    tokenRotation: 0.0,
+    flyingToken: null,
+    cursorStyle: 'default',
 }
 
 export const slice = createSlice({
@@ -15,34 +15,38 @@ export const slice = createSlice({
     initialState: INITIAL_STATE,
     reducers: {
         grabMap: (state, action: PayloadAction<Coordinate>) => {
-            return {
-                mode: MouseMode.MoveMap,
-                lastSeen: action.payload,
-                tokenId: null,
-                tokenRotation: 0.0,
+            return {...state,
+                mode: MouseMode.MoveMap, lastSeen: action.payload,
+                cursorStyle: 'move',
             };
         },
         releaseMap: (state) => {
-            return {...state, mode: MouseMode.Default, lastSeen: null};
-        },
-        grabToken: (state, action: PayloadAction<TokenState>) => {
-            const tokenId: TokenId = {...action.payload};
             return {...state,
-                mode: MouseMode.MoveToken,
-                lastSeen: action.payload.position,
-                tokenId,
-                tokenRotation: action.payload.rotation,
+                mode: MouseMode.Default, lastSeen: null,
+                cursorStyle: 'default',
+            };
+        },
+
+        grabToken: (state, action: PayloadAction<TokenState>) => {
+            return {...state,
+                mode: MouseMode.MoveToken, flyingToken: action.payload,
+                cursorStyle: 'move',
             };
         },
         placeToken: (state, action: PayloadAction<Coordinate>) => {
+            let flyingToken = state.flyingToken;
+            if ( flyingToken !== null ) { // This should always be true
+                flyingToken = {...flyingToken, position: action.payload};
+            }
             return {...state,
-                mode: MouseMode.TurnToken,
-                lastSeen: action.payload,
+                mode: MouseMode.TurnToken, flyingToken,
+                cursorStyle: 'crosshair',
             };
         },
         releaseToken: (state) => {
             return {...state,
-                mode: MouseMode.Default, tokenId: null, lastSeen: null
+                mode: MouseMode.Default, flyingToken: null,
+                cursorStyle: 'default',
             };
         },
     },

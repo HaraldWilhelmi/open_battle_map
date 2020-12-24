@@ -1,6 +1,6 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {TokenId, TokenState, Coordinate, MapSet} from '../../api/Types';
+import {TokenId, TokenState, Coordinate, NEW_TOKEN_MARK, MapSet} from '../../api/Types';
 import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {getTokenImageUrl} from '../tools/Token';
@@ -23,17 +23,18 @@ export function BoxToken(props: Props) {
 
     function pickupToken(event: MouseEvent) {
         if ( mouse.mode === MouseMode.Default ) {
+            event.stopPropagation();
+            event.preventDefault();
             const position: Coordinate = {
                 x: event.nativeEvent.clientX,
                 y: event.nativeEvent.clientY,
             };
             const token: TokenState = {...props.tokenId,
-                mark: '',
+                mark: NEW_TOKEN_MARK,
                 position,
                 rotation: 0.0,
             };
             dispatch(actions.mouse.grabToken(token));
-            event.stopPropagation();
         }
     }
 
@@ -43,6 +44,7 @@ export function BoxToken(props: Props) {
         src={url}
         alt={props.tokenId.color + " token"}
         onClick={pickupToken}
+        onDragStart={pickupToken}
     />
 }
 

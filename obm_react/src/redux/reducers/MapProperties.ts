@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {MapProperties, GeometryUpdate, MapMove, MapZoom} from '../Types';
-import {calculateGeometryUpdate, calculateMapMove, calculateMapZoom} from '../../user/tools/MapTools';
+import {calculateGeometryUpdate, calculateMapMove, calculateMapZoom} from '../../user/tools/Map';
 
 export const INITIAL_STATE: MapProperties = {
     widthAvailable: 0,

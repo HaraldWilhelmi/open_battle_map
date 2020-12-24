@@ -1,8 +1,9 @@
-import {useState, useEffect, MouseEvent} from 'react';
+import {useState, useEffect, useRef, MouseEvent} from 'react';
 import {useSelector} from 'react-redux';
 import {MapSet, Coordinate} from '../api/Types';
 import {RootState, MouseState, MouseMode} from '../redux/Types';
 import {getTokenImageUrl} from './tools/Token';
+import {getRotationFromTarget} from './tools/Map';
 import CSS from 'csstype';
 
 
@@ -20,6 +21,8 @@ export function FlyingTokenLayer(props: Props) {
     const [tokenRotation, setTokenRotation] = useState(0.0);
     const [tokenPosition, setTokenPosition] = useState(INITIAL_TOKEN_POSITION);
 
+    const layerRef = useRef<HTMLDivElement>(null);
+
     const mapSet: MapSet = useSelector(
         (state: RootState) => state.mapSet
     );
@@ -32,14 +35,12 @@ export function FlyingTokenLayer(props: Props) {
         () => {
             switch ( mouse.mode ) {
                 case MouseMode.MoveToken: {
-                    if ( mouse.tokenId !== null ) {
-                        const newTokenUrl = getTokenImageUrl(mapSet, mouse.tokenId);
+                    if ( mouse.flyingToken !== null ) {
+                        const newTokenUrl = getTokenImageUrl(mapSet, mouse.flyingToken);
                         if ( newTokenUrl !== tokenUrl ) {
                             setTokenUrl(newTokenUrl);
-                            setTokenRotation(mouse.tokenRotation);
-                            if ( mouse.lastSeen ) {
-                                setTokenPosition(mouse.lastSeen);
-                            }
+                            setTokenRotation(mouse.flyingToken.rotation);
+                            setTokenPosition(mouse.flyingToken.position);
                         }
                     }
                     break;
@@ -55,6 +56,16 @@ export function FlyingTokenLayer(props: Props) {
         [mouse, mapSet, tokenUrl]
     );
 
+    useEffect(() => {
+            const layer = layerRef.current;
+            if ( layer?.style?.cursor ) {
+                layer.style.cursor = mouse.cursorStyle;
+            }
+            return undefined;
+        },
+        [mouse]
+    );
+
     const moveToken = (event: MouseEvent) => {
         switch ( mouse.mode ) {
             case MouseMode.MoveToken: {
@@ -68,18 +79,26 @@ export function FlyingTokenLayer(props: Props) {
             }
             case MouseMode.TurnToken: {
                 event.stopPropagation();
-                const deltaX = event.nativeEvent.clientX - tokenPosition.x;
-                const deltaY = event.nativeEvent.clientY - tokenPosition.y;
-                setTokenRotation(Math.atan2(deltaX, deltaY));
+                const target: Coordinate = {
+                    x: event.nativeEvent.clientX,
+                    y: event.nativeEvent.clientY,
+                };
+                const rotation = getRotationFromTarget(tokenPosition, target);
+                setTokenRotation(rotation);
                 break;
             }
             default: {break}
         }
     }
 
-    const style: CSS.Properties = {
+    const layerStyle: CSS.Properties = {
+        cursor: mouse.cursorStyle,
+        zIndex: 999,
+    };
+
+    const tokenStyle: CSS.Properties = {
         position: 'relative',
-        transform: 'rotate(' + tokenRotation + 'rad) translate(-50%, -50%)',
+        transform: 'translate(-50%, -50%) rotate(' + tokenRotation + 'rad)',
         left: tokenPosition.x + 'px',
         top: tokenPosition.y + 'px',
         zIndex: 1000,
@@ -87,11 +106,13 @@ export function FlyingTokenLayer(props: Props) {
     };
 
     const token = tokenUrl === null ? <div /> : <img
-        src={tokenUrl} style={style} alt="moving token"
+        src={tokenUrl} style={tokenStyle} alt="moving token"
     />;
 
     return <div className="flying-token-layer"
         onMouseMove={moveToken}
+        style={layerStyle}
+        ref={layerRef}
     >
         {token}
         {props.children}

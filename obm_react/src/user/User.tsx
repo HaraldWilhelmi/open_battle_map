@@ -1,17 +1,14 @@
 import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
 import Button from 'react-bootstrap/Button';
 import {BattleMapId} from '../api/Types';
 import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
 import Map from './Map';
-import Work from './Work';
-import Play from './Play';
-import BattleMapSelector from './BattleMapSelector';
 import FlyingTokenLayer from './FlyingTokenLayer';
+import PlacedTokensLayer from './PlacedTokensLayer';
+import MenuBox from './MenuBox';
 import './User.css'
 
 
@@ -71,7 +68,7 @@ export function User() {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
         };
-    })
+    });
 
     let mySwitchAdmin = () => {
         dispatch(actions.messages.reset());
@@ -94,24 +91,15 @@ export function User() {
             <FlyingTokenLayer>
                 <Messages />
                 <div className="main-layer">
-                    <Map />
+
+                    <PlacedTokensLayer>
+                        <Map />
+                    </PlacedTokensLayer>
+
                     <div className="menu-box-vertical-ruler" />
-                    <div className="menu-box">
-                        <div className="section">
-                            <div className="menu-item"><h3>{mapSet.name}</h3></div>
-                            <BattleMapSelector />
-                        </div>
-                        <div className="section">
-                            <Tabs defaultActiveKey="play">
-                                <Tab eventKey="play" title="Play">
-                                    <Play />
-                                </Tab>
-                                <Tab eventKey="work" title="Work">
-                                    <Work />
-                                </Tab>
-                            </Tabs>
-                        </div>
-                    </div>
+
+                    <MenuBox />
+
                 </div>
             </FlyingTokenLayer>
         </div>

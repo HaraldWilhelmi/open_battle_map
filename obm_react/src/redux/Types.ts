@@ -1,7 +1,7 @@
 import {AnyAction} from 'redux';
 import {ThunkDispatch} from 'redux-thunk';
 import {AsyncThunk} from '@reduxjs/toolkit';
-import {MapSet, BattleMap, MapSetList, Coordinate, TokenId} from '../api/Types';
+import {MapSet, BattleMap, MapSetList, Coordinate, TokenState} from '../api/Types';
 
 
 // I really would like to write:
@@ -16,8 +16,8 @@ export type Timer = any;
 
 
 export enum MessageCategory {
-    Error,
-    Success,
+    Error = 'ERROR',
+    Success = 'INFO',
 }
 
 export interface Message {
@@ -66,7 +66,7 @@ export interface MapMove {
 }
 
 export interface MapZoom {
-    mousePosition?: Coordinate,
+    focusPoint?: Coordinate,
     zoomFactorRatio: number,
 }
 
@@ -80,8 +80,8 @@ export enum MouseMode {
 export interface MouseState {
     mode: MouseMode,
     lastSeen: Coordinate | null,
-    tokenId: TokenId | null,
-    tokenRotation: number,
+    flyingToken: TokenState | null,
+    cursorStyle: string,
 }
 
 export interface SyncStateItem {
@@ -104,6 +104,7 @@ export interface RootState {
     mapProperties: MapProperties,
     mapSetList: MapSetList,
     mouse: MouseState,
+    placedTokens: TokenState[],
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;

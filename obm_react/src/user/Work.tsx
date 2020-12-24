@@ -32,12 +32,14 @@ export function Work() {
         await uploadMapSetArchive(mapSet, file, dispatch);
         await refreshBattleMapSelector();
         await refreshMapBackground();
+        dispatch(actions.mapProperties.reset());
     }
 
     let myUploadBackground = async (file: File) => {
         dispatch(actions.messages.reset());
         await postImageData(battleMap, file, dispatch);
         refreshMapBackground();
+        dispatch(actions.mapProperties.reset());
     };
 
     let myCreateBattleMap = async (name: string) => {
@@ -48,6 +50,7 @@ export function Work() {
         }
         dispatch(actions.battleMap.create(request));
         refreshBattleMapSelector();
+        dispatch(actions.mapProperties.reset());
     };
 
     let myRenameBattleMap = async (name: string) => {
@@ -70,6 +73,7 @@ export function Work() {
                 }
             }
             refreshBattleMapSelector();
+            dispatch(actions.mapProperties.reset());
         }
     };
 

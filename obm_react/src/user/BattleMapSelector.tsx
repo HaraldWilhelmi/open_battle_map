@@ -35,6 +35,7 @@ export function BattleMapSelector() {
         const id: BattleMapId = { uuid: event.target.value, map_set_uuid: mapSet.uuid };
         dispatch(actions.messages.reset());
         dispatch(actions.battleMap.get(id));
+        dispatch(actions.mapProperties.reset());
     };
 
     return (

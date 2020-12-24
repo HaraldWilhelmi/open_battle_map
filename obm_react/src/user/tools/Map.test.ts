@@ -2,7 +2,7 @@ import {MapProperties, GeometryUpdate, MapMove, MapZoom, Coordinate} from '../..
 import {
     calculateMapZoom, calculateGeometryUpdate,
     getMapPositionFromScaledPosition, getPhysicalPositionFromScaledPosition
-} from './MapTools';
+} from './Map';
 
 
 const SAMPLE: MapProperties = {
@@ -91,7 +91,7 @@ test ('getPhysicalPositionFromScaledPosition', () => {
 test('calculateMapZoom - trivial', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 1.0, // Noop!
-        mousePosition: { x: 20, y: 30 },
+        focusPoint: { x: 10, y: 15 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
     expect(result).toStrictEqual(SAMPLE);
@@ -101,7 +101,7 @@ test('calculateMapZoom - trivial', () => {
 test('calculateMapZoom - x 1.5', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 1.5,
-        mousePosition: { x: 20, y: 30 }, // 10, 15 on the background map
+        focusPoint: { x: 10, y: 15 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
 
@@ -124,7 +124,7 @@ test('calculateMapZoom - x 1.5', () => {
 test('calculateMapZoom - over zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 35.0,
-        mousePosition: { x: 20, y: 30 }, // 10, 15 on the background map
+        focusPoint: { x: 10, y: 15 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
 
@@ -147,7 +147,7 @@ test('calculateMapZoom - over zoom', () => {
 test('calculateMapZoom - central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        mousePosition: { x: 200, y: 125 }, // 100, 63 on the background map - the middle
+        focusPoint: { x: 100, y: 62.5 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED);
@@ -156,7 +156,7 @@ test('calculateMapZoom - central zoom', () => {
 test('calculateMapZoom - 2x central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        mousePosition: { x: 400, y: 250 }, // 100, 63 on the background map - the middle
+        focusPoint: { x: 100, y: 62.5 },
     }
     const result = calculateMapZoom(SAMPLE_ZOOMED_CENTERED, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED_TWICE);
@@ -165,7 +165,7 @@ test('calculateMapZoom - 2x central zoom', () => {
 test('calculateMapZoom - 3x central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        mousePosition: { x: 800, y: 500 }, // 100, 63 on the background map - the middle
+        focusPoint: { x: 100, y: 62.5 },
     }
     const result = calculateMapZoom(SAMPLE_ZOOMED_TWICE, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED_TRICE);
