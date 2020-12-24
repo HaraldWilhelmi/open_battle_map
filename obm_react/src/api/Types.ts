@@ -79,7 +79,6 @@ export interface MapSetListItem {
 export type MapSetList = MapSetListItem[];
 
 export interface TokenId {
-    map_set_uuid: string,
     token_type: number,
     color: string,
     mark: string,

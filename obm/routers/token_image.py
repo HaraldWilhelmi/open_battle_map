@@ -9,9 +9,9 @@ from obm.dependencies import get_magic_color_svg
 router = APIRouter()
 
 
-@router.get('/{_map_set_uuid}/{token_type}/{color}/{mark}',
-            description='Get a token image by Type. Token Type 0 is reserved for the default token. '
-                        + 'That is the only one implemented yet.',
+@router.get('/standard/{token_type}/{color}/{mark}',
+            description='Get a token image by Type. Token Types up to 999 are reserved for standard tokens. '
+                        + 'This tokens are avaibale in all Map Sets. So far only Token Type 0 is implemented',
             responses={
                 status.HTTP_200_OK: {
                     'content': {'image/svg+xml': {}}
@@ -20,7 +20,6 @@ router = APIRouter()
             },
             )
 def get_token_image(
-        _map_set_uuid: UUID,
         token_type: int,
         color: Color,
         mark: str = '',

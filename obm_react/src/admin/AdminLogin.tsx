@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import Button from 'react-bootstrap/Button'
+import Messages from '../common/Messages';
 import {GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import './Admin.css';
@@ -27,6 +28,7 @@ export function AdminLogin() {
 
     return (
         <div>
+            <Messages />
             <div className="App-header">
                 <header className="App-header">
                     <h1>Open Battle Map</h1>

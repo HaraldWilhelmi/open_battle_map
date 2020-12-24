@@ -130,9 +130,12 @@ class MapSetIO:
 
     def delete_map_set(self, map_set: MapSet):
         for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):
-            unlink(self._map_set_paths.get_battle_map_path(map_set.uuid, battle_map_uuid))
-            background_path = self._map_set_paths.get_background_path(map_set.uuid, battle_map_uuid)
-            if isfile(background_path):
-                unlink(background_path)
+            self.delete_battle_map(map_set, battle_map_uuid);
         unlink(self._map_set_paths.get_map_set_path(map_set.uuid))
         rmdir(self._map_set_paths.get_map_set_dir(map_set.uuid))
+
+    def delete_battle_map(self, map_set: MapSet, uuid: UUID):
+        unlink(self._map_set_paths.get_battle_map_path(map_set.uuid, uuid))
+        background_path = self._map_set_paths.get_background_path(map_set.uuid, uuid)
+        if isfile(background_path):
+            unlink(background_path)

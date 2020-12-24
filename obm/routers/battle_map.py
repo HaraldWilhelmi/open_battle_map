@@ -65,6 +65,7 @@ async def delete_battle_map(
     map_set = get_map_set(manager, data.map_set_uuid)
     battle_map = get_battle_map(manager, data.map_set_uuid, data.uuid)
     manager.delete_battle_map(map_set, battle_map)
+    manager.save(map_set)
 
 
 class BattleMapUpdateRequest(BaseModel):

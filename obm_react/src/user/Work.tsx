@@ -91,7 +91,9 @@ export function Work() {
             <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} disabled={noBattleMap} />
             <UploadMenuItem label="Upload Map Image" doIt={myUploadBackground} accept="image/*" disabled={noBattleMap} />
             <div className="menu-item-help">
-                ({mapProperties.naturalWidth}x{mapProperties.naturalHeight} M:{mapProperties.naturalToDisplayRatio.toFixed(1)})
+                ({mapProperties.naturalWidth}x{mapProperties.naturalHeight}
+                - Zoom: {mapProperties.userZoomFactor.toFixed(1)}
+                - Mag.: {mapProperties.naturalToDisplayRatio.toFixed(1)})
             </div>
             <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} disabled={noBattleMap} />
         </div>

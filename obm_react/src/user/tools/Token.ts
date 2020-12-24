@@ -1,10 +1,23 @@
-import {TokenId} from '../../api/Types';
+import {MapSetId, TokenId} from '../../api/Types';
 
 
-export function getTokenImageUrl(tokenId: TokenId): string {
+export const standardTokens: TokenId[] =
+    ['Red', 'Blue', 'Lime', 'Gold', 'Silver', 'Sienna'].map(
+        (color: string) => {
+            return {
+                token_type: 0,
+                color,
+                mark: '',
+            };
+        }
+    );
+
+
+export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
     const mark = tokenId.mark === ' ' || tokenId.mark === '' ? '_' : tokenId.mark;
+    const tokenSet = tokenId.token_type < 1000 ? 'standard' : mapSetId;
     return "/api/token_image/"
-        + tokenId.map_set_uuid + "/"
+        + tokenSet + "/"
         + tokenId.token_type + "/"
         + tokenId.color + "/"
         + mark;

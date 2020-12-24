@@ -47,10 +47,10 @@ class MapSetManager:
     def save(self, map_set: MapSet):
         self._map_set_io.save_map_set(map_set)
 
-    @staticmethod
-    def delete_battle_map(map_set: MapSet, battle_map: BattleMap):
+    def delete_battle_map(self, map_set: MapSet, battle_map: BattleMap):
         assert battle_map.map_set_uuid == map_set.uuid
         del map_set.battle_maps_by_uuid[battle_map.uuid]
+        self._map_set_io.delete_battle_map(map_set, battle_map.uuid)
         map_set.touch()
 
     def delete(self, map_set: MapSet):

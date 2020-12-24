@@ -6,6 +6,7 @@ import AdminLogout from './AdminLogout';
 import {MapSetList} from '../api/Types';
 import {RootState, GenericDispatch} from '../redux/Types';
 import {actions} from '../redux/Store';
+import Messages from '../common/Messages';
 import './Admin.css';
 
 
@@ -48,6 +49,7 @@ function Admin() {
     )
     return (
         <div>
+            <Messages />
             <div className="App-header">
                 <header className="App-header">
                     <h1>Open Battle Map</h1>

@@ -1,11 +1,12 @@
 import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import Tabs from 'react-bootstrap/Tabs'
-import Tab from 'react-bootstrap/Tab'
-import Button from 'react-bootstrap/Button'
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tab';
+import Button from 'react-bootstrap/Button';
 import {BattleMapId} from '../api/Types';
 import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
+import Messages from '../common/Messages';
 import Map from './Map';
 import Work from './Work';
 import Play from './Play';
@@ -91,6 +92,7 @@ export function User() {
     return (
         <div className="max-height">
             <FlyingTokenLayer>
+                <Messages />
                 <div className="main-layer">
                     <Map />
                     <div className="menu-box-vertical-ruler" />
