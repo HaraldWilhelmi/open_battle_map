@@ -28,7 +28,7 @@ export function BoxToken(props: Props) {
                 y: event.nativeEvent.clientY,
             };
             const token: TokenState = {...props.tokenId,
-                mark: "1",
+                mark: '',
                 position,
                 rotation: 0.0,
             };

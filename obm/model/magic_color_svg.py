@@ -3,8 +3,6 @@
 # - convert them to templates by replacing all occurrences of the magic color #555555 by a template variable
 # - caches the templates
 # - on request return a new SVG image with the template variable replaced by a given color.
-# - If a mark is given (typically max. 2 characters - think of a jersey number) any occurrence of
-#   #X#MAGIC_MARKER#X# is replaced by that. Otherwise it's replaced by the empty string.
 #
 # Once something like this is an official standard we should replace this module:
 #
@@ -16,8 +14,7 @@ from pydantic.color import Color
 
 
 class MagicColorSvg:
-    OCTARIN = '"#555555"'
-    MAGIC_MARKER = '#X#MAGIC_MARKER#X#'
+    OCTARIN = '"#888888"'
 
     def __init__(self):
         self._template_cache: Dict[str, str] = {}
@@ -25,11 +22,10 @@ class MagicColorSvg:
     def register_svg(self, key: str, data: bytes):
         self._template_cache[key] = data.decode()
 
-    def get_colored_svg(self, key: str, color: Color, mark: str = '') -> bytes:
+    def get_colored_svg(self, key: str, color: Color) -> bytes:
         quoted_color = f'"{str(color)}"'
         return (
             self._template_cache[key]
             .replace(MagicColorSvg.OCTARIN, quoted_color)
-            .replace(MagicColorSvg.MAGIC_MARKER, mark)
             .encode()
         )

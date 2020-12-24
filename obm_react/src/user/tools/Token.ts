@@ -14,11 +14,9 @@ export const standardTokens: TokenId[] =
 
 
 export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
-    const mark = tokenId.mark === ' ' || tokenId.mark === '' ? '_' : tokenId.mark;
     const tokenSet = tokenId.token_type < 1000 ? 'standard' : mapSetId;
     return "/api/token_image/"
         + tokenSet + "/"
         + tokenId.token_type + "/"
-        + tokenId.color + "/"
-        + mark;
+        + tokenId.color;
 }
