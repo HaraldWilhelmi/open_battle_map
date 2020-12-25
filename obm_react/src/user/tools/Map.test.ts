@@ -1,4 +1,5 @@
-import {MapProperties, GeometryUpdate, MapMove, MapZoom, Coordinate} from '../../redux/Types';
+import {Coordinate} from "../../api/Types";
+import {MapProperties, GeometryUpdate, MapZoom} from '../../redux/Types';
 import {
     calculateMapZoom, calculateGeometryUpdate,
     getMapPositionFromScaledPosition, getPhysicalPositionFromScaledPosition

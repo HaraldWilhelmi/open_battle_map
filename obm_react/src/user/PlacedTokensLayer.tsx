@@ -3,7 +3,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {Coordinate, TokenState} from '../api/Types';
 import {RootState, MouseState, MouseMode, GenericDispatch, MapProperties} from '../redux/Types';
 import {actions} from '../redux/Store';
-import {PlacedToken} from './components/PlacedToken';
+import PlacedToken from './components/PlacedToken';
 import {getMapPositionFromScaledPosition, getRotationFromTarget} from './tools/Map';
 import {getTokenIdAsString} from './tools/Token';
 
@@ -66,10 +66,10 @@ export function PlacedTokensLayer(props: Props) {
     return <div className="placed-tokens-layer"
         onClick={placeToken}
     >
+        {props.children}
         <div className="placed-token-container">
             {tokens}
         </div>
-        {props.children}
     </div>;
 }
 

@@ -24,6 +24,15 @@ RESPONSE_CANT_MAP_NAME_TO_MEDIA_TYPE = {
     }
 }
 
+RESPONSE_BAD_TOKEN_TYPE = {
+    status.HTTP_404_NOT_FOUND: {
+        'description': 'Token with given token_id does not exist.'
+    },
+    status.HTTP_400_BAD_REQUEST: {
+        'description': 'The given token_type is out of range. Default tokens have types between 0 and 999. '
+            + 'Custom tokens have numbers >=1000.'
+    }
+}
 
 def get_map_set(manager: MapSetManager, uuid: UUID) -> MapSet:
     try:

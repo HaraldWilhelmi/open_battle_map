@@ -22,6 +22,9 @@ export function User() {
     let battleMap = useSelector(
         (state: RootState) => state.battleMap
     );
+    let defaultTokenSet = useSelector(
+        (state: RootState) => state.defaultTokenSet
+    );
 
     useEffect( // Initial load of MapSet
         () => {
@@ -61,12 +64,23 @@ export function User() {
         [mapSet, battleMap, dispatch]
     );
 
+    useEffect(() => {
+            if ( defaultTokenSet === null ) {
+                dispatch(actions.defaultTokenSet.get());
+            }
+            return undefined;
+        },
+        [defaultTokenSet, dispatch]
+    );
+
     useEffect( () => {
         dispatch(actions.mapSet.startSync());
         dispatch(actions.battleMap.startSync());
+        dispatch(actions.defaultTokenSet.startSync());
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
+            dispatch(actions.defaultTokenSet.stopSync());
         };
     });
 

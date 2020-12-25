@@ -1,9 +1,9 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+import {TokenType} from "../api/Types";
 import {RootState, GenericDispatch, MouseMode, MouseState} from '../redux/Types';
 import {actions} from '../redux/Store';
-import {standardTokens} from './tools/Token';
-import {BoxToken} from './components/BoxToken';
+import BoxToken from './components/BoxToken';
 
 
 export function TokenBox() {
@@ -13,9 +13,21 @@ export function TokenBox() {
         (state: RootState) => state.mouse
     );
 
-    const tokens = standardTokens.map(
-        (tokenId, index) => <BoxToken tokenId={tokenId} key={index}/>
+    const defaultTokenSet: TokenType[] = useSelector(
+        (state: RootState) => state.defaultTokenSet
     );
+
+    let tokens: JSX.Element[] = [];
+    if ( defaultTokenSet !== null ) {
+        for (let tokenType of defaultTokenSet) {
+            for (let colorCombo of tokenType.color_combos) {
+                const key = tokenType.token_type + '/' + colorCombo.color + '/' + colorCombo.mark_color;
+                tokens.push(
+                    <BoxToken tokenType={tokenType} colorCombo={colorCombo} key={key}/>
+                );
+            }
+        }
+    }
 
     function discardToken(event: MouseEvent)  {
         if ( mouse.mode === MouseMode.MoveToken) {

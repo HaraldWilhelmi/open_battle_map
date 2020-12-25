@@ -4,6 +4,7 @@ from obm.fileio.backup_io import BackupIo
 from obm.model.map_set_manager import MapSetManager
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.magic_color_svg import MagicColorSvg
+from obm.model.token_set_manager import TokenSetManager
 
 
 def get_config() -> Config:
@@ -24,3 +25,7 @@ def get_magic_color_svg() -> MagicColorSvg:
 
 def get_backup_io() -> BackupIo:
     return get_context().get(BackupIo)
+
+
+def get_token_set_manager() -> TokenSetManager:
+    return get_context().get(TokenSetManager)

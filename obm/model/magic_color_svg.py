@@ -13,6 +13,10 @@ from typing import Dict
 from pydantic.color import Color
 
 
+class NoSuchIMage(Exception):
+    pass
+
+
 class MagicColorSvg:
     OCTARIN = '"#888888"'
 
@@ -23,6 +27,8 @@ class MagicColorSvg:
         self._template_cache[key] = data.decode()
 
     def get_colored_svg(self, key: str, color: Color) -> bytes:
+        if key not in self._template_cache:
+            raise NoSuchIMage(f"Image with key '{key}' not found!")
         quoted_color = f'"{str(color)}"'
         return (
             self._template_cache[key]

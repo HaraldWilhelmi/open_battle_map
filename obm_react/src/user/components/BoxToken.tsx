@@ -1,21 +1,18 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {TokenId, TokenState, Coordinate, NEW_TOKEN_MARK, MapSet} from '../../api/Types';
+import {TokenType, ColorCombo, TokenState, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
 import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
-import {getTokenImageUrl} from '../tools/Token';
+import {Token} from './Token';
 
 
 interface Props {
-    tokenId: TokenId,
+    tokenType: TokenType,
+    colorCombo: ColorCombo,
 }
 
 export function BoxToken(props: Props) {
     const dispatch: GenericDispatch = useDispatch();
-
-    const mapSet: MapSet = useSelector(
-        (state: RootState) => state.mapSet
-    );
 
     const mouse: MouseState = useSelector(
         (state: RootState) => state.mouse
@@ -29,7 +26,8 @@ export function BoxToken(props: Props) {
                 x: event.nativeEvent.clientX,
                 y: event.nativeEvent.clientY,
             };
-            const token: TokenState = {...props.tokenId,
+            const token: TokenState = {...props.colorCombo,
+                token_type: props.tokenType.token_type,
                 mark: NEW_TOKEN_MARK,
                 position,
                 rotation: 0.0,
@@ -38,14 +36,15 @@ export function BoxToken(props: Props) {
         }
     }
 
-    const url = getTokenImageUrl(mapSet, props.tokenId);
-    return <img
-        className="token-in-box"
-        src={url}
-        alt={props.tokenId.color + " token"}
-        onClick={pickupToken}
-        onDragStart={pickupToken}
-    />
+    const tokenId: TokenId = {...props.colorCombo,
+        token_type: props.tokenType.token_type,
+        mark: '0',
+    };
+
+    return <div className="token-in-box">
+            <Token tokenId={tokenId} width={45} rotation={0.0} onClick={pickupToken} onWheel={() => { return; }} />
+        </div>
+
 }
 
 export default BoxToken;

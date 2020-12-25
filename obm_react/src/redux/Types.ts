@@ -1,7 +1,7 @@
 import {AnyAction} from 'redux';
 import {ThunkDispatch} from 'redux-thunk';
 import {AsyncThunk} from '@reduxjs/toolkit';
-import {MapSet, BattleMap, MapSetList, Coordinate, TokenState} from '../api/Types';
+import {MapSet, BattleMap, MapSetList, Coordinate, TokenState, TokenSet} from '../api/Types';
 
 
 // I really would like to write:
@@ -105,6 +105,7 @@ export interface RootState {
     mapSetList: MapSetList,
     mouse: MouseState,
     placedTokens: TokenState[],
+    defaultTokenSet: TokenSet,
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;

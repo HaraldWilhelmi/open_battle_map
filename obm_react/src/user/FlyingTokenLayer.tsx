@@ -93,7 +93,6 @@ export function FlyingTokenLayer(props: Props) {
 
     const layerStyle: CSS.Properties = {
         cursor: mouse.cursorStyle,
-        zIndex: 999,
     };
 
     const tokenStyle: CSS.Properties = {

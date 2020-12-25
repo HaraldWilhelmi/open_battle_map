@@ -1,20 +1,8 @@
-import {MapSetId, TokenId, TokenState, NEW_TOKEN_MARK} from '../../api/Types';
-
-
-export const standardTokens: TokenId[] =
-    ['Red', 'Blue', 'Lime', 'Gold', 'Silver', 'Sienna'].map(
-        (color: string) => {
-            return {
-                token_type: 0,
-                color,
-                mark: '',
-            };
-        }
-    );
+import {MapSetId, NEW_TOKEN_MARK, TokenId, TokenSet, TokenState, TokenType} from '../../api/Types';
 
 
 export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
-    const tokenSet = tokenId.token_type < 1000 ? 'standard' : mapSetId;
+    const tokenSet = tokenId.token_type < 1000 ? 'default' : mapSetId;
     return "/api/token_image/"
         + tokenSet + "/"
         + tokenId.token_type + "/"
@@ -25,8 +13,7 @@ export function placeToken(state: TokenState[], token: TokenState): TokenState[]
     let newState = [...state];
 
     if (token.mark === NEW_TOKEN_MARK) {
-        const mark = getFreeMarkForToken(state, token);
-        token.mark =mark;
+        token.mark =getFreeMarkForToken(state, token);
         newState.push(token);
         return newState;
     }
@@ -57,7 +44,7 @@ export function getFreeMarkForToken(state: TokenState[], token: TokenState): str
 }
 
 export function isSameToken(a: TokenId, b: TokenId): boolean {
-    return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark;
+    return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark && a.mark_color === b.mark_color;
 }
 
 export function removeToken(state: TokenState[], tokenId: TokenId): TokenState[] {
@@ -72,5 +59,14 @@ export function removeToken(state: TokenState[], tokenId: TokenId): TokenState[]
 }
 
 export function getTokenIdAsString(tokenId: TokenId): string {
-    return tokenId.token_type + '/' + tokenId.color + '/' + tokenId.mark;
+    return tokenId.token_type + '/' + tokenId.color + '/' + tokenId.mark + '/' + tokenId.mark_color;
+}
+
+export function getTokenType(tokenSet: TokenSet, tokenId: TokenId): TokenType {
+    for ( let candidate of tokenSet ) {
+        if ( candidate.token_type === tokenId.token_type ) {
+            return candidate;
+        }
+    }
+    throw Error('No such token_type in this Token Set.')
 }

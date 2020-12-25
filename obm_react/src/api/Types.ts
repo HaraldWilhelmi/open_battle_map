@@ -78,9 +78,14 @@ export interface MapSetListItem {
 
 export type MapSetList = MapSetListItem[];
 
-export interface TokenId {
-    token_type: number,
+
+export interface ColorCombo {
     color: string,
+    mark_color: string,
+}
+
+export interface TokenId extends ColorCombo {
+    token_type: number,
     mark: string,
 }
 
@@ -96,6 +101,27 @@ export interface TokenState extends TokenId {
     rotation: number,
 }
 
+
+export enum ActiveAreaShape {
+    rect= 'rect',
+    circle= 'circle',
+}
+
+export interface ActiveArea {
+    shape: ActiveAreaShape,
+    coords: number[],
+}
+
+export interface TokenType {
+    token_type: number,
+    width_in_m: number,
+    mark_font_size: string,
+    active_areas: ActiveArea[],
+    color_combos: ColorCombo[],
+}
+
+export type TokenSet = TokenType[];
+
 export interface ReadonlyApiDescriptor {
     name: string,
     baseUrl: string,
@@ -105,7 +131,6 @@ export interface ReadonlyApiDescriptor {
 export interface ReadonlyApi<DATA> extends ReadonlyApiDescriptor {
     get: () => Promise<DATA>,
 }
-
 
 export interface UpdatableApiWithIdDescriptor<ID> {
     name: string,

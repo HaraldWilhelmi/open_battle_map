@@ -1,6 +1,5 @@
 from os.path import expanduser, join, isfile
 from os import umask
-from typing import Optional
 from datetime import timedelta
 import json
 from pydantic import BaseModel
