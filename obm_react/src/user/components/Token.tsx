@@ -13,6 +13,7 @@ interface Props {
     rotation: number,
     onClick: (event: MouseEvent) => void,
     onWheel: (event: WheelEvent) => void,
+    pointerEvents?: boolean,
 }
 
 export function Token(props: Props) {
@@ -40,12 +41,15 @@ export function Token(props: Props) {
         transform: 'rotate(' + props.rotation + 'rad)',
     };
 
+    const pointerEvents = props.pointerEvents ?? true ? 'all' : 'none';
+
     const imageStyle: CSS.Properties = {
         left: 0,
         top: 0,
         width: props.width + 'px',
         height: 'auto',
         zIndex: 100,
+        pointerEvents,
     };
 
     const markStyle: CSS.Properties = {
