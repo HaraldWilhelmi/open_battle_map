@@ -56,6 +56,7 @@ export function PlacedToken(props: Props) {
         transform: 'translate(-50%, -50%)',
         left: positionOnScreen.x + 'px',
         top: positionOnScreen.y + 'px',
+        pointerEvents: mouse.flyingToken === null ? 'all' : 'none',
     };
 
     return <div style={style}>
@@ -65,6 +66,7 @@ export function PlacedToken(props: Props) {
             rotation={props.token.rotation}
             onClick={pickupToken}
             onWheel={doZoom}
+            pointerEvents={mouse.flyingToken === null}
         />
     </div>
 }

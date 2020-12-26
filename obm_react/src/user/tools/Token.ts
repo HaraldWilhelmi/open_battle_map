@@ -34,7 +34,6 @@ export function getFreeMarkForToken(state: TokenState[], token: TokenState): str
     for ( let placedToken of state ) {
         if ( placedToken.token_type === token.token_type && placedToken.color === token.color ) {
             const foundMarkAsInt = ~~placedToken.mark;
-            console.log("Found: " + foundMarkAsInt);
             if ( foundMarkAsInt >= candidate ) {
                 candidate = foundMarkAsInt + 1;
             }
