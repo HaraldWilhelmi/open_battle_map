@@ -3,12 +3,14 @@ import {MapProperties, GeometryUpdate, MapMove, MapZoom} from '../Types';
 import {calculateGeometryUpdate, calculateMapMove, calculateMapZoom} from '../../user/tools/Map';
 
 export const INITIAL_STATE: MapProperties = {
-    widthAvailable: 0,
-    heightAvailable: 0,
-    width: 0,
-    height: 0,
     naturalWidth: 0,
     naturalHeight: 0,
+    widthAvailable: 0,
+    heightAvailable: 0,
+    zoomedWidth: 0,
+    zoomedHeight: 0,
+    visibleWidth: 0,
+    visibleHeight: 0,
     xOffset: 0,
     yOffset: 0,
     userZoomFactor: 1.0,

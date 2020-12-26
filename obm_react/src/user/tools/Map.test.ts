@@ -2,17 +2,19 @@ import {Coordinate} from "../../api/Types";
 import {MapProperties, GeometryUpdate, MapZoom} from '../../redux/Types';
 import {
     calculateMapZoom, calculateGeometryUpdate,
-    getMapPositionFromScaledPosition, getPhysicalPositionFromScaledPosition
+    getMapPositionFromPhysicalPosition, getPhysicalPositionFromMapPosition
 } from './Map';
 
 
 const SAMPLE: MapProperties = {
     widthAvailable: 400,
     heightAvailable: 300,
-    width: 400,
-    height: 250,
+    zoomedWidth: 400,
+    zoomedHeight: 250,
     naturalWidth: 200,
     naturalHeight: 125,
+    visibleWidth: 400,
+    visibleHeight: 250,
     xOffset: 0,
     yOffset: 0,
     userZoomFactor: 1.0,
@@ -23,10 +25,12 @@ const SAMPLE: MapProperties = {
 const SAMPLE_ZOOMED: MapProperties = {
     widthAvailable: 400,
     heightAvailable: 300,
-    width: 800,
-    height: 500,
+    zoomedWidth: 800,
+    zoomedHeight: 500,
     naturalWidth: 200,
     naturalHeight: 125,
+    visibleWidth: 400,
+    visibleHeight: 300,
     xOffset: -200, // Please note the slight asymmetry after the first zoom,
     yOffset: -125, // due to 50px vertical space which were used before
     userZoomFactor: 2.0,
@@ -37,10 +41,12 @@ const SAMPLE_ZOOMED: MapProperties = {
 const SAMPLE_ZOOMED_CENTERED: MapProperties = {
     widthAvailable: 400,
     heightAvailable: 300,
-    width: 800,
-    height: 500,
+    zoomedWidth: 800,
+    zoomedHeight: 500,
     naturalWidth: 200,
     naturalHeight: 125,
+    visibleWidth: 400,
+    visibleHeight: 300,
     xOffset: -200,
     yOffset: -100,
     userZoomFactor: 2.0,
@@ -51,10 +57,12 @@ const SAMPLE_ZOOMED_CENTERED: MapProperties = {
 const SAMPLE_ZOOMED_TWICE: MapProperties = {
     widthAvailable: 400,
     heightAvailable: 300,
-    width: 1600,
-    height: 1000,
+    zoomedWidth: 1600,
+    zoomedHeight: 1000,
     naturalWidth: 200,
     naturalHeight: 125,
+    visibleWidth: 400,
+    visibleHeight: 300,
     xOffset: -600,
     yOffset: -350,
     userZoomFactor: 4.0,
@@ -65,10 +73,12 @@ const SAMPLE_ZOOMED_TWICE: MapProperties = {
 const SAMPLE_ZOOMED_TRICE: MapProperties = {
     widthAvailable: 400,
     heightAvailable: 300,
-    width: 3200,
-    height: 2000,
+    zoomedWidth: 3200,
+    zoomedHeight: 2000,
     naturalWidth: 200,
     naturalHeight: 125,
+    visibleWidth: 400,
+    visibleHeight: 300,
     xOffset: -1400,
     yOffset: -850,
     userZoomFactor: 8.0,
@@ -77,22 +87,22 @@ const SAMPLE_ZOOMED_TRICE: MapProperties = {
 }
 
 
-test ('getMapPositionFromScaledPosition', () => {
-    const coordinate: Coordinate = {x: 400, y: 250}; // Middle of 800 x 500 scaled image
-    const result = getMapPositionFromScaledPosition(SAMPLE_ZOOMED, coordinate);
-    expect(result).toStrictEqual({x: 100, y: 62.5});
+test ('getMapPositionFromPhysicalPosition', () => {
+    const coordinate: Coordinate = {x: 200, y: 160}; // total Zoom x4
+    const result = getMapPositionFromPhysicalPosition(SAMPLE_ZOOMED, coordinate);
+    expect(result).toStrictEqual({x: 50, y: 40});
 });
 
-test ('getPhysicalPositionFromScaledPosition', () => {
-    const coordinate: Coordinate = {x: 400, y: 250}; // Middle of 800 x 500 scaled image
-    const result = getPhysicalPositionFromScaledPosition(SAMPLE_ZOOMED, coordinate);
-    expect(result).toStrictEqual({x: 200, y: 125});
+test ('getPhysicalPositionFromMapPosition', () => {
+    const coordinate: Coordinate = {x: 100, y: 60}; // total Zoom x4
+    const result = getPhysicalPositionFromMapPosition(SAMPLE_ZOOMED, coordinate);
+    expect(result).toStrictEqual({x: 400, y: 240});
 });
 
 test('calculateMapZoom - trivial', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 1.0, // Noop!
-        focusPoint: { x: 10, y: 15 },
+        physicalFocusPoint: { x: 10, y: 15 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
     expect(result).toStrictEqual(SAMPLE);
@@ -102,17 +112,19 @@ test('calculateMapZoom - trivial', () => {
 test('calculateMapZoom - x 1.5', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 1.5,
-        focusPoint: { x: 10, y: 15 },
+        physicalFocusPoint: { x: 20, y: 30 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
 
     const expectedResult: MapProperties = {
         widthAvailable: 400,
         heightAvailable: 300,
-        width: 600,
-        height: 375,
+        zoomedWidth: 600,
+        zoomedHeight: 375,
         naturalWidth: 200,
         naturalHeight: 125,
+        visibleWidth: 400,
+        visibleHeight: 300,
         xOffset: -10,
         yOffset: -15,
         userZoomFactor: 1.5,
@@ -125,17 +137,19 @@ test('calculateMapZoom - x 1.5', () => {
 test('calculateMapZoom - over zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 35.0,
-        focusPoint: { x: 10, y: 15 },
+        physicalFocusPoint: { x: 20, y: 30 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
 
     const expectedResult: MapProperties = {
         widthAvailable: 400,
         heightAvailable: 300,
-        width: 6400,
-        height: 4000,
+        zoomedWidth: 6400,
+        zoomedHeight: 4000,
         naturalWidth: 200,
         naturalHeight: 125,
+        visibleWidth: 400,
+        visibleHeight: 300,
         xOffset: -300,
         yOffset: -450,
         userZoomFactor: 16.0,
@@ -148,7 +162,7 @@ test('calculateMapZoom - over zoom', () => {
 test('calculateMapZoom - central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        focusPoint: { x: 100, y: 62.5 },
+        physicalFocusPoint: { x: 200, y: 125 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED);
@@ -157,7 +171,7 @@ test('calculateMapZoom - central zoom', () => {
 test('calculateMapZoom - 2x central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        focusPoint: { x: 100, y: 62.5 },
+        physicalFocusPoint: { x: 400, y: 250 },
     }
     const result = calculateMapZoom(SAMPLE_ZOOMED_CENTERED, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED_TWICE);
@@ -166,7 +180,7 @@ test('calculateMapZoom - 2x central zoom', () => {
 test('calculateMapZoom - 3x central zoom', () => {
     const mapZoom: MapZoom = {
         zoomFactorRatio: 2.0,
-        focusPoint: { x: 100, y: 62.5 },
+        physicalFocusPoint: { x: 800, y: 500 },
     }
     const result = calculateMapZoom(SAMPLE_ZOOMED_TWICE, mapZoom);
     expect(result).toStrictEqual(SAMPLE_ZOOMED_TRICE);
@@ -196,10 +210,12 @@ test('calculateGeometryUpdate - change aspect ratio of frame', () => {
     const expectedResult: MapProperties = {
         widthAvailable: 400,
         heightAvailable: 200,
-        width: 320,
-        height: 200,
+        zoomedWidth: 320,
+        zoomedHeight: 200,
         naturalWidth: 200,
         naturalHeight: 125,
+        visibleWidth: 320,
+        visibleHeight: 200,
         xOffset: 0,
         yOffset: 0,
         userZoomFactor: 1.0,

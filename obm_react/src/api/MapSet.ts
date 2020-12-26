@@ -16,7 +16,7 @@ function detectSpecialErrors(response: Response, _op: Operation, _id: MapSetId|u
 
 
 export const mapSetApi = createUpdatableApiWithId<MapSetId, MapSetUpdate, MapSetCreate, MapSet>({
-    name: 'Map Set',
+    name: 'Background Set',
     baseUrl: '/api/map_set',
     isIdOf: (id: MapSetId, idLike: MapSetId) => id.uuid === idLike.uuid,
     getIdOf: (idLike: MapSetId) => { return {uuid: idLike.uuid}; },

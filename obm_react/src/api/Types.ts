@@ -8,14 +8,14 @@ export enum Operation {
 
 export class MapSetNotFound extends Error {
     constructor() {
-        super('Map Set not found!');
+        super('Background Set not found!');
         Object.setPrototypeOf(this, MapSetNotFound.prototype);
     }
 }
 
 export class BattleMapNotFound extends Error {
     constructor() {
-        super('Battle Map not found!');
+        super('Battle Background not found!');
         Object.setPrototypeOf(this, BattleMapNotFound.prototype);
     }
 }

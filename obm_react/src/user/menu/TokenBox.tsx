@@ -1,9 +1,9 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {TokenType} from "../api/Types";
-import {RootState, GenericDispatch, MouseMode, MouseState} from '../redux/Types';
-import {actions} from '../redux/Store';
-import BoxToken from './components/BoxToken';
+import {TokenType} from "../../api/Types";
+import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
+import {actions} from '../../redux/Store';
+import BoxToken from '../components/BoxToken';
 
 
 export function TokenBox() {

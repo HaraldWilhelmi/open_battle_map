@@ -28,17 +28,17 @@ class BackupIo:
     def import_map_set_tar_gz(self, uuid: UUID, tar_gz: BinaryIO):
         import_dir = self._create_import_dir(uuid)
         try:
-            info(f"Starting to import Map Set {uuid} from archive ...")
+            info(f"Starting to import Background Set {uuid} from archive ...")
             target_dir = self._map_set_path.get_map_set_dir(uuid)
             if not isdir(target_dir):
-                raise ImportValidationError(f"Map Set {uuid} does not exist on this server! Go away hacker!")
+                raise ImportValidationError(f"Background Set {uuid} does not exist on this server! Go away hacker!")
             self._extract_data(import_dir, tar_gz)
             self._validate_data(import_dir)
             rmtree(target_dir)
             os.rename(import_dir, target_dir)
-            info(f"Successfully imported Map Set {uuid}.")
+            info(f"Successfully imported Background Set {uuid}.")
         except Exception as e:
-            warning(f"FAILED to import Map Set {uuid}.")
+            warning(f"FAILED to import Background Set {uuid}.")
             raise e
         finally:
             if isdir(import_dir):
@@ -49,7 +49,7 @@ class BackupIo:
         try:
             os.mkdir(import_dir)
         except FileExistsError:
-            raise ImportValidationError(f"Map Set {uuid} has already a running input.")
+            raise ImportValidationError(f"Background Set {uuid} has already a running input.")
         return import_dir
 
     def _extract_data(self, import_dir: str, tar_gz: BinaryIO):

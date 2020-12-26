@@ -1,0 +1,14 @@
+.placed-tokens-layer {
+    display: inline-table;
+    overflow: hidden;
+}
+
+.placed-token-container {
+    width: 0;
+    height: 0;
+}
+
+.map-frame {
+    height: 100%;
+    background-color: #e0e0e0;
+}

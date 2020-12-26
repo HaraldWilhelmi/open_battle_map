@@ -19,7 +19,7 @@ class BattleMapCreateRequest(BaseModel):
 
 
 @router.get('/{map_set_uuid}/{uuid}',
-            description='Get a Battle Map.',
+            description='Get a Battle Background.',
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
             response_model=BattleMap,
             response_model_include={
@@ -35,7 +35,7 @@ def battle_map_info(
 
 @router.put('/',
             status_code=status.HTTP_201_CREATED,
-            description='Creates a new Battle Map.',
+            description='Creates a new Battle Background.',
             responses=RESPONSE_MAP_SET_NOT_FOUND,
             response_model=BattleMap,
             response_model_include={'name', 'uuid', 'map_set_uuid'}
@@ -55,7 +55,7 @@ class BattleMapDeleteRequest(BaseModel):
     map_set_uuid: UUID
 
 
-@router.delete('/', description='Deletes a Battle Map.',
+@router.delete('/', description='Deletes a Battle Background.',
                responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
                )
 async def delete_battle_map(
@@ -75,7 +75,7 @@ class BattleMapUpdateRequest(BaseModel):
     _check_name = validator('name', allow_reuse=True)(name_validator)
 
 
-@router.post('/', description='Update Battle Map.',
+@router.post('/', description='Update Battle Background.',
              responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND
              )
 async def update_battle_map(

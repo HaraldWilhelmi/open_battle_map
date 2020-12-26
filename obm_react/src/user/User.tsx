@@ -5,10 +5,9 @@ import {BattleMapId} from '../api/Types';
 import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
-import Map from './Map';
+import Map from './map/Map';
 import FlyingTokenLayer from './FlyingTokenLayer';
-import PlacedTokensLayer from './PlacedTokensLayer';
-import MenuBox from './MenuBox';
+import Menu from './menu/Menu';
 import './User.css'
 
 
@@ -39,7 +38,7 @@ export function User() {
         [uuidFromPath, dispatch]
     );
 
-    useEffect( // Load Battle Map if needed and possible
+    useEffect( // Load Battle Background if needed and possible
         () => {
             if ( mapSet === null || mapSet.battle_maps.length === 0) {
                 if ( battleMap !== null ) {
@@ -101,22 +100,14 @@ export function User() {
         );
     }
     return (
-        <div className="max-height">
-            <FlyingTokenLayer>
-                <Messages />
-                <div className="main-layer">
-
-                    <PlacedTokensLayer>
-                        <Map />
-                    </PlacedTokensLayer>
-
-                    <div className="menu-box-vertical-ruler" />
-
-                    <MenuBox />
-
-                </div>
-            </FlyingTokenLayer>
-        </div>
+        <FlyingTokenLayer>
+            <Messages />
+            <div className="main-layer">
+                <Map />
+                <div className="menu-box-vertical-ruler" />
+                <Menu />
+            </div>
+        </FlyingTokenLayer>
     );
 }
 

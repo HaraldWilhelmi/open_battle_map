@@ -9,7 +9,7 @@ function detectSpecialErrors(response: Response, operation: Operation) {
 }
 
 export const mapSetListApi = createReadonlyApi<MapSetList>({
-    name: 'Map Set List',
+    name: 'Background Set List',
     baseUrl: '/api/map_set_list',
     detectSpecialErrors: detectSpecialErrors,
 });

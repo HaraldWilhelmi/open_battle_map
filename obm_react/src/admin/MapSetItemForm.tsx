@@ -35,7 +35,7 @@ export function MapSetItemRow(props: Props) {
     };
 
     let myDelete = async () => {
-        let warning = 'Really delete Map Set "' + item.name + '" ('
+        let warning = 'Really delete Background Set "' + item.name + '" ('
             + item.uuid + ')?'
         if (window.confirm(warning)) {
             const id: MapSetId = {uuid: props.item.uuid};

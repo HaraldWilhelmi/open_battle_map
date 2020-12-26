@@ -40,12 +40,14 @@ export enum Mode {
 }
 
 export interface MapProperties {
-    widthAvailable: number,
-    heightAvailable: number,
-    width: number,
-    height: number,
     naturalWidth: number,
     naturalHeight: number,
+    widthAvailable: number,
+    heightAvailable: number,
+    zoomedWidth: number,
+    zoomedHeight: number,
+    visibleWidth: number,
+    visibleHeight: number,
     xOffset: number,
     yOffset: number,
     userZoomFactor: number,
@@ -66,7 +68,7 @@ export interface MapMove {
 }
 
 export interface MapZoom {
-    focusPoint?: Coordinate,
+    physicalFocusPoint?: Coordinate,
     zoomFactorRatio: number,
 }
 

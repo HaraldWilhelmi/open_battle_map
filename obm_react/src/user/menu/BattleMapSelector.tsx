@@ -1,7 +1,7 @@
 import {useDispatch, useSelector} from 'react-redux';
-import {actions} from '../redux/Store';
-import {RootState, GenericDispatch} from '../redux/Types';
-import {MapSet, BattleMap, BattleMapId} from '../api/Types';
+import {actions} from '../../redux/Store';
+import {RootState, GenericDispatch} from '../../redux/Types';
+import {MapSet, BattleMap, BattleMapId} from '../../api/Types';
 
 
 export function BattleMapSelector() {

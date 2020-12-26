@@ -8,9 +8,6 @@ import {getPhysicalPositionFromMapPosition, ZOOM_INCREMENT} from '../tools/Map';
 import Token from './Token';
 
 
-const MAP_BORDER_PIXELS = 1;
-
-
 interface Props {
     token: TokenState,
 }
@@ -43,15 +40,16 @@ export function PlacedToken(props: Props) {
     }
 
     function doZoom (event: WheelEvent) {
+        event.stopPropagation();
         const zoomFactorRatio = event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT;
-        const focusPoint = props.token.position;
-        const mapZoom: MapZoom = {focusPoint, zoomFactorRatio};
+        const physicalFocusPoint = getPhysicalPositionFromMapPosition(mapProperties, props.token.position);
+        const mapZoom: MapZoom = {physicalFocusPoint, zoomFactorRatio};
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
     let positionOnScreen = getPhysicalPositionFromMapPosition(mapProperties, props.token.position);
-    positionOnScreen.x += MAP_BORDER_PIXELS;
-    positionOnScreen.y += MAP_BORDER_PIXELS;
+    positionOnScreen.x += mapProperties.xOffset < 0 ? mapProperties.xOffset : 0;
+    positionOnScreen.y += mapProperties.yOffset < 0 ? mapProperties.yOffset : 0;
 
     const style: CSS.Properties = {
         position: 'absolute',

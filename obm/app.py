@@ -24,7 +24,7 @@ from obm.routers.backup import router as backup_router
 
 TAGS_META_DATA = [
     {
-        'name': 'Map Set',
+        'name': 'Background Set',
         'description':
             'A map set is a collection of battle maps, which share some settings '
             + 'and resources. The object itself only contains meta data used for '
@@ -36,16 +36,16 @@ TAGS_META_DATA = [
             + get_config_file_name() + '.'
     },
     {
-        'name': 'Map Set List',
+        'name': 'Background Set List',
         'description':
-            'Access the complete list of all Map Sets hosted on the server. '
+            'Access the complete list of all Background Sets hosted on the server. '
             + 'The single API call of ths group requires a Admin Secret like '
-            + 'most of the normal Map Set operations. Look there for details.'
+            + 'most of the normal Background Set operations. Look there for details.'
     },
     {
-        'name': 'Battle Map',
+        'name': 'Battle Background',
         'description':
-            'This calls help to administer Battle Baps of a given Map Set. '
+            'This calls help to administer Battle Baps of a given Background Set. '
             + 'A battle map may have a background image (the actual map) '
             + 'and a number of parameters, e.g. the scale of the map.'
     },
@@ -53,14 +53,14 @@ TAGS_META_DATA = [
         'name': 'Image Data',
         'description':
             'This calls allow to access the image data used as background image '
-            + 'of a Battle Map.'
+            + 'of a Battle Background.'
     },
     {
         'name': 'Token Set',
         'description':
             'A Token Set is a collection of token meta data. Each token_type has also an '
             + 'image, which can be accessed via Token Image request. So far only a global '
-            + 'default Token Set is implemented, which is share by all Map Sets.'
+            + 'default Token Set is implemented, which is share by all Background Sets.'
     },
     {
         'name': 'Token Image',
@@ -70,10 +70,10 @@ TAGS_META_DATA = [
         'name': 'Backup',
         'description':
             'These operations allow to download and upload the complete data of '
-            + 'a Map Set. The format of the data (.obm file) is a gzipped TAR file '
+            + 'a Background Set. The format of the data (.obm file) is a gzipped TAR file '
             + 'with mostly JSON and a few binary images inside. Basically the files '
             + 'look like the result of a "tar cfz <file name> ." command in the '
-            + 'directory of the Map Set on the server.'
+            + 'directory of the Background Set on the server.'
     },
 ]
 
@@ -96,9 +96,9 @@ token_set_manager: TokenSetManager = ctx.get(TokenSetManager)
 _ = token_set_manager.get_default_token_set()  # If default token set does not load abort early!
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
-app.include_router(map_set_list_router, prefix='/api/map_set_list', tags=['Map Set List'])
-app.include_router(map_set_router, prefix='/api/map_set', tags=['Map Set'])
-app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Map'])
+app.include_router(map_set_list_router, prefix='/api/map_set_list', tags=['Background Set List'])
+app.include_router(map_set_router, prefix='/api/map_set', tags=['Background Set'])
+app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Background'])
 app.include_router(image_data_router, prefix='/api/image_data', tags=['Image Data'])
 app.include_router(token_set_router, prefix='/api/token_set', tags=['Token Set'])
 app.include_router(token_image_router, prefix='/api/token_image', tags=['Token Image'])

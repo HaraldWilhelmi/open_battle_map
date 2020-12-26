@@ -13,5 +13,5 @@ export async function uploadMapSetArchive(mapSetId: MapSetId, file: File, dispat
             body: body,
         })
     )
-    handleResponse(dispatch, response, 'to upload Map Set "' + mapSetId.uuid + '"');
+    handleResponse(dispatch, response, 'to upload Background Set "' + mapSetId.uuid + '"');
 }

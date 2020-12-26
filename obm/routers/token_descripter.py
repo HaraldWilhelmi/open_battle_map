@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get('/default/',
-            description='Get the default token descriptors shared by all Map Sets',
+            description='Get the default token descriptors shared by all Background Sets',
             )
 def get_default_token_descriptors(
         token_set_manager: TokenSetManager = Depends(get_token_set_manager)

@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get('/default/{token_type}/{color}',
             description='Get the image (SVG) for a default token. The token_type must be < 1000. Higher values '
-                        + 'are reserved for the custom tokens of the Map Set.',
+                        + 'are reserved for the custom tokens of the Background Set.',
             responses={
                 status.HTTP_200_OK: {
                     'content': {'image/svg+xml': {}}

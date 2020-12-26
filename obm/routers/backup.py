@@ -24,7 +24,7 @@ router = APIRouter()
 
 
 @router.get('/{uuid}',
-            description='Download a complete Map Set, e.g. as backup or to migrate it to a different server instance.',
+            description='Download a complete Background Set, e.g. as backup or to migrate it to a different server instance.',
             responses=RESPONSE_MAP_SET_NOT_FOUND,
             )
 def download_map_set(
@@ -52,7 +52,7 @@ def _get_safe_file_name(raw_name: str) -> str:
 
 
 @router.post('/',
-             description='Upload a complete Map Set, e.g. to restore an backup or to migrate to a different server.',
+             description='Upload a complete Background Set, e.g. to restore an backup or to migrate to a different server.',
              responses={
                  **RESPONSE_MAP_SET_NOT_FOUND,
                  **RESPONSE_IMPORT_VALIDATION_ERROR,

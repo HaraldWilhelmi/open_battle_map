@@ -8,7 +8,7 @@ from obm.model.map_set_manager import MapSetManager
 
 RESPONSE_MAP_SET_NOT_FOUND = {
     status.HTTP_404_NOT_FOUND: {
-        'description': 'Map Set not found.'
+        'description': 'Background Set not found.'
     }
 }
 

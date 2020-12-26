@@ -1,12 +1,13 @@
 import {useSelector} from 'react-redux';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import {RootState} from '../redux/Types';
+import {RootState} from '../../redux/Types';
 import BattleMapSelector from './BattleMapSelector';
 import Work from './Work';
 import Play from './Play';
+import './Menu.css';
 
-export function MenuBox() {
+export function Menu() {
     let mapSet = useSelector(
         (state: RootState) => state.mapSet
     );
@@ -31,4 +32,4 @@ export function MenuBox() {
     );
 }
 
-export default MenuBox;
+export default Menu;

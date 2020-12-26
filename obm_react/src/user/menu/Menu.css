@@ -1,0 +1,52 @@
+
+.menu-item{
+    width: 200px;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 2px;
+}
+.menu-field {
+    flex: 1 1 auto;
+    vertical-align: middle;
+    margin: auto;
+}
+input.menu-field {
+    width: 100%;
+}
+.menu-label {
+    width: 80px;
+}
+.section {
+    padding-bottom: 3ex;
+}
+
+.menu-item-help {
+  color: #808080;
+  font-size: 10px;
+}
+
+h3 {
+    padding-top: 1ex;
+    padding-bottom: 1ex;
+}
+
+h4 {
+    padding-top: 1.5ex;
+    padding-bottom: 0.5ex;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.token-box {
+    width: 200px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    display: flex;
+    background-color: #e0e0e0;
+}
+
+.token-in-box {
+    flex: 0 0 auto;
+}

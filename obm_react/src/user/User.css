@@ -1,3 +1,10 @@
+.map-box {
+    flex: 1 1 auto;
+    height: 100%;
+    overflow: hidden;
+    background-color: #e0e0e0;
+}
+
 .menu-box-vertical-ruler {
     height: 100%;
     flex: 0 0 2px;
@@ -8,57 +15,6 @@
     flex: 0 0 200px;
     flex-direction: column;
     margin: 1ex;
-}
-.menu-item{
-    width: 200px;
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 2px;
-}
-.menu-field {
-    flex: 1 1 auto;
-    vertical-align: middle;
-    margin: auto;
-}
-input.menu-field {
-    width: 100%;
-}
-.menu-label {
-    width: 80px;
-}
-.section {
-    padding-bottom: 3ex;
-}
-
-.menu-item-help {
-  color: #808080;
-  font-size: 10px;
-}
-
-h3 {
-    padding-top: 1ex;
-    padding-bottom: 1ex;
-}
-
-h4 {
-    padding-top: 1.5ex;
-    padding-bottom: 0.5ex;
-}
-
-input[type="file"] {
-    display: none;
-}
-
-.token-box {
-    width: 200px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    display: flex;
-    background-color: #e0e0e0;
-}
-
-.token-in-box {
-    flex: 0 0 auto;
 }
 
 .flying-token-layer {
@@ -82,27 +38,3 @@ input[type="file"] {
 .token-frame {
     position: relative;
 }
-
-.placed-tokens-layer {
-    flex: 1 1 auto;
-    height: 100%;
-    overflow: hidden;
-}
-
-.placed-token-container {
-    width: 0;
-    height: 0;
-    z-index: 100;
-    overflow: visible;
-}
-
-.map-frame {
-    height: 100%;
-    background-color: #e0e0e0;
-}
-
-.map-image {
-    position: relative;
-    border-style: dashed;
-}
-
