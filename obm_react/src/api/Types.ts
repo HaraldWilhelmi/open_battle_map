@@ -67,7 +67,7 @@ export interface BattleMapCreate {
 }
 
 export interface BattleMap extends BattleMapUpdate, BattleMapCreate {
-    background_revision: number;
+    revision: number;
 }
 
 

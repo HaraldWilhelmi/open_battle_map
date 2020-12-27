@@ -1,9 +1,13 @@
 from os.path import isfile
+from pydantic.color import Color
+from uuid import uuid4
 from pytest import fixture
 
 from obm.common.dep_context import DepContext
+from obm.data.common import Coordinate
 from obm.data.config import Config
-from obm.data.battle_map import Background
+from obm.data.token_state import TokenAction, TokenActionType
+from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.map_set_io import MapSetIO
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.map_set_cache import MapSetCache
@@ -14,6 +18,7 @@ from obm.model.map_set_manager import MapSetManager
 def ctx(tmpdir):
     ctx = DepContext()
     ctx.register(Config(admin_secret='bla', data_dir=str(tmpdir)))
+    ctx.register(MapSetPaths(ctx=ctx))
     ctx.register(MapSetIO(ctx=ctx))
     ctx.register(MapSetCache(ctx=ctx))
     ctx.register(MapSetDirectory(ctx=ctx))
@@ -22,6 +27,7 @@ def ctx(tmpdir):
 
 
 def test_simple(ctx: DepContext):
+    map_set_paths: MapSetPaths = ctx.get(MapSetPaths)
     map_set_io: MapSetIO = ctx.get(MapSetIO)
     map_set_cache: MapSetCache = ctx.get(MapSetCache)
     map_set_manager: MapSetManager = ctx.get(MapSetManager)
@@ -30,20 +36,28 @@ def test_simple(ctx: DepContext):
     map_set = map_set_manager.create('Test1')
     assert map_set.name == 'Test1'
 
-    map_set_file = map_set_io.get_map_set_path(map_set.uuid)
+    map_set_file = map_set_paths.get_map_set_path(map_set.uuid)
     assert isfile(map_set_file)
 
     battle_maps = map_set.get_battle_maps()
     assert len(battle_maps) == 1
 
-    battle_map_file = map_set_io.get_battle_map_path(map_set.uuid, battle_maps[0].uuid)
-    background_file = map_set_io.get_background_path(map_set.uuid, battle_maps[0].uuid)
+    battle_map_file = map_set_paths.get_battle_map_path(map_set.uuid, battle_maps[0].uuid)
+    background_file = map_set_paths.get_background_path(map_set.uuid, battle_maps[0].uuid)
     assert isfile(battle_map_file)
     assert not isfile(background_file)
 
     map_set.name = 'Changed1'
     battle_maps[0].name = 'Changed2'
-    battle_maps[0].background = Background(media_type='nonsense', image_data=b'trash')
+    battle_maps[0].set_background_image(media_type='nonsense', image_data=b'trash')
+    battle_maps[0].process_action(
+        TokenAction(
+            action_type=TokenActionType.Added,
+            uuid=uuid4(),
+            token_type=0, color=Color('Black'), mark='23', mark_color=Color('White'),
+            position=Coordinate(x=17, y=27),
+        )
+    )
     map_set_manager.save(map_set)
     assert isfile(background_file)
 
@@ -53,7 +67,9 @@ def test_simple(ctx: DepContext):
     fresh_battle_maps = fresh_map_set.get_battle_maps()
     assert len(fresh_battle_maps) == 1
     assert fresh_battle_maps[0].name == 'Changed2'
-    assert fresh_battle_maps[0].background.image_data == b'trash'
+    assert fresh_battle_maps[0].get_background_image() == b'trash'
+    assert len(fresh_battle_maps[0].tokens)
+    assert fresh_battle_maps[0].tokens[0].mark == '23'
 
     map_set_manager.delete(fresh_map_set)
     assert not isfile(map_set_file)

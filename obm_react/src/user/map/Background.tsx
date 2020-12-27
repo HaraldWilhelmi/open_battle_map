@@ -74,7 +74,7 @@ export function Background(props: Props) {
     const url = '/api/image_data/'
         + battleMap.map_set_uuid + '/'
         + battleMap.uuid
-        + '?v=' + battleMap.background_revision;
+        + '?v=' + battleMap.revision;
 
     return (
         <img

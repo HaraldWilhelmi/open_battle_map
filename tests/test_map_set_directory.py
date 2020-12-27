@@ -1,10 +1,10 @@
 from pytest import fixture
-from pytest_mock import MockerFixture
 from uuid import UUID
 
 from obm.common.dep_context import DepContext
 from obm.data.config import Config
 from obm.data.map_set import MapSet
+from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.map_set_io import MapSetIO
 from obm.model.map_set_directory import MapSetDirectory
 
@@ -24,6 +24,7 @@ def uuids():
 def ctx(mocker, uuids):
     ctx = DepContext()
     ctx.register(Config(admin_secret='bla'))
+    ctx.register(MapSetPaths(ctx))
 
     map_set_io = MapSetIO(ctx=ctx)
     mocker.patch.object(

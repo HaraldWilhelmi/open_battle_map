@@ -26,5 +26,5 @@ export const NO_SUCH_BATTLE_MAP: BattleMap = {
     name: '* No Background *',
     uuid: 'dummy',
     map_set_uuid: 'dummy',
-    background_revision: 0,
+    revision: 0,
 };

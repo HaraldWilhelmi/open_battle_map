@@ -1,17 +1,7 @@
-from typing import List, Dict
-from enum import Enum
+from typing import List
 from pydantic import BaseModel, root_validator
-from pydantic.color import Color
 
-
-class ColorCombo(BaseModel):
-    color: Color
-    mark_color: Color
-
-
-class ActiveAreaShape(Enum):
-    RECT = 'rect'
-    CIRCLE = 'circle'
+from obm.data.common import ColorCombo, ActiveAreaShape
 
 
 # noinspection SpellCheckingInspection

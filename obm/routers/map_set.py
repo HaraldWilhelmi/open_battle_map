@@ -67,8 +67,8 @@ async def map_set_info(
 
 def _get_battle_maps(map_set):
     battle_maps = [
-        BattleMapItem(uuid=uuid, name=battle_map.name)
-        for uuid, battle_map in map_set.battle_maps_by_uuid.items()
+        BattleMapItem(uuid=battle_map.uuid, name=battle_map.name)
+        for battle_map in map_set.get_battle_maps()
     ]
     battle_maps.sort(key=lambda x: x.name)
     return battle_maps
@@ -111,7 +111,8 @@ async def create_map_set(
         manager: MapSetManager = Depends(get_map_set_manager),
         _: None = Depends(check_admin_secret)
 ) -> MapSet:
-    return manager.create(data.name)
+    map_set = manager.create(data.name)
+    return map_set.get_clean_data()
 
 
 class MapSetDeleteRequest(BaseModel):

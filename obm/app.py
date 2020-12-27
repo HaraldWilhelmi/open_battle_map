@@ -5,7 +5,6 @@ from obm.data.config import get_config_for_production, get_config_file_name
 from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.map_set_io import MapSetIO
 from obm.fileio.backup_io import BackupIo
-from obm.fileio.static_data import get_default_token
 from obm.fileio.token_set_io import TokenSetIo
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.map_set_cache import MapSetCache

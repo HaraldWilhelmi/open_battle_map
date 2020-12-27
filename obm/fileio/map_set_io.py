@@ -2,7 +2,7 @@ from glob import glob
 from os.path import isfile
 from os import makedirs, unlink, rmdir
 from uuid import UUID
-from typing import Dict, List, Optional
+from typing import List, Optional
 import json
 
 from obm.common.dep_context import DepContext, get_context
@@ -49,45 +49,34 @@ class MapSetIO:
             fp.write(
                 map_set.json(include={'name'}, indent=4)
             )
-        for battle_map in map_set.battle_maps_by_uuid.values():
-            self.save_battle_map(battle_map)
-        map_set.saved_flag = True
 
-    def save_battle_map(self, battle_map: BattleMap):
-        map_set_uuid = battle_map.map_set_uuid
-        with open(self._map_set_paths.get_battle_map_path(map_set_uuid, battle_map.uuid), 'w') as fp:
+    def save_battle_map(self, map_set: MapSet, battle_map: BattleMap):
+        with open(self._map_set_paths.get_battle_map_path(map_set.uuid, battle_map.uuid), 'w') as fp:
             fp.write(
-                battle_map.json(exclude={'background_image_data', 'map_set_uuid'}, indent=4)
+                battle_map.json(indent=4)
             )
 
-        image_path = self._map_set_paths.get_background_path(map_set_uuid, battle_map.uuid)
-        if battle_map.background_image_data is None:
+    def save_background(self, map_set: MapSet, battle_map: BattleMap, image_data: Optional[bytes]):
+        image_path = self._map_set_paths.get_background_path(map_set.uuid, battle_map.uuid)
+        if image_data is None:
             if isfile(image_path):
                 unlink(image_path)
         else:
             with open(image_path, 'wb') as fp:
-                fp.write(battle_map.background_image_data)
+                fp.write(image_data)
 
     def load_map_set(self, uuid: UUID) -> MapSet:
-        try:
-            map_set = self.load_map_set_core_data(uuid)
-            for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):
-                battle_map = self.load_battle_map(map_set, battle_map_uuid)
-                map_set.battle_maps_by_uuid[battle_map.uuid] = battle_map
-        except MapSetLoadError as e:
-            raise e
-        except Exception as e:
-            raise MapSetLoadError(f"Failed to load map set {uuid}: {type(e).__name__}({str(e)})")
-        return map_set
-
-    def load_map_set_core_data(self, uuid: UUID) -> MapSet:
         map_set_file = self._map_set_paths.get_map_set_path(uuid)
         if not isfile(map_set_file):
             raise NoSuchMapSet(f"No map set found at path '{map_set_file}'")
-        with open(map_set_file, 'r') as fp:
-            raw_data = json.load(fp)
-        map_set = MapSet(**raw_data, uuid=uuid)
-        map_set.saved_flag = True
+        try:
+            with open(map_set_file, 'r') as fp:
+                raw_data = json.load(fp)
+            map_set = MapSet(**raw_data, uuid=uuid)
+        except Exception as e:
+            raise MapSetLoadError(
+                f"Failed to load map set {uuid}: {type(e).__name__}({str(e)})"
+            )
         return map_set
 
     def scan_disk_for_battle_maps(self, map_set: MapSet) -> List[UUID]:
@@ -101,11 +90,14 @@ class MapSetIO:
         battle_map_path = self._map_set_paths.get_battle_map_path(map_set.uuid, battle_map_uuid)
         if not isfile(battle_map_path):
             raise NoSuchBattleMap(f"No battle map found aft path '{battle_map_path}'")
-        with open(battle_map_path, 'r') as fp:
-            raw_data = json.load(fp)
-        image_data = self.load_image_data(map_set, battle_map_uuid)
-        battle_map = self.create_battle_map_from_raw_data(map_set.uuid, raw_data, image_data)
-        assert battle_map_uuid == battle_map.uuid, f"UUID in {battle_map_path} does not match file name!"
+        try:
+            with open(battle_map_path, 'r') as fp:
+                raw_data = json.load(fp)
+            battle_map = BattleMap(**raw_data)
+        except Exception as e:
+            raise MapSetLoadError(
+                f"Failed to load Battle Map {map_set.uuid}/{battle_map_uuid}: {type(e).__name__}({str(e)})"
+            )
         return battle_map
 
     def load_image_data(self, map_set: MapSet, battle_map_uuid: UUID) -> Optional[bytes]:
@@ -116,21 +108,9 @@ class MapSetIO:
         else:
             return None
 
-    @staticmethod
-    def create_battle_map_from_raw_data(map_set_uuid: UUID, raw_data: Dict, image_data: bytes) -> BattleMap:
-        battle_map = BattleMap(**raw_data, map_set_uuid=map_set_uuid)
-        if image_data is None:
-            if battle_map.background_media_type is not None:
-                raise CorruptedImageData(f"Battle map {battle_map.uuid} has missing image data!")
-        else:
-            if battle_map.background_media_type is None:
-                raise CorruptedImageData(f"Battle map {battle_map.uuid} has image data but no media type!")
-            battle_map.background_image_data = image_data
-        return battle_map
-
     def delete_map_set(self, map_set: MapSet):
         for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):
-            self.delete_battle_map(map_set, battle_map_uuid);
+            self.delete_battle_map(map_set, battle_map_uuid)
         unlink(self._map_set_paths.get_map_set_path(map_set.uuid))
         rmdir(self._map_set_paths.get_map_set_dir(map_set.uuid))
 

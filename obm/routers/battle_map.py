@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 from fastapi import Depends, APIRouter, status
 from pydantic import BaseModel, validator
@@ -18,36 +19,45 @@ class BattleMapCreateRequest(BaseModel):
     _check_name = validator('name', allow_reuse=True)(name_validator)
 
 
+class BattleMapInfo(BaseModel):
+    uuid: UUID
+    map_set_uuid: UUID
+    name: str
+    revision: int
+    token_log_count: int
+
+    background_pixels_per_meter: int
+    background_media_type: Optional[str]
+
+
 @router.get('/{map_set_uuid}/{uuid}',
             description='Get a Battle Background.',
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
-            response_model=BattleMap,
-            response_model_include={
-                'name', 'uuid', 'map_set_uuid', 'background_revision'
-            }
+            response_model=BattleMapInfo,
             )
 def battle_map_info(
         map_set_uuid: UUID, uuid: UUID,
         manager: MapSetManager = Depends(get_map_set_manager),
-) -> BattleMap:
-    return get_battle_map(manager, map_set_uuid, uuid)
+) -> BattleMapInfo:
+    battle_map = get_battle_map(manager, map_set_uuid, uuid)
+    return BattleMapInfo(map_set_uuid=map_set_uuid, **battle_map.__dict__)
 
 
 @router.put('/',
             status_code=status.HTTP_201_CREATED,
             description='Creates a new Battle Background.',
             responses=RESPONSE_MAP_SET_NOT_FOUND,
-            response_model=BattleMap,
+            response_model=BattleMapInfo,
             response_model_include={'name', 'uuid', 'map_set_uuid'}
             )
 async def create_battle_map(
         data: BattleMapCreateRequest,
         manager: MapSetManager = Depends(get_map_set_manager),
-) -> BattleMap:
+) -> BattleMapInfo:
     map_set = get_map_set(manager, data.map_set_uuid)
-    battle_map = manager.add_new_battle_map(map_set, name=data.name)
+    battle_map = map_set.add_new_battle_map(data.name)
     manager.save(map_set)
-    return battle_map
+    return BattleMapInfo(map_set_uuid=map_set.uuid, **battle_map.__dict__)
 
 
 class BattleMapDeleteRequest(BaseModel):
@@ -85,4 +95,5 @@ async def update_battle_map(
     map_set = get_map_set(manager, data.map_set_uuid)
     battle_map = get_battle_map(manager, data.map_set_uuid, data.uuid)
     battle_map.name = data.name
+    battle_map.revision += 1
     manager.save(map_set)

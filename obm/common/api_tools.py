@@ -1,10 +1,10 @@
 from uuid import UUID
 from fastapi import HTTPException, status
 
-from obm.data.map_set import MapSet
-from obm.data.battle_map import BattleMap
 from obm.fileio.map_set_io import NoSuchMapSet
 from obm.model.map_set_manager import MapSetManager
+from obm.model.managed_map_set import ManagedMapSet
+from obm.model.managed_battle_map import ManagedBattleMap
 
 RESPONSE_MAP_SET_NOT_FOUND = {
     status.HTTP_404_NOT_FOUND: {
@@ -34,16 +34,17 @@ RESPONSE_BAD_TOKEN_TYPE = {
     }
 }
 
-def get_map_set(manager: MapSetManager, uuid: UUID) -> MapSet:
+
+def get_map_set(manager: MapSetManager, uuid: UUID) -> ManagedMapSet:
     try:
         return manager.get_by_uuid(uuid)
     except NoSuchMapSet:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'No such map set found.')
 
 
-def get_battle_map(manager: MapSetManager, map_set_uuid: UUID, battle_map_uuid: UUID) -> BattleMap:
+def get_battle_map(manager: MapSetManager, map_set_uuid: UUID, battle_map_uuid: UUID) -> ManagedBattleMap:
     map_set = get_map_set(manager, map_set_uuid)
-    if battle_map_uuid in map_set.battle_maps_by_uuid:
-        return map_set.battle_maps_by_uuid[battle_map_uuid]
-    else:
+    try:
+        return map_set.get_battle_map(battle_map_uuid)
+    except Exception:
         raise HTTPException(status.HTTP_404_NOT_FOUND, 'Battle map not found.')

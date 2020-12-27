@@ -25,11 +25,12 @@ def get_image_data(
         manager: MapSetManager = Depends(get_map_set_manager),
 ) -> Response:
     battle_map = get_battle_map(manager, map_set_uuid, uuid)
-    if battle_map.background_image_data is None:
+    image_data = battle_map.get_background_image()
+    if image_data is None:
         content = get_default_map()
         media_type = 'image/svg+xml'
     else:
-        content = battle_map.background_image_data
+        content = image_data
         media_type = battle_map.background_media_type
     return Response(content=content, media_type=media_type)
 
@@ -52,7 +53,7 @@ async def upload_image_data(
     image_media_type_validator(image_data.content_type)
     map_set = get_map_set(manager, map_set_uuid)
     battle_map = get_battle_map(manager, map_set_uuid, uuid)
-    battle_map.background_media_type = image_data.content_type
-    battle_map.background_image_data = await image_data.read()
-    battle_map.background_revision += 1
+    data = await image_data.read()
+    battle_map.set_background_image(data, image_data.content_type)
+    battle_map.revision += 1
     manager.save(map_set)
