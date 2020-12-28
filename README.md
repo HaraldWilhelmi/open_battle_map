@@ -2,6 +2,8 @@
 
 ## What is Open Battle Background?
 
+**This software is not even Alpha now ... Don't expect anything to work yet!**
+
 Open Battle Background is a small Web Service, which helps you to play role playing games,
 tactical board games etc. remotely with your friends (Corvid-19 ...). It should
 basically work with everything, where you move figures or tokens or whatever over
