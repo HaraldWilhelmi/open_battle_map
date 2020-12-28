@@ -100,14 +100,16 @@ export function User() {
         );
     }
     return (
-        <FlyingTokenLayer>
+        <div>
+            <FlyingTokenLayer>
+                <div className="main-layer">
+                    <Map />
+                    <div className="menu-box-vertical-ruler" />
+                    <Menu />
+                </div>
+            </FlyingTokenLayer>
             <Messages />
-            <div className="main-layer">
-                <Map />
-                <div className="menu-box-vertical-ruler" />
-                <Menu />
-            </div>
-        </FlyingTokenLayer>
+        </div>
     );
 }
 

@@ -1,19 +1,44 @@
-.ErrorMessage {
-  background-color: red;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.error-message {
+    background-color: red;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    animation-name: fade-away;
+    animation-duration: 30s;
 }
 
-.SuccessMessage {
-  background-color: green;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.success-message {
+    background-color: green;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    animation-name: fade-away;
+    animation-duration: 30s;
 }
+
+@keyframes fade-away {
+    from {opacity: 100%;}
+    to {opacity: 0;}
+}
+
+.message-box {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 10000;
+    pointer-events: none;
+}
+

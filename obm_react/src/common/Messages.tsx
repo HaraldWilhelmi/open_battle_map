@@ -7,8 +7,8 @@ interface Props {}
 
 function cssForCategory(category: MessageCategory) {
     switch(category) {
-        case MessageCategory.Success: { return 'SuccessMessage'; }
-        default: { return 'ErrorMessage'; }
+        case MessageCategory.Success: { return 'success-message'; }
+        default: { return 'error-message'; }
     }
 }
 
@@ -21,7 +21,7 @@ const Messages = (props: Props) => {
             </div>
         )
     );
-    return (<div>{messages}</div>);
+    return (<div className="message-box">{messages}</div>);
 }
 
 export default Messages;

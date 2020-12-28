@@ -13,7 +13,7 @@ function detectSpecialErrors(response: Response, _op: Operation, _id: BattleMapI
 
 
 export const battleMapApi = createUpdatableApiWithId<BattleMapId, BattleMapUpdate, BattleMapCreate, BattleMap>({
-    name: 'Background Set',
+    name: 'Battle Map',
     baseUrl: '/api/battle_map',
     isIdOf: (id: BattleMapId, idLike: BattleMapId) =>
         id.uuid === idLike.uuid && id.map_set_uuid === idLike.map_set_uuid,
