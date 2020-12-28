@@ -30,7 +30,7 @@ class ManagedBattleMap(BattleMap):
             token.get_lookup_key(): token
             for token in self.tokens
         }
-        self.log_offset = self.token_log_count + 1
+        self.log_offset = self.token_action_count + 1
 
     def process_action(self, action: TokenAction) -> None:
         action_type = action.action_type
@@ -42,7 +42,7 @@ class ManagedBattleMap(BattleMap):
             self._remove_token(action)
         else:
             self._move_token(action)
-        self.token_log_count += 1
+        self.token_action_count += 1
 
     def _add_token(self, action: TokenAction) -> None:
         new_token = TokenState(**action.__dict__)

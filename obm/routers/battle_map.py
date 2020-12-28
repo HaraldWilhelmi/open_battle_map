@@ -7,7 +7,6 @@ from obm.common.validators import name_validator
 from obm.common.api_tools import RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND, RESPONSE_MAP_SET_NOT_FOUND, \
     get_map_set, get_battle_map
 from obm.dependencies import get_map_set_manager
-from obm.data.battle_map import BattleMap
 from obm.model.map_set_manager import MapSetManager
 
 router = APIRouter()
@@ -24,7 +23,7 @@ class BattleMapInfo(BaseModel):
     map_set_uuid: UUID
     name: str
     revision: int
-    token_log_count: int
+    token_action_count: int
 
     background_pixels_per_meter: int
     background_media_type: Optional[str]

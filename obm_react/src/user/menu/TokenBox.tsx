@@ -31,7 +31,7 @@ export function TokenBox() {
 
     function discardToken(event: MouseEvent)  {
         if ( mouse.mode === MouseMode.MoveToken) {
-            dispatch(actions.mouse.releaseToken());
+            dispatch(actions.tokens.dropIntoBox());
             event.stopPropagation();
         }
     }

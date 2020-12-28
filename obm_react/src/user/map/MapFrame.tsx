@@ -3,7 +3,7 @@ import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
 import {Coordinate} from '../../api/Types';
 import {
-    RootState, MapProperties, GenericDispatch, MapZoom, MapMove, MouseMode, MouseState
+    RootState, MapProperties, GenericDispatch, MapZoom, MapMove, MouseMode, MouseState, Tokens
 } from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {ZOOM_INCREMENT, getMapPositionFromPhysicalPosition, calculateMapFrame, getRotationFromTarget} from '../tools/Map';
@@ -21,6 +21,10 @@ export function MapFrame(props: Props) {
 
     const mouse: MouseState = useSelector(
         (state: RootState) => state.mouse
+    );
+
+    const tokens: Tokens = useSelector(
+        (state: RootState) => state.tokens
     );
 
     const doZoom = (event: WheelEvent) => {
@@ -72,12 +76,12 @@ export function MapFrame(props: Props) {
                     y: event.nativeEvent.offsetY,
                 };
                 const position = getMapPositionFromPhysicalPosition(mapProperties, physicalPosition);
-                dispatch(actions.mouse.placeToken(position));
+                dispatch(actions.tokens.positionOnMapForAdjustment(position));
                 break;
             }
             case MouseMode.TurnToken: {
                 event.stopPropagation();
-                let token = mouse.flyingToken;
+                let token = tokens.flyingToken;
                 if ( token !== null ) {  // Always true
                     const target: Coordinate = getMapPositionFromPhysicalPosition(mapProperties, {
                         x: event.nativeEvent.offsetX,
@@ -85,7 +89,7 @@ export function MapFrame(props: Props) {
                     });
                     const rotation = getRotationFromTarget(token.position, target);
                     token = {...token, rotation};
-                    dispatch(actions.placedTokens.place(token));
+                    dispatch(actions.tokens.placeOnMap(rotation));
                 }
                 dispatch(actions.mouse.releaseToken());
                 break;

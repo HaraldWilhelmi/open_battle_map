@@ -95,6 +95,6 @@ export function createUpdatableApiWithId<
     };
 
     return {...descriptor,
-        get, create,update, remove
+        get, create, update, remove
     };
 }

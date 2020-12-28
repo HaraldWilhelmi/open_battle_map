@@ -1,4 +1,14 @@
-import {MapSetId, NEW_TOKEN_MARK, TokenId, TokenSet, TokenState, TokenType} from '../../api/Types';
+import {v4 as uuid} from 'uuid';
+import {
+    MapSetId,
+    NEW_TOKEN_MARK,
+    TokenAction,
+    TokenActionType,
+    TokenId,
+    TokenSet,
+    TokenState,
+    TokenType
+} from '../../api/Types';
 
 
 export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
@@ -9,24 +19,18 @@ export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
         + tokenId.color;
 }
 
-export function placeToken(state: TokenState[], token: TokenState): TokenState[] {
-    let newState = [...state];
-
+export function getTokenAction(state: TokenState[], token: TokenState): TokenAction {
+    let newMark = token.mark;
+    let actionType = TokenActionType.moved;
     if (token.mark === NEW_TOKEN_MARK) {
-        token.mark =getFreeMarkForToken(state, token);
-        newState.push(token);
-        return newState;
+        actionType = TokenActionType.added;
+        newMark = getFreeMarkForToken(state, token);
     }
-
-    for ( let i = 0; i < newState.length; i++ ) {
-        if ( isSameToken(token, newState[i]) ) {
-            newState[i] = token;
-            return newState;
-        }
-    }
-
-    newState.push(token);
-    return newState;
+    return {...token,
+        action_type: actionType,
+        mark: newMark,
+        uuid: uuid(),
+    };
 }
 
 export function getFreeMarkForToken(state: TokenState[], token: TokenState): string {
@@ -46,7 +50,7 @@ export function isSameToken(a: TokenId, b: TokenId): boolean {
     return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark && a.mark_color === b.mark_color;
 }
 
-export function removeToken(state: TokenState[], tokenId: TokenId): TokenState[] {
+export function pickupToken(state: TokenState[], tokenId: TokenId): TokenState[] {
     let newState = [...state];
     for ( let i = 0; i < newState.length; i++ ) {
         if ( isSameToken(tokenId, newState[i]) ) {
@@ -55,6 +59,16 @@ export function removeToken(state: TokenState[], tokenId: TokenId): TokenState[]
         }
     }
     return newState;
+}
+
+export function getTokensWithout(tokens: TokenState[], tokenId: TokenId): TokenState[] {
+    for ( let i = 0; i < tokens.length; i++ ) {
+        if ( isSameToken(tokenId, tokens[i]) ) {
+            tokens.splice(i, 1);
+            return tokens;
+        }
+    }
+    throw new Error('Token not found in list - that should never happen!');
 }
 
 export function getTokenIdAsString(tokenId: TokenId): string {

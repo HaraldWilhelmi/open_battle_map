@@ -1,8 +1,8 @@
 import {MouseEvent, WheelEvent} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import CSS from 'csstype';
-import {TokenState, Coordinate} from '../../api/Types';
-import {RootState, GenericDispatch, MouseMode, MouseState, MapProperties, MapZoom} from '../../redux/Types';
+import {Coordinate, TokenState} from '../../api/Types';
+import {GenericDispatch, MapProperties, MapZoom, MouseMode, MouseState, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {getPhysicalPositionFromMapPosition, ZOOM_INCREMENT} from '../tools/Map';
 import Token from './Token';
@@ -34,8 +34,7 @@ export function PlacedToken(props: Props) {
             const flyingToken: TokenState = {...props.token,
                 position
             };
-            dispatch(actions.mouse.grabToken(flyingToken));
-            dispatch(actions.placedTokens.remove(props.token));
+            dispatch(actions.tokens.pickupFromMap(flyingToken));
         }
     }
 
@@ -56,7 +55,7 @@ export function PlacedToken(props: Props) {
         transform: 'translate(-50%, -50%)',
         left: positionOnScreen.x + 'px',
         top: positionOnScreen.y + 'px',
-        pointerEvents: mouse.flyingToken === null ? 'all' : 'none',
+        pointerEvents: mouse.mode === MouseMode.Default ? 'all' : 'none',
     };
 
     return <div style={style}>
@@ -66,7 +65,7 @@ export function PlacedToken(props: Props) {
             rotation={props.token.rotation}
             onClick={pickupToken}
             onWheel={doZoom}
-            pointerEvents={mouse.flyingToken === null}
+            pointerEvents={mouse.mode === MouseMode.Default}
         />
     </div>
 }

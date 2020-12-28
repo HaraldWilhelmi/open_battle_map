@@ -101,10 +101,21 @@ export interface TokenState extends TokenId {
     rotation: number,
 }
 
+export enum TokenActionType {
+    added='added',
+    removed='removed',
+    moved='moved',
+}
+
+export interface TokenAction extends TokenState {
+    action_type: TokenActionType,
+    uuid: string,
+}
+
 
 export enum ActiveAreaShape {
-    rect= 'rect',
-    circle= 'circle',
+    rect='rect',
+    circle='circle',
 }
 
 export interface ActiveArea {

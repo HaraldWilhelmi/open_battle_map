@@ -32,7 +32,7 @@ export function BoxToken(props: Props) {
                 position,
                 rotation: 0.0,
             };
-            dispatch(actions.mouse.grabToken(token));
+            dispatch(actions.tokens.pickupFromBox(token));
         }
     }
 

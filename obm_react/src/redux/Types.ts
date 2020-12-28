@@ -82,8 +82,13 @@ export enum MouseMode {
 export interface MouseState {
     mode: MouseMode,
     lastSeen: Coordinate | null,
-    flyingToken: TokenState | null,
     cursorStyle: string,
+}
+
+export interface Tokens {
+    flyingToken: TokenState | null,
+    flyingTokenIsNew: boolean,
+    placedTokens: TokenState[],
 }
 
 export interface SyncStateItem {
@@ -106,7 +111,7 @@ export interface RootState {
     mapProperties: MapProperties,
     mapSetList: MapSetList,
     mouse: MouseState,
-    placedTokens: TokenState[],
+    tokens: Tokens,
     defaultTokenSet: TokenSet,
 }
 

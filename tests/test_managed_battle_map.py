@@ -42,7 +42,7 @@ def get_test_move(data=None):
 
 def test_trivial(battle_map: ManagedBattleMap):
     assert len(battle_map.get_history(0)) == 0
-    assert battle_map.token_log_count == 0
+    assert battle_map.token_action_count == 0
     assert len(battle_map.tokens) == 0
 
 
@@ -51,7 +51,7 @@ def test_simple(battle_map: ManagedBattleMap):
 
     battle_map.process_action(move)
 
-    assert battle_map.token_log_count == 1
+    assert battle_map.token_action_count == 1
     assert len(battle_map.tokens) == 1
     assert battle_map.tokens[0].mark == '23'
 
@@ -69,7 +69,7 @@ def test_overflow(battle_map: ManagedBattleMap):
         battle_map.process_action(move)
         test_moves.append(move)
 
-    assert battle_map.token_log_count == 120
+    assert battle_map.token_action_count == 120
     assert len(battle_map.tokens) == 120
 
     history = battle_map.get_history(20)

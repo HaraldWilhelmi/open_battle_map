@@ -1,7 +1,7 @@
-import {useState, useEffect, useRef, MouseEvent} from 'react';
+import {MouseEvent, useEffect, useRef, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {Coordinate} from '../api/Types';
-import {RootState, MouseState, MouseMode} from '../redux/Types';
+import {MouseMode, MouseState, RootState, Tokens} from '../redux/Types';
 import {getRotationFromTarget} from './tools/Map';
 import Token from './components/Token';
 import CSS from 'csstype';
@@ -22,16 +22,15 @@ export function FlyingTokenLayer(props: Props) {
         (state: RootState) => state.mouse
     );
 
+    const tokens: Tokens = useSelector(
+        (state: RootState) => state.tokens
+    )
+
     useEffect(() => {
             const layer = layerRef.current;
             if ( layer?.style?.cursor ) {
                 layer.style.cursor = mouse.cursorStyle;
             }
-
-            if ( mouse.flyingToken !== null ) {
-                setRotation(mouse.flyingToken.rotation);
-            }
-
             return undefined;
         },
         [mouse]
@@ -70,7 +69,7 @@ export function FlyingTokenLayer(props: Props) {
 
     let token = <div />;
 
-    if ( mouse.flyingToken !== null ) {
+    if ( tokens.flyingToken !== null ) {
         const divStyle: CSS.Properties = {
             position: 'absolute',
             transform: 'translate(-50%, -50%)',
@@ -81,7 +80,7 @@ export function FlyingTokenLayer(props: Props) {
         };
         token = <div style={divStyle}>
             <Token
-                tokenId={mouse.flyingToken}
+                tokenId={tokens.flyingToken}
                 width={75}
                 rotation={rotation}
                 onClick={doNothing}

@@ -16,6 +16,7 @@ from obm.routers.map_set_list import router as map_set_list_router
 from obm.routers.map_set import router as map_set_router
 from obm.routers.battle_map import router as battle_map_router
 from obm.routers.image_data import router as image_data_router
+from obm.routers.token import router as token_router
 from obm.routers.token_descripter import router as token_set_router
 from obm.routers.token_image import router as token_image_router
 from obm.routers.backup import router as backup_router
@@ -55,6 +56,11 @@ TAGS_META_DATA = [
             + 'of a Battle Background.'
     },
     {
+        'name': 'Token',
+        'description':
+            'The Token service grants access to the Tokens on a Battle Map and their actions.'
+    },
+    {
         'name': 'Token Set',
         'description':
             'A Token Set is a collection of token meta data. Each token_type has also an '
@@ -92,13 +98,14 @@ ctx.register(MagicColorSvg())
 ctx.register(TokenSetManager())
 
 token_set_manager: TokenSetManager = ctx.get(TokenSetManager)
-_ = token_set_manager.get_default_token_set()  # If default token set does not load abort early!
+_ = token_set_manager.get_default_token_set()  # If default token set does not load - abort early!
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
 app.include_router(map_set_list_router, prefix='/api/map_set_list', tags=['Background Set List'])
 app.include_router(map_set_router, prefix='/api/map_set', tags=['Background Set'])
 app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Background'])
 app.include_router(image_data_router, prefix='/api/image_data', tags=['Image Data'])
+app.include_router(token_router, prefix='/api/token', tags=['Token'])
 app.include_router(token_set_router, prefix='/api/token_set', tags=['Token Set'])
 app.include_router(token_image_router, prefix='/api/token_image', tags=['Token Image'])
 app.include_router(backup_router, prefix='/api/backup', tags=['Backup'])

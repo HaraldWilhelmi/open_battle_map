@@ -5,16 +5,16 @@ import PlacedToken from '../components/PlacedToken';
 import {getTokenIdAsString} from '../tools/Token';
 
 export function PlacedTokensLayer() {
-    const placedTokens = useSelector(
-        (state: RootState) => state.placedTokens
+    const tokens = useSelector(
+        (state: RootState) => state.tokens
     )
 
-    const tokens = placedTokens.map(
+    const placedTokens = tokens.placedTokens.map(
         (token: TokenState) => <PlacedToken token={token} key={getTokenIdAsString(token)}/>
     )
 
     return <div className="placed-token-container">
-        {tokens}
+        {placedTokens}
     </div>;
 }
 

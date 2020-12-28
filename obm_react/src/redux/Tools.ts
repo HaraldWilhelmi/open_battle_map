@@ -34,9 +34,9 @@ interface ReadonlySyncSetupActions<DATA> extends GenericSyncSetupActions {
 }
 
 interface ReadonlySyncSetup<DATA> {
-    reducer: Reducer<DATA|null, AnyAction>,
+    reducer: Reducer<DATA|null>,
     actions: ReadonlySyncSetupActions<DATA>,
-};
+}
 
 
 export function createReadonlySyncReducer<DATA>(
@@ -91,12 +91,12 @@ export function createReadonlySyncReducer<DATA>(
         name,
         initialState: null as DATA | null,
         reducers: {
-            invalidate: (state) => null,
+            invalidate: () => null,
         },
         extraReducers: builder => {
             builder.addCase(get.fulfilled, (state, action) => action.payload)
             builder.addCase(sync.fulfilled, (state, action) => action.payload)
-            builder.addCase(get.rejected, (state) => null)
+            builder.addCase(get.rejected, () => null)
         },
     });
 
@@ -172,9 +172,9 @@ export interface UpdatableSyncWithIdSetupActions<
 export interface UpdatableSyncWithIdSetup<
     ID, CREATE, DATA extends ID & CREATE
 > {
-    reducer: Reducer<DATA|null, AnyAction>,
+    reducer: Reducer<DATA|null>,
     actions: UpdatableSyncWithIdSetupActions<ID, CREATE, DATA>,
-};
+}
 
 
 export function createUpdatableSyncWithIdReducer<
@@ -312,7 +312,7 @@ export function createUpdatableSyncWithIdReducer<
         name,
         initialState: null as DATA | null,
         reducers: {
-            invalidate: (state) => null,
+            invalidate: () => null,
         },
         extraReducers: builder => {
             builder.addCase(get.fulfilled, (state, action) => action.payload)
@@ -320,8 +320,8 @@ export function createUpdatableSyncWithIdReducer<
             builder.addCase(create.fulfilled, (state, action) => action.payload)
             builder.addCase(update.fulfilled, (state, action) => action.payload)
 
-            builder.addCase(remove.fulfilled, (state) => null)
-            builder.addCase(get.rejected, (state) => null)
+            builder.addCase(remove.fulfilled, () => null)
+            builder.addCase(get.rejected, () => null)
         },
     });
 
