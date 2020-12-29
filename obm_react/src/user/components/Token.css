@@ -1,0 +1,13 @@
+.background {
+    fill: #505050;
+}
+
+.outline {
+    stroke: White;
+    stroke-width: 1px;
+}
+
+.token-frame {
+    position: relative;
+    pointer-events: none;
+}

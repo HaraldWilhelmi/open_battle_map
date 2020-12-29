@@ -55,7 +55,7 @@ export function PlacedToken(props: Props) {
         transform: 'translate(-50%, -50%)',
         left: positionOnScreen.x + 'px',
         top: positionOnScreen.y + 'px',
-        pointerEvents: mouse.mode === MouseMode.Default ? 'all' : 'none',
+        pointerEvents: 'none',
     };
 
     return <div style={style}>

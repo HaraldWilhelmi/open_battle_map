@@ -1,9 +1,14 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+import CSS from 'csstype';
 import {TokenType, ColorCombo, TokenState, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
 import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {Token} from './Token';
+import {getTokenType} from "../tools/Token";
+
+
+const BOX_TOKEN_WIDTH = 45;
 
 
 interface Props {
@@ -16,6 +21,10 @@ export function BoxToken(props: Props) {
 
     const mouse: MouseState = useSelector(
         (state: RootState) => state.mouse
+    );
+
+    const defaultTokenSet: TokenType[] = useSelector(
+        (state: RootState) => state.defaultTokenSet
     );
 
     function pickupToken(event: MouseEvent) {
@@ -41,8 +50,21 @@ export function BoxToken(props: Props) {
         mark: '0',
     };
 
+    const tokenType = getTokenType(defaultTokenSet, tokenId);
+
+    const boxTokenOuterFrameStyle: CSS.Properties = {
+        position: 'relative',
+        width: BOX_TOKEN_WIDTH + 'px',
+        height: (tokenType.height * BOX_TOKEN_WIDTH / tokenType.width) + 'px',
+        pointerEvents: 'none',
+    }
+
     return <div className="token-in-box">
-            <Token tokenId={tokenId} width={45} rotation={0.0} onClick={pickupToken} onWheel={() => { return; }} />
+            <div style={boxTokenOuterFrameStyle}>
+                <div className="box-token-inner-frame">
+                    <Token tokenId={tokenId} width={45} rotation={0.0} onClick={pickupToken} onWheel={() => { return; }} />
+                </div>
+            </div>
         </div>
 
 }

@@ -50,3 +50,10 @@ input[type="file"] {
 .token-in-box {
     flex: 0 0 auto;
 }
+
+.box-token-inner-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}

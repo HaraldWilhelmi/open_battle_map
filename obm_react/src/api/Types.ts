@@ -112,22 +112,12 @@ export interface TokenAction extends TokenState {
     uuid: string,
 }
 
-
-export enum ActiveAreaShape {
-    rect='rect',
-    circle='circle',
-}
-
-export interface ActiveArea {
-    shape: ActiveAreaShape,
-    coords: number[],
-}
-
 export interface TokenType {
     token_type: number,
     width_in_m: number,
     mark_font_size: string,
-    active_areas: ActiveArea[],
+    width: number,
+    height: number,
     color_combos: ColorCombo[],
 }
 
