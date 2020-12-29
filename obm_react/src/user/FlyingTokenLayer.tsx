@@ -31,9 +31,13 @@ export function FlyingTokenLayer(props: Props) {
             if ( layer?.style?.cursor ) {
                 layer.style.cursor = mouse.cursorStyle;
             }
+            if ( tokens.flyingToken !== null && mouse.mode === MouseMode.MoveToken ) {
+                setPosition(tokens.flyingToken.position);
+                setRotation(tokens.flyingToken.rotation);
+            }
             return undefined;
         },
-        [mouse]
+        [mouse, tokens.flyingToken]
     );
 
     const moveToken = (event: MouseEvent) => {

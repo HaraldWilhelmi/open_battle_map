@@ -58,6 +58,7 @@ export function User() {
                 map_set_uuid: mapSet.uuid,
             }
             dispatch(actions.battleMap.get(battleMapId));
+            dispatch(actions.tokens.loadTokensFromServer());
             return undefined;
         },
         [mapSet, battleMap, dispatch]

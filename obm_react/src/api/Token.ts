@@ -1,4 +1,4 @@
-import {TokenAction, BattleMapId} from './Types';
+import {TokenAction, BattleMapId, TokenState} from './Types';
 import {GenericDispatch} from '../redux/Types';
 import {handleResponse} from '../common/Tools';
 
@@ -21,5 +21,20 @@ export async function postTokenAction(battleMapId: BattleMapId, action: TokenAct
             body: JSON.stringify(body),
         })
     )
-    handleResponse(dispatch, response, 'to sent token action');
+    handleResponse(dispatch, response);
+}
+
+export async function getAllTokens(battleMapId: BattleMapId, dispatch: GenericDispatch): Promise<TokenState[]> {
+    const url = '/api/token/all/' + battleMapId.map_set_uuid + '/' + battleMapId.uuid;
+    const response = await(
+        fetch(url, {
+            method:'GET',
+
+        })
+    )
+    if ( response.ok ) {
+        return response.json()
+    }
+    handleResponse(dispatch, response);
+    return []; // Never
 }

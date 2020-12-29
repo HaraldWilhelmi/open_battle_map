@@ -30,9 +30,6 @@ class ManagedMapSet(MapSet):
             key=lambda x: x.name
         )
 
-    def mark_as_saved(self):
-        self.saved_flag = True
-
     def add_new_battle_map(self, name: str) -> ManagedBattleMap:
         battle_map = ManagedBattleMap(name=name, uuid=uuid4(), map_set=self)
         self.battle_maps_by_uuid[battle_map.uuid] = battle_map

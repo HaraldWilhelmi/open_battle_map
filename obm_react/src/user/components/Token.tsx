@@ -63,17 +63,19 @@ export function Token(props: Props) {
         fontSize: tokenType.mark_font_size,
     };
 
-    const areas = tokenType.active_areas.map(
-        (area) =>
-            <area
+    let areas = [];
+    for ( let i = 0; i < tokenType.active_areas.length; i++ ) {
+        const area = tokenType.active_areas[i];
+        areas[i] = <area
                 shape={area.shape}
                 coords={area.coords.join(',')}
                 onClick={props.onClick}
                 onDragStart={props.onClick}
                 onWheel={props.onWheel}
                 alt="click me"
-            />
-    );
+                key={i}
+            />;
+    }
 
     return <div className="token-frame">
         <div style={rotatorStyle}>

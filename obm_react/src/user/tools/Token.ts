@@ -64,10 +64,13 @@ export function pickupToken(state: TokenState[], tokenId: TokenId): TokenState[]
 export function getTokensWithout(tokens: TokenState[], tokenId: TokenId): TokenState[] {
     for ( let i = 0; i < tokens.length; i++ ) {
         if ( isSameToken(tokenId, tokens[i]) ) {
-            tokens.splice(i, 1);
-            return tokens;
+            return [
+                ...tokens.slice(0, i),
+                ...tokens.slice(i+1, tokens.length)
+            ];
         }
     }
+    console.log('Token not found in list - that should never happen!');
     throw new Error('Token not found in list - that should never happen!');
 }
 

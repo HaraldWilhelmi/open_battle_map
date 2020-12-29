@@ -25,6 +25,7 @@ class TokenId(ColorCombo):
 
 class TokenState(TokenId):
     position: Coordinate
+    rotation: float
 
 
 class TokenActionType(Enum):

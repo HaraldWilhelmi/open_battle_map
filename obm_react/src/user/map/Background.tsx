@@ -1,9 +1,9 @@
-import {useEffect, useRef, RefObject} from 'react';
+import {useEffect, useRef, RefObject, MouseEvent} from 'react';
 import CSS from 'csstype';
 import {useSelector, useDispatch} from 'react-redux';
-import {BattleMap} from '../../api/Types';
+import {BattleMap, Coordinate} from '../../api/Types';
 import {
-    RootState, MapProperties, GenericDispatch, GeometryUpdate
+    RootState, MapProperties, GenericDispatch, GeometryUpdate, MouseMode, MapMove, MouseState
 } from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {MAP_BORDER_WIDTH} from '../tools/Map';
@@ -24,6 +24,10 @@ export function Background(props: Props) {
 
     const mapProperties: MapProperties = useSelector(
         (state: RootState) => state.mapProperties
+    );
+
+    const mouse: MouseState = useSelector(
+        (state: RootState) => state.mouse
     );
 
     const detectGeometryChange = () => {
@@ -57,6 +61,39 @@ export function Background(props: Props) {
         return ( <p>:-(</p> );
     }
 
+    const enterMapMove = (event: MouseEvent) => {
+        event.preventDefault();
+        if ( mouse.mode === MouseMode.Default ) {
+            const position: Coordinate = {
+                x: event.nativeEvent.clientX,
+                y: event.nativeEvent.clientY,
+            };
+            dispatch(actions.mouse.grabMap(position));
+        }
+    }
+
+    const leaveMapMove = () => {
+        if ( mouse.mode === MouseMode.MoveMap ) {
+            dispatch(actions.mouse.releaseMap());
+        }
+    }
+
+    const doMapMove = (event: MouseEvent) => {
+        if ( mouse.mode === MouseMode.MoveMap ) {
+            const oldX = mouse?.lastSeen?.x ?? -1;
+            const oldY = mouse?.lastSeen?.y ?? -1;
+            if ( oldX >= 0 && oldY >= 0 ) {
+                const mapMove: MapMove = {
+                    deltaX: event.nativeEvent.clientX - oldX,
+                    deltaY: event.nativeEvent.clientY - oldY,
+                };
+                dispatch(actions.mapProperties.move(mapMove));
+            } else {
+                dispatch(actions.mouse.releaseMap());
+            }
+        }
+    }
+
     const effectiveXOffset = mapProperties.xOffset < 0 ? mapProperties.xOffset : 0;
     const effectiveYOffset = mapProperties.yOffset < 0 ? mapProperties.yOffset : 0;
 
@@ -83,6 +120,10 @@ export function Background(props: Props) {
             alt="Battle Background Background"
             ref={imageRef}
             onLoad={detectGeometryChange}
+            onMouseDown={enterMapMove}
+            onMouseUp={leaveMapMove}
+            onMouseLeave={leaveMapMove}
+            onMouseMove={doMapMove}
         />
     );
 }

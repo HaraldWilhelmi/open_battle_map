@@ -39,6 +39,7 @@ async def put_token_action(
     battle_map = get_battle_map(manager, data.map_set_uuid, data.battle_map_uuid)
     try:
         battle_map.process_action(data)
+        manager.save_battle_map(battle_map)
     except IllegalMove as e:
         raise HTTPException(status.HTTP_409_CONFLICT, str(e))
 

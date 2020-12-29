@@ -1,5 +1,5 @@
 import {Coordinate, TokenAction, TokenActionType, TokenState} from '../../api/Types';
-import {postTokenAction} from '../../api/TokenAction';
+import {postTokenAction, getAllTokens} from '../../api/Token';
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {MouseMode, ThunkApi, Tokens} from '../Types';
 import {getFreeMarkForToken, getTokensWithout} from '../../user/tools/Token';
@@ -20,7 +20,8 @@ export const slice = createSlice({
     reducers: {
         pickupFromMap: (state, action: PayloadAction<TokenState>) => {
             const placedTokens = getTokensWithout(state.placedTokens, action.payload);
-            return {...state, placedTokens, flyingToken: action.payload, flyingTokenIsNew: false};
+            const flyingToken: TokenState = {...action.payload};
+            return {...state, placedTokens, flyingToken, flyingTokenIsNew: false};
         },
         pickupFromBox: (state, action: PayloadAction<TokenState>) => {
             return {...state, flyingToken: action.payload, flyingTokenIsNew: true};
@@ -40,11 +41,18 @@ export const slice = createSlice({
                 flyingToken: null,
                 flyingTokenIsNew: false,
                 placedTokens: [...state.placedTokens, action.payload]
-            }
+            };
         },
         dropIntoBox: (state) => {
             return {...state, flyingToken: null, flyingTokenIsNew: false};
         },
+        loadTokensFromServer: (state, action: PayloadAction<TokenState[]>) => {
+            return {
+                flyingToken: null,
+                flyingTokenIsNew: false,
+                placedTokens: action.payload,
+            };
+        }
     },
 });
 
@@ -145,9 +153,24 @@ const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
     }
 );
 
+const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
+    'tokens/loadTokensFromServer',
+    async (_: undefined, thunkApi) => {
+        const getState = thunkApi.getState;
+        const dispatch = thunkApi.dispatch;
+        const state = getState();
+        const battleMap = state.battleMap;
+        if ( battleMap !== null ) {
+            const tokens = await getAllTokens(battleMap, dispatch);
+            dispatch(slice.actions.loadTokensFromServer(tokens))
+            dispatch(mouseActions.releaseToken());
+        }
+    }
+);
+
 
 export const tokensActions = {
-    pickupFromMap, pickupFromBox, positionOnMapForAdjustment, placeOnMap, dropIntoBox
+    pickupFromMap, pickupFromBox, positionOnMapForAdjustment, placeOnMap, dropIntoBox, loadTokensFromServer
 };
 
 export default slice.reducer;

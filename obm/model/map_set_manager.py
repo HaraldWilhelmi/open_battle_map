@@ -57,11 +57,19 @@ class MapSetManager:
         clean_map_set = map_set.get_clean_data()
         map_set_io.save_map_set(clean_map_set)
         for battle_map in map_set.get_battle_maps():
-            map_set_io.save_battle_map(clean_map_set, battle_map.get_clean_data())
-            map_set_io.save_background(
-                map_set, battle_map, battle_map.get_background_image()
-            )
-        map_set.mark_as_saved()
+            self.save_battle_map(battle_map)
+            self.save_background(battle_map)
+        map_set.saved_flag = True
+
+    def save_battle_map(self, battle_map: ManagedBattleMap):
+        map_set_io = self._map_set_io
+        map_set_io.save_battle_map(battle_map.map_set, battle_map.get_clean_data())
+
+    def save_background(self, battle_map):
+        map_set_io = self._map_set_io
+        map_set_io.save_background(
+            battle_map.map_set, battle_map, battle_map.get_background_image()
+        )
 
     def load(self, uuid: UUID) -> ManagedMapSet:
         map_set_io = self._map_set_io
@@ -76,7 +84,7 @@ class MapSetManager:
             battle_maps=battle_maps,
             **map_set.__dict__
         )
-        result.mark_as_saved()
+        result.saved_flag = True
         return result
 
     def load_battle_map(self, map_set: MapSet, uuid: UUID) -> ManagedBattleMap:
