@@ -18,14 +18,6 @@ def battle_map() -> ManagedBattleMap:
     )
 
 
-SAMPLE_MOVE = TokenAction(
-    action_type=TokenActionType.Added,
-    uuid=UUID('b213e5a6-2b6e-41c6-b120-e941711b2ca4'),
-    token_type=17, color=Color('Black'), mark='23', mark_color=Color('White'),
-    position=Coordinate(x=27, y=13)
-)
-
-
 def get_test_move(data=None):
     if data is None:
         data = {}
@@ -35,6 +27,7 @@ def get_test_move(data=None):
         'token_type': 17, 'color': Color('Black'),
         'mark': '23', 'mark_color': Color('White'),
         'position': Coordinate(x=27, y=13),
+        'rotation': 2.3,
         **data
     }
     return TokenAction(**raw_data)

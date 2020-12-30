@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Response
 from pydantic import BaseModel
 
 from obm.model.admin import check_admin_secret
@@ -22,9 +22,11 @@ class MapSetItem(BaseModel):
             response_model=List[MapSetItem]
             )
 async def list_all(
+        response: Response,
         directory: MapSetDirectory = Depends(get_map_set_directory),
         _: None = Depends(check_admin_secret)
 ):
+    response.headers['Cache-Control'] = 'no-cache'
     return [
         MapSetItem(uuid=uuid, name=name)
         for uuid, name in directory.get_uuid_to_name_mapping().items()

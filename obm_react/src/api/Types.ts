@@ -68,6 +68,8 @@ export interface BattleMapCreate {
 
 export interface BattleMap extends BattleMapUpdate, BattleMapCreate {
     revision: number;
+    token_action_count: number;
+    background_pixels_per_meter: number;
 }
 
 
@@ -101,6 +103,13 @@ export interface TokenState extends TokenId {
     rotation: number,
 }
 
+
+export interface AllTokenStatesResponse {
+    next_action_index: number,
+    tokens: TokenState[],
+}
+
+
 export enum TokenActionType {
     added='added',
     removed='removed',
@@ -111,6 +120,21 @@ export interface TokenAction extends TokenState {
     action_type: TokenActionType,
     uuid: string,
 }
+
+
+export class TokenActionHistoryExpired extends Error {}
+
+
+export interface TokenActionHistoryId extends BattleMapId {
+    since: number,
+}
+
+export interface TokenActionHistory extends TokenActionHistoryId {
+    last_action_index: number,
+    battle_map_revision: number,
+    actions: TokenAction[],
+}
+
 
 export interface TokenType {
     token_type: number,
@@ -123,35 +147,45 @@ export interface TokenType {
 
 export type TokenSet = TokenType[];
 
-export interface ReadonlyApiDescriptor {
+
+
+export interface  GenericApiDescriptor {
     name: string,
     baseUrl: string,
+}
+
+export interface ReadonlyApiDescriptor extends GenericApiDescriptor {
     detectSpecialErrors?: (response: Response, operation: Operation) => void,
 }
+
+export interface IdDescriptor<ID, ID_LIKE extends ID> {
+    isIdOf: (id: ID, idLike: ID_LIKE) => boolean,
+    getIdOf: (idLike: ID_LIKE) => ID,
+    getFetchUri: (id: ID) => string,
+    detectSpecialErrors?: (response: Response, operation: Operation, id: ID|undefined) => void,
+}
+
+export interface ApiWithIdDescriptor<ID, ID_LIKE extends  ID>
+    extends GenericApiDescriptor, IdDescriptor<ID, ID_LIKE> {}
+
 
 export interface ReadonlyApi<DATA> extends ReadonlyApiDescriptor {
     get: () => Promise<DATA>,
 }
 
-export interface UpdatableApiWithIdDescriptor<ID> {
-    name: string,
-    baseUrl: string,
-    isIdOf: (id: ID, idLike: ID) => boolean,
-    getIdOf: (idLike: ID) => ID,
-    getFetchUri: (id: ID) => string,
-    detectSpecialErrors?: (response: Response, operation: Operation, id: ID|undefined) => void,
+export interface ReadonlyApiWithId<ID, ID_LIKE extends ID, DATA extends ID_LIKE> extends ApiWithIdDescriptor<ID, ID_LIKE> {
+    get: (id: ID) => Promise<DATA>,
+    checkForErrors: (response: Response, operation: Operation, id: ID|undefined) => void,
 }
-
 
 export interface UpdatableApiWithId<
     ID,
     UPDATE extends ID,
     CREATE,
-    DATA extends ID & UPDATE & CREATE
+    DATA extends UPDATE & CREATE
 >
-    extends UpdatableApiWithIdDescriptor<ID>
+    extends ReadonlyApiWithId<ID, UPDATE, DATA>
 {
-    get: (id: ID) => Promise<DATA>,
     create: (data: CREATE) => Promise<DATA>,
     update: (data: UPDATE) => Promise<void>,
     remove: (id: ID) => Promise<void>,

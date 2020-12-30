@@ -77,10 +77,12 @@ export function User() {
         dispatch(actions.mapSet.startSync());
         dispatch(actions.battleMap.startSync());
         dispatch(actions.defaultTokenSet.startSync());
+        dispatch(actions.tokenActionHistory.startSync());
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
             dispatch(actions.defaultTokenSet.stopSync());
+            dispatch(actions.tokenActionHistory.stopSync());
         };
     });
 

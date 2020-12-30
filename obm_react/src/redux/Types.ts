@@ -1,7 +1,7 @@
 import {AnyAction} from 'redux';
 import {ThunkDispatch} from 'redux-thunk';
 import {AsyncThunk} from '@reduxjs/toolkit';
-import {MapSet, BattleMap, MapSetList, Coordinate, TokenState, TokenSet} from '../api/Types';
+import {MapSet, BattleMap, MapSetList, Coordinate, TokenState, TokenSet, TokenActionHistory} from '../api/Types';
 
 
 // I really would like to write:
@@ -85,10 +85,16 @@ export interface MouseState {
     cursorStyle: string,
 }
 
+export interface MovingTokenState extends TokenState {
+    toPosition: Coordinate,
+    toRotation: number,
+}
+
 export interface Tokens {
     flyingToken: TokenState | null,
     flyingTokenIsNew: boolean,
     placedTokens: TokenState[],
+    movingTokens: MovingTokenState[],
 }
 
 export interface SyncStateItem {
@@ -113,6 +119,8 @@ export interface RootState {
     mouse: MouseState,
     tokens: Tokens,
     defaultTokenSet: TokenSet,
+    localTokenActionTrack: string[],
+    tokenActionHistory: TokenActionHistory,
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;
@@ -122,6 +130,7 @@ export enum ThunkRejectReasons {
     NothingToSync = 'Nothing to sync',
     InconsistentUpdate = 'Inconsistent Update',
     InconsistentRemove = 'Inconsistent Remove',
+    ApiError = 'API Error',
 }
 
 export interface ThunkApi {

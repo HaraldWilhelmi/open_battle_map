@@ -4,7 +4,11 @@ import CSS from 'csstype';
 import {Coordinate, TokenState} from '../../api/Types';
 import {GenericDispatch, MapProperties, MapZoom, MouseMode, MouseState, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
-import {getPhysicalPositionFromMapPosition, ZOOM_INCREMENT} from '../tools/Map';
+import {
+    getMapFramePositionFromMapPosition,
+    getScaledBackgroundPositionFromMapPosition,
+    ZOOM_INCREMENT
+} from '../tools/Map';
 import Token from './Token';
 
 
@@ -41,14 +45,12 @@ export function PlacedToken(props: Props) {
     function doZoom (event: WheelEvent) {
         event.stopPropagation();
         const zoomFactorRatio = event.deltaY < 0 ? ZOOM_INCREMENT : 1 / ZOOM_INCREMENT;
-        const physicalFocusPoint = getPhysicalPositionFromMapPosition(mapProperties, props.token.position);
+        const physicalFocusPoint = getScaledBackgroundPositionFromMapPosition(mapProperties, props.token.position);
         const mapZoom: MapZoom = {physicalFocusPoint, zoomFactorRatio};
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
-    let positionOnScreen = getPhysicalPositionFromMapPosition(mapProperties, props.token.position);
-    positionOnScreen.x += mapProperties.xOffset < 0 ? mapProperties.xOffset : 0;
-    positionOnScreen.y += mapProperties.yOffset < 0 ? mapProperties.yOffset : 0;
+    let positionOnScreen = getMapFramePositionFromMapPosition(mapProperties, props.token.position);
 
     const style: CSS.Properties = {
         position: 'absolute',

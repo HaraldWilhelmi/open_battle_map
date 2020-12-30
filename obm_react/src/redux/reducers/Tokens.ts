@@ -1,16 +1,19 @@
-import {Coordinate, TokenAction, TokenActionType, TokenState} from '../../api/Types';
-import {postTokenAction, getAllTokens} from '../../api/Token';
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {MouseMode, ThunkApi, Tokens} from '../Types';
-import {getFreeMarkForToken, getTokensWithout} from '../../user/tools/Token';
+import {Coordinate, TokenAction, TokenActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
+import {postTokenAction, getAllTokens} from '../../api/Token';
+import {GenericDispatch, MouseMode, MovingTokenState, RootState, ThunkApi, Tokens} from '../Types';
+import {getFreeMarkForToken, getTokensWithout, startMove, endMove} from '../../user/tools/Token';
 import {v4 as uuidV4} from "uuid";
 import {mouseActions} from "./Mouse";
+import {localTokenActionTrackActions} from "./LocalTokenActionTrack";
+import {actions} from "../Store";
 
 
 const INITIAL_STATE: Tokens = {
     flyingToken: null,
     flyingTokenIsNew: false,
     placedTokens: [],
+    movingTokens: [],
 };
 
 
@@ -37,10 +40,10 @@ export const slice = createSlice({
             return state;
         },
         placeOnMap: (state, action: PayloadAction<TokenState>) => {
-            return {
+            return {...state,
                 flyingToken: null,
                 flyingTokenIsNew: false,
-                placedTokens: [...state.placedTokens, action.payload]
+                placedTokens: [...state.placedTokens, action.payload],
             };
         },
         dropIntoBox: (state) => {
@@ -51,8 +54,11 @@ export const slice = createSlice({
                 flyingToken: null,
                 flyingTokenIsNew: false,
                 placedTokens: action.payload,
+                movingTokens: [],
             };
-        }
+        },
+        startMove: (state, action: PayloadAction<TokenState>) => startMove(state, action.payload),
+        endMove: (state, action: PayloadAction<MovingTokenState>) => endMove(state, action.payload),
     },
 });
 
@@ -100,6 +106,25 @@ const positionOnMapForAdjustment = createAsyncThunk<void, Coordinate, ThunkApi>(
     }
 );
 
+const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
+    'tokens/loadTokensFromServer',
+    async (_: undefined, thunkApi) => {
+        const getState = thunkApi.getState;
+        const dispatch = thunkApi.dispatch;
+        const state = getState();
+        const battleMap = state.battleMap;
+        if ( battleMap !== null ) {
+            const allTokenStatesResponse = await getAllTokens(battleMap, dispatch);
+            dispatch(localTokenActionTrackActions.reset());
+            dispatch(slice.actions.loadTokensFromServer(allTokenStatesResponse.tokens));
+            const tokenActionHistoryId: TokenActionHistoryId = {...battleMap, since: allTokenStatesResponse.next_action_index};
+            dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
+            dispatch(mouseActions.releaseToken());
+        }
+    }
+);
+
+
 const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
     'tokens/placeOnMap',
     async (rotation, thunkApi) => {
@@ -124,10 +149,19 @@ const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
         const action: TokenAction = {...newToken, action_type: actionType, uuid};
         dispatch(slice.actions.placeOnMap(newToken));
         dispatch(mouseActions.releaseToken());
-        // TODO: Error handling!
-        await postTokenAction(state.battleMap, action, dispatch);
+        await logAction(state, action, dispatch);
     }
 );
+
+async function logAction(state: RootState, action: TokenAction, dispatch: GenericDispatch) {
+    try {
+        await postTokenAction(state.battleMap, action, dispatch);
+        dispatch(localTokenActionTrackActions.log(action.uuid));
+    } catch (e) {
+        console.log("Warning: Failed to send token action - will reload everything from server!")
+        dispatch(loadTokensFromServer());
+    }
+}
 
 const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
     'tokens/dropIntoBox',
@@ -147,30 +181,16 @@ const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
                 action_type: TokenActionType.removed,
                 uuid: uuidV4(),
             };
-            // TODO: Error handling!
-            await postTokenAction(state.battleMap, action, dispatch);
-        }
-    }
-);
-
-const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
-    'tokens/loadTokensFromServer',
-    async (_: undefined, thunkApi) => {
-        const getState = thunkApi.getState;
-        const dispatch = thunkApi.dispatch;
-        const state = getState();
-        const battleMap = state.battleMap;
-        if ( battleMap !== null ) {
-            const tokens = await getAllTokens(battleMap, dispatch);
-            dispatch(slice.actions.loadTokensFromServer(tokens))
-            dispatch(mouseActions.releaseToken());
+            await logAction(state, action, dispatch);
         }
     }
 );
 
 
 export const tokensActions = {
-    pickupFromMap, pickupFromBox, positionOnMapForAdjustment, placeOnMap, dropIntoBox, loadTokensFromServer
+    pickupFromMap, pickupFromBox, positionOnMapForAdjustment, placeOnMap, dropIntoBox, loadTokensFromServer,
+    startMove: slice.actions.startMove,
+    endMove: slice.actions.endMove,
 };
 
 export default slice.reducer;

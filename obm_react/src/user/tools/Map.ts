@@ -82,12 +82,19 @@ export function getDefaultFocusPoint(mapProperties: MapProperties) {
     }
 }
 
-export function getPhysicalPositionFromMapPosition(mapProperties: MapProperties, mapPosition: Coordinate): Coordinate {
+export function getScaledBackgroundPositionFromMapPosition(mapProperties: MapProperties, mapPosition: Coordinate): Coordinate {
     const totalZoomFactor = mapProperties.totalZoomFactor;
     return {
         x: mapPosition.x * totalZoomFactor,
         y: mapPosition.y * totalZoomFactor,
     }
+}
+
+export function getMapFramePositionFromMapPosition(mapProperties: MapProperties, mapPosition: Coordinate): Coordinate {
+    let result = getScaledBackgroundPositionFromMapPosition(mapProperties, mapPosition);
+    result.x += mapProperties.xOffset < 0 ? mapProperties.xOffset : 0;
+    result.y += mapProperties.yOffset < 0 ? mapProperties.yOffset : 0;
+    return result;
 }
 
 export function getMapPositionFromPhysicalPosition(mapProperties: MapProperties, physicalPosition: Coordinate): Coordinate {

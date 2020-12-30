@@ -1,6 +1,6 @@
 from typing import List
 from uuid import UUID
-from fastapi import Depends, APIRouter, status, HTTPException
+from fastapi import Depends, APIRouter, status, HTTPException, Response
 from pydantic import BaseModel
 
 from obm.common.api_tools import RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND, get_battle_map
@@ -44,20 +44,30 @@ async def put_token_action(
         raise HTTPException(status.HTTP_409_CONFLICT, str(e))
 
 
+class AllTokenStatesResponse(BaseModel):
+    next_action_index: int
+    tokens: List[TokenState]
+
+
 @router.get('/all/{map_set_uuid}/{battle_map_uuid}',
             description='Get the present state of all tokens on the map.',
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
-            response_model=List[TokenState],
+            response_model=AllTokenStatesResponse,
             )
-def battle_map_info(
+def get_all_token_states(
         map_set_uuid: UUID, battle_map_uuid: UUID,
         manager: MapSetManager = Depends(get_map_set_manager),
-) -> List[TokenState]:
+) -> AllTokenStatesResponse:
     battle_map = get_battle_map(manager, map_set_uuid, battle_map_uuid)
-    return battle_map.tokens
+    return AllTokenStatesResponse(
+        next_action_index=battle_map.token_action_count,
+        tokens=battle_map.tokens,
+    )
 
 
 class HistoryResponse(BaseModel):
+    map_set_uuid: UUID
+    uuid: UUID
     last_action_index: int
     battle_map_revision: int
     actions: List[TokenAction]
@@ -71,12 +81,13 @@ RESPONSE_LOGS_EXPIRED = {
 
 
 @router.get('/history/{map_set_uuid}/{battle_map_uuid}/{since}',
-            description='Get all taken actions after the given sequence number.',
+            description='Get all Token Actions starting with the given sequence number.',
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
             response_model=HistoryResponse,
             )
 def get_history(
         map_set_uuid: UUID, battle_map_uuid: UUID, since: int,
+        response: Response,
         manager: MapSetManager = Depends(get_map_set_manager),
 ):
     battle_map = get_battle_map(manager, map_set_uuid, battle_map_uuid)
@@ -84,7 +95,10 @@ def get_history(
         actions = battle_map.get_history(since)
     except LogsExpired as e:
         raise HTTPException(status.HTTP_410_GONE, str(e))
+    response.headers['Cache-Control'] = 'no-cache'
     return HistoryResponse(
+        map_set_uuid=battle_map.map_set.uuid,
+        uuid=battle_map.uuid,
         last_action_index=battle_map.token_action_count - 1,
         battle_map_revision=battle_map.revision,
         actions=actions,

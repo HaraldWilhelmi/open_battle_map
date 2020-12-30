@@ -1,6 +1,6 @@
 import {useRef} from "react";
 import Background from './Background';
-import PlacedTokensLayer from './PlacedTokensLayer';
+import TokensLayer from './TokensLayer';
 import MapFrame from './MapFrame';
 import './Map.css'
 
@@ -11,7 +11,7 @@ export function Map() {
         <div className="map-box" ref={mapBoxRef}>
             <MapFrame>
                 <Background mapBoxRef={mapBoxRef}/>
-                <PlacedTokensLayer />
+                <TokensLayer />
             </MapFrame>
         </div>
     );

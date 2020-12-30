@@ -1,5 +1,5 @@
 import {
-    Operation, ReadonlyApiDescriptor, ReadonlyApi, UpdatableApiWithIdDescriptor, UpdatableApiWithId
+    Operation, ReadonlyApiDescriptor, ReadonlyApi, ApiWithIdDescriptor, UpdatableApiWithId, ReadonlyApiWithId
 } from './Types';
 
 
@@ -25,20 +25,19 @@ export function createReadonlyApi<DATA>(
         let response = await(fetch(descriptor.baseUrl + '/'));
         checkForErrors(response, Operation.GET);
         return response.json();
-    };
+    }
 
     return {...descriptor, get}
 }
 
 
-export function createUpdatableApiWithId<
+export function createReadonlyApiWithId<
     ID,
-    UPDATE extends ID,
-    CREATE,
-    DATA extends ID & UPDATE & CREATE
+    ID_LIKE extends ID,
+    DATA extends ID_LIKE
 >(
-    descriptor: UpdatableApiWithIdDescriptor<ID>
-): UpdatableApiWithId<ID, UPDATE, CREATE, DATA> {
+    descriptor: ApiWithIdDescriptor<ID, ID_LIKE>
+): ReadonlyApiWithId<ID, ID_LIKE, DATA> {
 
     function checkForErrors(
         response: Response, operation: Operation, id: ID|undefined
@@ -57,7 +56,22 @@ export function createUpdatableApiWithId<
         let response = await(fetch(url));
         checkForErrors(response, Operation.GET, id);
         return response.json();
-    };
+    }
+
+    return {...descriptor, get, checkForErrors};
+}
+
+
+export function createUpdatableApiWithId<
+    ID,
+    UPDATE extends ID,
+    CREATE,
+    DATA extends ID & UPDATE & CREATE
+>(
+    descriptor: ApiWithIdDescriptor<ID, UPDATE>
+): UpdatableApiWithId<ID, UPDATE, CREATE, DATA> {
+    const readOnlyApi = createReadonlyApiWithId<ID, UPDATE, DATA>(descriptor);
+    const checkForErrors = readOnlyApi.checkForErrors;
 
     const create: (body: CREATE) => Promise<DATA> = async (body) => {
         const response = await(
@@ -94,7 +108,5 @@ export function createUpdatableApiWithId<
         checkForErrors(response, Operation.DELETE, id);
     };
 
-    return {...descriptor,
-        get, create, update, remove
-    };
+    return {...readOnlyApi, create, update, remove};
 }

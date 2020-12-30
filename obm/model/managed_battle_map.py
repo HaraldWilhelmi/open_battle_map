@@ -30,7 +30,7 @@ class ManagedBattleMap(BattleMap):
             token.get_lookup_key(): token
             for token in self.tokens
         }
-        self.log_offset = self.token_action_count + 1
+        self.log_offset = self.token_action_count
 
     def process_action(self, action: TokenAction) -> None:
         action_type = action.action_type
@@ -83,9 +83,9 @@ class ManagedBattleMap(BattleMap):
         self._do_house_keeping(action)
 
     def get_history(self, since: int) -> List[TokenAction]:
-        if since < self.log_offset - 1:
+        if since < self.log_offset:
             raise LogsExpired('Requested data to old.')
-        first_index = since + 1 - self.log_offset
+        first_index = since - self.log_offset
         return self.logs[first_index:]
 
     def get_background_image(self) -> Optional[bytes]:

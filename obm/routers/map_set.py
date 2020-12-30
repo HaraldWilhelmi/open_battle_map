@@ -51,6 +51,7 @@ async def map_set_info(
         config: Config = Depends(get_config)
 ) -> MapSetInfoResponse:
     map_set = get_map_set(manager, uuid)
+    response.headers['Cache-Control'] = 'no-cache'
     _update_known_map_sets_cookie(
         map_set_uuid=uuid,
         old_cookie=obm_known_map_sets,

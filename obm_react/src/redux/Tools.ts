@@ -1,9 +1,7 @@
-import {Reducer, AnyAction} from 'redux';
-import {createSlice, createAsyncThunk, AsyncThunk} from '@reduxjs/toolkit';
-import {ReadonlyApi, UpdatableApiWithId, Operation} from '../api/Types';
-import {
-    GenericDispatch, RootState, SyncDescriptor, ThunkApi, ThunkRejectReasons
-} from './Types';
+import {AnyAction, Reducer} from 'redux';
+import {AsyncThunk, createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {Operation, ReadonlyApi, ReadonlyApiWithId, UpdatableApiWithId} from '../api/Types';
+import {GenericDispatch, RootState, SyncDescriptor, ThunkApi, ThunkRejectReasons} from './Types';
 import {syncerActions} from './reducers/Syncer';
 import {messagesActions} from './reducers/Messages';
 
@@ -46,24 +44,26 @@ export function createReadonlySyncReducer<DATA>(
 
     function handleError(
         error: Error, operation: Operation, dispatch: GenericDispatch,
-    ): never {
+    ): ThunkRejectReasons {
         const handler = descriptor.errorHandler;
         if ( handler !== undefined ) {
             handler(error, operation, dispatch);
         }
         dispatch(messagesActions.reportError(error.message));
-        throw error;
+        return ThunkRejectReasons.ApiError;
     }
 
     const get = createAsyncThunk<DATA, undefined, ThunkApi>(
         name + '/get',
         async (_: undefined, thunkApi) => {
             const dispatch = thunkApi.dispatch;
+            const rejectWithValue = thunkApi.rejectWithValue;
+
             try {
                 return await descriptor.api.get();
             }
             catch(error) {
-                handleError(error as Error, Operation.GET, dispatch);
+                return rejectWithValue(handleError(error as Error, Operation.GET, dispatch));
             }
             finally {
                 dispatch(syncerActions.obsoleteSync(name));
@@ -75,15 +75,21 @@ export function createReadonlySyncReducer<DATA>(
     const sync = createAsyncThunk<DATA, undefined, ThunkApi>(
         name + '/sync',
         async (_: undefined, thunkApi) => {
+            const dispatch = thunkApi.dispatch;
             const getState = thunkApi.getState;
             const rejectWithValue = thunkApi.rejectWithValue;
 
-            const data = await descriptor.api.get();
-            const stateAfter = getState().syncer[name];
-            if ( stateAfter.isObsolete ) {
-                return rejectWithValue(ThunkRejectReasons.ObsoleteSync);
+            try {
+                const data = await descriptor.api.get();
+                const stateAfter = getState().syncer[name];
+                if (stateAfter.isObsolete) {
+                    return rejectWithValue(ThunkRejectReasons.ObsoleteSync);
+                }
+                return data;
             }
-            return data;
+            catch (error) {
+                return rejectWithValue(handleError(error as Error, Operation.GET, dispatch));
+            }
         }
     );
 
@@ -147,6 +153,150 @@ function getStopSyncThunk<DATA>(descriptor: GenericSyncDescriptor<DATA>):
 }
 
 
+export interface ReadonlySyncWithIdDescriptor<
+    ID,
+    ID_LIKE extends ID,
+    DATA extends ID_LIKE
+> extends GenericSyncDescriptor<DATA> {
+    api: ReadonlyApiWithId<ID, ID_LIKE, DATA>,
+    errorHandler?: (
+        error: Error, operation: Operation, id: ID|undefined,
+        dispatch: GenericDispatch
+    ) => void,
+}
+
+export interface ReadonlySyncWithIdSetupActions<
+    ID, DATA extends ID
+> extends GenericSyncSetupActions {
+    get: AsyncThunk<DATA, ID, ThunkApi>,
+}
+
+export interface ReadonlySyncWithIdSetup<
+    ID, DATA extends ID
+> {
+    reducer: Reducer<DATA|null>,
+    actions: ReadonlySyncWithIdSetupActions<ID, DATA>,
+}
+
+
+interface SyncWithIdHelper<ID, DATA extends ID> {
+    handleError(error: Error, operation: Operation, id: ID|undefined, dispatch: GenericDispatch): ThunkRejectReasons,
+    getIdOfLoadedData(state: RootState): ID | undefined,
+    get: AsyncThunk<DATA, ID, ThunkApi>,
+    sync: AsyncThunk<DATA, undefined, ThunkApi>,
+    startSync: AsyncThunk<void, undefined, ThunkApi>,
+    stopSync: AsyncThunk<void, undefined, ThunkApi>,
+}
+
+
+function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
+    descriptor: ReadonlySyncWithIdDescriptor<ID, ID_LIKE, DATA>
+): SyncWithIdHelper<ID, DATA> {
+    const name = descriptor.name;
+
+    function handleError(
+        error: Error, operation: Operation, id: ID|undefined, dispatch: GenericDispatch
+    ): ThunkRejectReasons {
+        const handler = descriptor.errorHandler;
+        if ( handler !== undefined ) {
+            handler(error, operation, id, dispatch);
+        }
+        dispatch(messagesActions.reportError(error.message));
+        return ThunkRejectReasons.ApiError;
+    }
+
+    const get = createAsyncThunk<DATA, ID, ThunkApi>(
+        name + '/get',
+        async (id: ID, thunkApi) => {
+            const dispatch = thunkApi.dispatch;
+            const rejectWithValue = thunkApi.rejectWithValue;
+            try {
+                return await descriptor.api.get(id);
+            }
+            catch(error) {
+                return rejectWithValue(handleError(error as Error, Operation.GET, id, dispatch));
+            }
+            finally {
+                dispatch(syncerActions.obsoleteSync(name));
+            }
+        }
+    );
+
+    const sync = createAsyncThunk<DATA, undefined, ThunkApi>(
+        name + '/sync',
+        async (_: undefined, thunkApi) => {
+            const dispatch = thunkApi.dispatch;
+            const getState = thunkApi.getState;
+            const rejectWithValue = thunkApi.rejectWithValue;
+
+            const stateBefore = getState();
+            const id = getIdOfLoadedData(stateBefore);
+            if ( id === undefined ) {
+                return rejectWithValue(ThunkRejectReasons.NothingToSync);
+            }
+            try {
+                const data = await descriptor.api.get(id);
+
+                const stateAfter = getState();
+                if (checkIfSyncIsObsolete(stateAfter)) {
+                    return rejectWithValue(ThunkRejectReasons.ObsoleteSync);
+                }
+                return data;
+            }
+            catch (error) {
+                return rejectWithValue(handleError(error as Error, Operation.GET, id, dispatch));
+            }
+        }
+    );
+
+    function getIdOfLoadedData(state: RootState): ID | undefined {
+        const data= descriptor.getMyOwnState(state);
+        if ( data === null ) {
+            return undefined;
+        } else {
+            return descriptor.api.getIdOf(data);
+        }
+    }
+
+    function checkIfSyncIsObsolete(state: RootState): boolean {
+        let syncState = state.syncer[name];
+        return syncState.isObsolete;
+    }
+
+    const startSync = getStartSyncThunk(descriptor, sync);
+    const stopSync = getStopSyncThunk(descriptor);
+
+    return {handleError, getIdOfLoadedData, get, sync, startSync, stopSync};
+}
+
+
+export function createReadonlySyncWithIdReducer<ID, DATA extends ID>(
+    descriptor: ReadonlySyncWithIdDescriptor<ID, DATA, DATA>
+): ReadonlySyncWithIdSetup<ID, DATA> {
+    const name = descriptor.name;
+
+    const helper = createSyncWithIdHelper(descriptor);
+    const get = helper.get;
+    const sync = helper.sync;
+
+    const slice = createSlice({
+        name,
+        initialState: null as DATA | null,
+        reducers: {invalidate: () => null},
+        extraReducers: builder => {
+            builder.addCase(get.fulfilled, (state, action) => action.payload)
+            builder.addCase(sync.fulfilled, (state, action) => action.payload)
+            builder.addCase(get.rejected, () => null)
+        },
+    });
+
+    return {
+        reducer: slice.reducer,
+        actions: {...slice.actions, ...helper},
+    }
+}
+
+
 export interface UpdatableSyncWithIdDescriptor<
     ID,
     UPDATE extends ID,
@@ -162,8 +312,7 @@ export interface UpdatableSyncWithIdDescriptor<
 
 export interface UpdatableSyncWithIdSetupActions<
     ID, CREATE, DATA extends ID & CREATE
-> extends GenericSyncSetupActions {
-    get: AsyncThunk<DATA, ID, ThunkApi>,
+> extends ReadonlySyncWithIdSetupActions<ID, DATA> {
     create: AsyncThunk<DATA, CREATE, ThunkApi>,
     update: AsyncThunk<DATA, DATA, ThunkApi>,
     remove: AsyncThunk<ID, ID, ThunkApi>,
@@ -188,79 +337,23 @@ export function createUpdatableSyncWithIdReducer<
     const name = descriptor.name;
     const isIdOf = descriptor.api.isIdOf;
 
-    function handleError(
-        error: Error, operation: Operation, id: ID|undefined, dispatch: GenericDispatch,
-    ): never {
-        const handler = descriptor.errorHandler;
-        if ( handler !== undefined ) {
-            handler(error, operation, id, dispatch);
-        }
-        dispatch(messagesActions.reportError(error.message));
-        throw error;
-    }
-
-    const get = createAsyncThunk<DATA, ID, ThunkApi>(
-        name + '/get',
-        async (id: ID, thunkApi) => {
-            const dispatch = thunkApi.dispatch;
-            try {
-                return await descriptor.api.get(id);
-            }
-            catch(error) {
-                handleError(error as Error, Operation.GET, id, dispatch);
-            }
-            finally {
-                dispatch(syncerActions.obsoleteSync(name));
-            }
-        }
-    );
-
-    const sync = createAsyncThunk<DATA, undefined, ThunkApi>(
-        name + '/sync',
-        async (_: undefined, thunkApi) => {
-            const getState = thunkApi.getState;
-            const rejectWithValue = thunkApi.rejectWithValue;
-
-            const stateBefore = getState();
-            const id = getIdOfLoadedData(stateBefore);
-            if ( id === undefined ) {
-                return rejectWithValue(ThunkRejectReasons.NothingToSync);
-            }
-
-            const data = await descriptor.api.get(id);
-
-            const stateAfter = getState();
-            if ( checkIfSyncIsObsolete(stateAfter) ) {
-                return rejectWithValue(ThunkRejectReasons.ObsoleteSync);
-            }
-            return data;
-        }
-    );
-
-    function getIdOfLoadedData(state: RootState): ID | undefined {
-        const data= descriptor.getMyOwnState(state);
-        if ( data === null ) {
-            return undefined;
-        } else {
-            return descriptor.api.getIdOf(data);
-        }
-    }
-
-    function checkIfSyncIsObsolete(state: RootState): boolean {
-        let syncState = state.syncer[name];
-        return syncState.isObsolete;
-    }
+    const helper = createSyncWithIdHelper(descriptor);
+    const get = helper.get;
+    const sync = helper.sync;
+    const handleError = helper.handleError;
+    const getIdOfLoadedData = helper.getIdOfLoadedData;
 
     const create = createAsyncThunk<DATA, CREATE, ThunkApi>(
         name + '/create',
         async (create: CREATE, thunkApi) => {
             const dispatch = thunkApi.dispatch;
+            const rejectWithValue = thunkApi.rejectWithValue;
             try {
                 const data = await descriptor.api.create(create);
                 dispatch(syncerActions.obsoleteSync(name));
                 return data;
             } catch(error) {
-                handleError(error as Error, Operation.PUT, undefined, dispatch);
+                return rejectWithValue(handleError(error as Error, Operation.PUT, undefined, dispatch));
             }
         }
     );
@@ -283,7 +376,7 @@ export function createUpdatableSyncWithIdReducer<
                 return data;
             } catch(error) {
                 const id = descriptor.api.getIdOf(data);
-                handleError(error as Error, Operation.POST, id, dispatch);
+                return rejectWithValue(handleError(error as Error, Operation.POST, id, dispatch));
             }
         }
     );
@@ -303,7 +396,7 @@ export function createUpdatableSyncWithIdReducer<
                 await descriptor.api.remove(id);
                 return id;
             } catch(error) {
-                handleError(error as Error, Operation.DELETE, id, dispatch);
+                return rejectWithValue(handleError(error as Error, Operation.DELETE, id, dispatch));
             }
         }
     );
@@ -311,9 +404,7 @@ export function createUpdatableSyncWithIdReducer<
     const slice = createSlice({
         name,
         initialState: null as DATA | null,
-        reducers: {
-            invalidate: () => null,
-        },
+        reducers: {invalidate: () => null},
         extraReducers: builder => {
             builder.addCase(get.fulfilled, (state, action) => action.payload)
             builder.addCase(sync.fulfilled, (state, action) => action.payload)
@@ -325,13 +416,8 @@ export function createUpdatableSyncWithIdReducer<
         },
     });
 
-    const startSync = getStartSyncThunk(descriptor, sync);
-    const stopSync = getStopSyncThunk(descriptor);
-
     return {
         reducer: slice.reducer,
-        actions: {...slice.actions,
-            get, create, update, remove, startSync, stopSync
-        },
+        actions: {...slice.actions, ...helper, create, update, remove},
     }
 }

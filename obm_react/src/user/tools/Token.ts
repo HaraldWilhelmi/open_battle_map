@@ -1,42 +1,16 @@
-import {v4 as uuid} from 'uuid';
+import {internalError} from "../../common/Tools";
 import {
-    MapSetId,
-    NEW_TOKEN_MARK,
-    TokenAction,
-    TokenActionType,
     TokenId,
     TokenSet,
     TokenState,
     TokenType
 } from '../../api/Types';
-
-
-export function getTokenImageUrl(mapSetId: MapSetId, tokenId: TokenId): string {
-    const tokenSet = tokenId.token_type < 1000 ? 'default' : mapSetId;
-    return "/api/token_image/"
-        + tokenSet + "/"
-        + tokenId.token_type + "/"
-        + tokenId.color;
-}
-
-export function getTokenAction(state: TokenState[], token: TokenState): TokenAction {
-    let newMark = token.mark;
-    let actionType = TokenActionType.moved;
-    if (token.mark === NEW_TOKEN_MARK) {
-        actionType = TokenActionType.added;
-        newMark = getFreeMarkForToken(state, token);
-    }
-    return {...token,
-        action_type: actionType,
-        mark: newMark,
-        uuid: uuid(),
-    };
-}
+import {MovingTokenState, Tokens} from "../../redux/Types";
 
 export function getFreeMarkForToken(state: TokenState[], token: TokenState): string {
     let candidate = 1;
     for ( let placedToken of state ) {
-        if ( placedToken.token_type === token.token_type && placedToken.color === token.color ) {
+        if ( isSameToken(placedToken, token) ) {
             const foundMarkAsInt = ~~placedToken.mark;
             if ( foundMarkAsInt >= candidate ) {
                 candidate = foundMarkAsInt + 1;
@@ -70,8 +44,7 @@ export function getTokensWithout(tokens: TokenState[], tokenId: TokenId): TokenS
             ];
         }
     }
-    console.log('Token not found in list - that should never happen!');
-    throw new Error('Token not found in list - that should never happen!');
+    internalError('Token not found in list - that should never happen!');
 }
 
 export function getTokenIdAsString(tokenId: TokenId): string {
@@ -84,5 +57,45 @@ export function getTokenType(tokenSet: TokenSet, tokenId: TokenId): TokenType {
             return candidate;
         }
     }
-    throw Error('No such token_type in this Token Set.')
+    internalError('No such token_type in this Token Set.')
+}
+
+export function startMove(state: Tokens, token: TokenState): Tokens {
+    const placedTokens = state.placedTokens;
+    for ( let i = 0; i < placedTokens.length; i++ ) {
+        if ( isSameToken(token, placedTokens[i]) ) {
+            const movingToken: MovingTokenState = {...state.placedTokens[i],
+                toPosition: token.position,
+                toRotation: token.rotation,
+            };
+            return {...state,
+                placedTokens: [
+                    ...placedTokens.slice(0, i),
+                    ...placedTokens.slice(i + 1, placedTokens.length)
+                ],
+                movingTokens: [...state.movingTokens, movingToken],
+            };
+        }
+    }
+    internalError('Token not found in list - that should never happen!');
+}
+
+export function endMove(state: Tokens, token: MovingTokenState): Tokens {
+    const movingTokens = state.movingTokens;
+    for ( let i = 0; i < movingTokens.length; i++ ) {
+        if ( isSameToken(token, movingTokens[i]) ) {
+            const movedToken: TokenState = {...token,
+                position: token.toPosition,
+                rotation: token.toRotation,
+            };
+            return {...state,
+                movingTokens: [
+                    ...movingTokens.slice(0, i),
+                    ...movingTokens.slice(i + 1, movingTokens.length)
+                ],
+                placedTokens: [...state.placedTokens, movedToken],
+            };
+        }
+    }
+    internalError('Token not found in list - that should never happen!');
 }

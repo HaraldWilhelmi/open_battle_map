@@ -2,7 +2,7 @@ import {Coordinate} from "../../api/Types";
 import {MapProperties, GeometryUpdate, MapZoom} from '../../redux/Types';
 import {
     calculateMapZoom, calculateGeometryUpdate,
-    getMapPositionFromPhysicalPosition, getPhysicalPositionFromMapPosition
+    getMapPositionFromPhysicalPosition, getScaledBackgroundPositionFromMapPosition
 } from './Map';
 
 
@@ -95,7 +95,7 @@ test ('getMapPositionFromPhysicalPosition', () => {
 
 test ('getPhysicalPositionFromMapPosition', () => {
     const coordinate: Coordinate = {x: 100, y: 60}; // total Zoom x4
-    const result = getPhysicalPositionFromMapPosition(SAMPLE_ZOOMED, coordinate);
+    const result = getScaledBackgroundPositionFromMapPosition(SAMPLE_ZOOMED, coordinate);
     expect(result).toStrictEqual({x: 400, y: 240});
 });
 

@@ -24,18 +24,9 @@ export function handleResponse(
     }
 }
 
-export function cronEffect(doSomething: () => void, milliseconds: number) {
-    let timer: any;
-
-    function doIt() {
-        try {
-            doSomething();
-        }
-        finally {
-            timer = setTimeout(doIt, milliseconds);
-        }
-    }
-
-    doIt();
-    return () => clearTimeout(timer);
+export function internalError(message: string): never {
+    const e = new Error(message);
+    console.log('INTERNAL ERROR: ' + message);
+    console.log(e.stack);
+    throw  e;
 }

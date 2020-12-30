@@ -22,8 +22,10 @@ router = APIRouter()
             )
 def get_image_data(
         map_set_uuid: UUID, uuid: UUID,
+        response: Response,
         manager: MapSetManager = Depends(get_map_set_manager),
 ) -> Response:
+    response.headers['Cache-Control'] = 'no-cache'
     battle_map = get_battle_map(manager, map_set_uuid, uuid)
     image_data = battle_map.get_background_image()
     if image_data is None:

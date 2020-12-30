@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import UUID
-from fastapi import Depends, APIRouter, status
+from fastapi import Depends, APIRouter, status, Response
 from pydantic import BaseModel, validator
 
 from obm.common.validators import name_validator
@@ -36,8 +36,10 @@ class BattleMapInfo(BaseModel):
             )
 def battle_map_info(
         map_set_uuid: UUID, uuid: UUID,
+        response: Response,
         manager: MapSetManager = Depends(get_map_set_manager),
 ) -> BattleMapInfo:
+    response.headers['Cache-Control'] = 'no-cache'
     battle_map = get_battle_map(manager, map_set_uuid, uuid)
     return BattleMapInfo(map_set_uuid=map_set_uuid, **battle_map.__dict__)
 
