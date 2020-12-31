@@ -153,5 +153,5 @@ export function getNextNiceScaleExample(maxValue: number): ScaleRuler {
     if ( 3 * candidate < maxValue ) {
         return {parts: 3, total: 3 * candidate};
     }
-    return {parts: 2, total: candidate};
+    return {parts: 10, total: candidate};
 }

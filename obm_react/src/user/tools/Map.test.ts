@@ -228,7 +228,7 @@ test('calculateGeometryUpdate - change aspect ratio of frame', () => {
 
 test('getNextNiceScaleExample - simple', () => {
     const result = getNextNiceScaleExample(17.3);
-    expect(result).toStrictEqual({parts: 2, total: 10});
+    expect(result).toStrictEqual({parts: 10, total: 10});
 });
 
 test('getNextNiceScaleExample - huge', () => {
