@@ -2,7 +2,7 @@
 
 ## Project Status
 
-**This software is not even Alpha now ... Don't expect anything to work yet!**
+**This software is barely Alpha now ... expect breaking changes everywhere!**
 
 ## What is Open Battle Background?
 
@@ -66,3 +66,8 @@ completely different.
 ## More features
 
 TBC
+
+## Project History
+
+ * 2020-12-31: Minimal feature set done
+ * 2020-12-02: First commit
