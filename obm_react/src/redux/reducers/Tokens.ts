@@ -1,8 +1,8 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {Coordinate, TokenAction, TokenActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
 import {postTokenAction, getAllTokens} from '../../api/Token';
-import {GenericDispatch, MouseMode, MovingTokenState, RootState, ThunkApi, Tokens} from '../Types';
-import {getFreeMarkForToken, getTokensWithout, startMove, endMove} from '../../user/tools/Token';
+import {GenericDispatch, MouseMode, ActingTokenState, RootState, ThunkApi, Tokens} from '../Types';
+import {getFreeMarkForToken, getTokensWithout, startTokenAction, endTokenAction} from '../../user/tools/Token';
 import {v4 as uuidV4} from "uuid";
 import {mouseActions} from "./Mouse";
 import {localTokenActionTrackActions} from "./LocalTokenActionTrack";
@@ -13,7 +13,7 @@ const INITIAL_STATE: Tokens = {
     flyingToken: null,
     flyingTokenIsNew: false,
     placedTokens: [],
-    movingTokens: [],
+    actingTokens: [],
 };
 
 
@@ -54,11 +54,11 @@ export const slice = createSlice({
                 flyingToken: null,
                 flyingTokenIsNew: false,
                 placedTokens: action.payload,
-                movingTokens: [],
+                actingTokens: [],
             };
         },
-        startMove: (state, action: PayloadAction<TokenState>) => startMove(state, action.payload),
-        endMove: (state, action: PayloadAction<MovingTokenState>) => endMove(state, action.payload),
+        startAction: (state, action: PayloadAction<TokenAction>) => startTokenAction(state, action.payload),
+        endAction: (state, action: PayloadAction<ActingTokenState>) => endTokenAction(state, action.payload),
     },
 });
 
@@ -189,8 +189,8 @@ const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
 
 export const tokensActions = {
     pickupFromMap, pickupFromBox, positionOnMapForAdjustment, placeOnMap, dropIntoBox, loadTokensFromServer,
-    startMove: slice.actions.startMove,
-    endMove: slice.actions.endMove,
+    startMove: slice.actions.startAction,
+    endMove: slice.actions.endAction,
 };
 
 export default slice.reducer;

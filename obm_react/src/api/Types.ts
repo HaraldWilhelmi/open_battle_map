@@ -59,6 +59,7 @@ export interface BattleMapId {
 
 export interface BattleMapUpdate extends BattleMapId {
     name: string;
+    background_pixels_per_meter: number;
 }
 
 export interface BattleMapCreate {
@@ -69,7 +70,6 @@ export interface BattleMapCreate {
 export interface BattleMap extends BattleMapUpdate, BattleMapCreate {
     revision: number;
     token_action_count: number;
-    background_pixels_per_meter: number;
 }
 
 

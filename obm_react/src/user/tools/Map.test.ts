@@ -2,7 +2,7 @@ import {Coordinate} from "../../api/Types";
 import {MapProperties, GeometryUpdate, MapZoom} from '../../redux/Types';
 import {
     calculateMapZoom, calculateGeometryUpdate,
-    getMapPositionFromPhysicalPosition, getScaledBackgroundPositionFromMapPosition
+    getMapPositionFromPhysicalPosition, getScaledBackgroundPositionFromMapPosition, getNextNiceScaleExample
 } from './Map';
 
 
@@ -224,3 +224,19 @@ test('calculateGeometryUpdate - change aspect ratio of frame', () => {
     };
     expect(result).toStrictEqual(expectedResult);
 });
+
+
+test('getNextNiceScaleExample - simple', () => {
+    const result = getNextNiceScaleExample(17.3);
+    expect(result).toStrictEqual({parts: 2, total: 10});
+});
+
+test('getNextNiceScaleExample - huge', () => {
+    const result = getNextNiceScaleExample(60889);
+    expect(result).toEqual({parts: 5, total: 50000});
+})
+
+test('getNextNiceScaleExample - tiny', () => {
+    const result = getNextNiceScaleExample(0.034234);
+    expect(result).toEqual({parts: 3, total: 0.03});
+})

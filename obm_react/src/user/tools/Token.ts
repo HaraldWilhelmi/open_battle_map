@@ -1,16 +1,65 @@
 import {internalError} from "../../common/Tools";
-import {
-    TokenId,
-    TokenSet,
-    TokenState,
-    TokenType
-} from '../../api/Types';
-import {MovingTokenState, Tokens} from "../../redux/Types";
+import {TokenAction, TokenActionType, TokenId, TokenSet, TokenState, TokenType} from '../../api/Types';
+import {ActingTokenState, Tokens} from "../../redux/Types";
+
+
+export function isSameToken(a: TokenId, b: TokenId): boolean {
+    return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark && a.mark_color === b.mark_color;
+}
+
+export function getTokensWithout<T0 extends TokenId, T1 extends TokenId>(tokens: T0[], token: T1): T0[] {
+    const index = getTokenIndex(tokens, token);
+    if ( index < 0 ) {
+        tokenError(token, "Failed to remove from list - not found!");
+    }
+    return getTokensWithoutIndex(tokens, index)
+}
+
+function tokenError(token: TokenId, message: string): never {
+    const key = getTokenIdAsString(token);
+    internalError('Token ' + key + ': ' + message);
+}
+
+export function getTokenIndex<T0 extends TokenId, T1 extends TokenId>(arr: T0[], token: T1): number {
+    return arr.findIndex(
+        (it) => isSameToken(it, token)
+    );
+}
+
+export function getTokensWithoutIndex<T extends TokenId>(tokens: T[], index: number): T[] {
+    return [
+        ...tokens.slice(0, index),
+        ...tokens.slice(index + 1, tokens.length),
+    ];
+}
+
+export function getTokenIdAsString(tokenId: TokenId): string {
+    return tokenId.token_type + '/' + tokenId.color + '/' + tokenId.mark + '/' + tokenId.mark_color;
+}
+
+export function getTokenIdAsKeyframesName(tokenId: TokenId): string {
+    let raw: string = getTokenIdAsString(tokenId);
+    return raw.replace(/[^a-zA-Z0-9-]/g, '-');
+}
+
+
+export function getTokenType(tokenSet: TokenSet, tokenId: TokenId): TokenType {
+    for ( let candidate of tokenSet ) {
+        if ( candidate.token_type === tokenId.token_type ) {
+            return candidate;
+        }
+    }
+    tokenError(tokenId, 'Unknown token_type!');
+}
 
 export function getFreeMarkForToken(state: TokenState[], token: TokenState): string {
     let candidate = 1;
     for ( let placedToken of state ) {
-        if ( isSameToken(placedToken, token) ) {
+        if (
+            placedToken.token_type === token.token_type
+            && placedToken.color === token.color
+            && placedToken.mark_color === token.mark_color
+        ) {
             const foundMarkAsInt = ~~placedToken.mark;
             if ( foundMarkAsInt >= candidate ) {
                 candidate = foundMarkAsInt + 1;
@@ -20,9 +69,6 @@ export function getFreeMarkForToken(state: TokenState[], token: TokenState): str
     return '' + candidate;
 }
 
-export function isSameToken(a: TokenId, b: TokenId): boolean {
-    return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark && a.mark_color === b.mark_color;
-}
 
 export function pickupToken(state: TokenState[], tokenId: TokenId): TokenState[] {
     let newState = [...state];
@@ -35,67 +81,117 @@ export function pickupToken(state: TokenState[], tokenId: TokenId): TokenState[]
     return newState;
 }
 
-export function getTokensWithout(tokens: TokenState[], tokenId: TokenId): TokenState[] {
-    for ( let i = 0; i < tokens.length; i++ ) {
-        if ( isSameToken(tokenId, tokens[i]) ) {
-            return [
-                ...tokens.slice(0, i),
-                ...tokens.slice(i+1, tokens.length)
-            ];
-        }
+
+export function startTokenAction(state: Tokens, action: TokenAction): Tokens {
+    switch ( action.action_type ) {
+        case TokenActionType.added: { return startAddedAction(state, action); }
+        case TokenActionType.moved: { return startMovedAction(state, action); }
+        case TokenActionType.removed: { return startRemovedAction(state, action); }
     }
-    internalError('Token not found in list - that should never happen!');
 }
 
-export function getTokenIdAsString(tokenId: TokenId): string {
-    return tokenId.token_type + '/' + tokenId.color + '/' + tokenId.mark + '/' + tokenId.mark_color;
+function startAddedAction(state: Tokens, action: TokenAction): Tokens {
+    const indexPlacedTokens = getTokenIndex(state.placedTokens, action);
+    const indexActingTokens = getTokenIndex(state.actingTokens, action);
+    if ( indexPlacedTokens >= 0 || indexActingTokens >= 0 ) {
+        tokenError(action, 'Can not add existing token!');
+    }
+    const movingToken: ActingTokenState = {...action,
+        fromPosition: {x: -1, y: -1},
+        fromRotation: 0,
+    };
+    return {...state,
+        actingTokens: [...state.actingTokens, movingToken],
+    };
 }
 
-export function getTokenType(tokenSet: TokenSet, tokenId: TokenId): TokenType {
-    for ( let candidate of tokenSet ) {
-        if ( candidate.token_type === tokenId.token_type ) {
-            return candidate;
-        }
+
+function startMovedAction(state: Tokens, action: TokenAction): Tokens {
+    const indexPlacedTokens = getTokenIndex(state.placedTokens, action);
+    if ( indexPlacedTokens >= 0 ) {
+        return startIsolatedAction(state, action, indexPlacedTokens);
     }
-    internalError('No such token_type in this Token Set.')
+    
+    const indexActingTokens = getTokenIndex(state.actingTokens, action);
+    if ( indexActingTokens >= 0 ) {
+        return mergedMovedAction(state, action, indexActingTokens);
+    }
+
+    tokenError(action, 'Tried to move non-existing token!');
 }
 
-export function startMove(state: Tokens, token: TokenState): Tokens {
-    const placedTokens = state.placedTokens;
-    for ( let i = 0; i < placedTokens.length; i++ ) {
-        if ( isSameToken(token, placedTokens[i]) ) {
-            const movingToken: MovingTokenState = {...state.placedTokens[i],
-                toPosition: token.position,
-                toRotation: token.rotation,
-            };
-            return {...state,
-                placedTokens: [
-                    ...placedTokens.slice(0, i),
-                    ...placedTokens.slice(i + 1, placedTokens.length)
-                ],
-                movingTokens: [...state.movingTokens, movingToken],
-            };
-        }
-    }
-    internalError('Token not found in list - that should never happen!');
+function startIsolatedAction(state: Tokens, action: TokenAction, indexPlacedTokens: number) {
+    const oldToken = state.placedTokens[indexPlacedTokens];
+    const actingToken: ActingTokenState = {
+        ...action,
+        fromPosition: oldToken.position,
+        fromRotation: oldToken.rotation,
+    };
+    return {
+        ...state,
+        placedTokens: getTokensWithoutIndex(state.placedTokens, indexPlacedTokens),
+        actingTokens: [...state.actingTokens, actingToken],
+    };
 }
 
-export function endMove(state: Tokens, token: MovingTokenState): Tokens {
-    const movingTokens = state.movingTokens;
-    for ( let i = 0; i < movingTokens.length; i++ ) {
-        if ( isSameToken(token, movingTokens[i]) ) {
-            const movedToken: TokenState = {...token,
-                position: token.toPosition,
-                rotation: token.toRotation,
-            };
-            return {...state,
-                movingTokens: [
-                    ...movingTokens.slice(0, i),
-                    ...movingTokens.slice(i + 1, movingTokens.length)
-                ],
-                placedTokens: [...state.placedTokens, movedToken],
-            };
-        }
+function mergedMovedAction(state: Tokens, action: TokenAction, indexActingTokens: number) {
+    let actingTokens = [...state.actingTokens];
+    const oldMovingToken = actingTokens[indexActingTokens];
+    if (oldMovingToken.action_type === TokenActionType.removed) {
+        tokenError(action,'Do not know how to merge a Move on top of a Remove!');
     }
-    internalError('Token not found in list - that should never happen!');
+    actingTokens[indexActingTokens] = {
+        ...oldMovingToken,
+        position: action.position
+    }
+    return {...state, actingTokens};
+}
+
+
+function startRemovedAction(state: Tokens, action: TokenAction): Tokens {
+    const indexPlacedTokens = getTokenIndex(state.placedTokens, action);
+    if ( indexPlacedTokens >= 0 ) {
+        const oldToken = state.placedTokens[indexPlacedTokens];
+        const patchedAction: TokenAction = {...action, position: oldToken.position};
+        return startIsolatedAction(state, patchedAction, indexPlacedTokens);
+    }
+    
+    const indexActingTokens = getTokenIndex(state.actingTokens, action);
+    if ( indexActingTokens >= 0 ) {
+        return mergedRemovedAction(state, action, indexActingTokens);
+    }
+
+    tokenError(action, 'Tried to remove non-existing token!');
+}
+
+function mergedRemovedAction(state: Tokens, action: TokenAction, indexActingTokens: number) {
+    let actingTokens = [...state.actingTokens];
+    const oldMovingToken = actingTokens[indexActingTokens];
+    if ( oldMovingToken.action_type === TokenActionType.removed ) {
+        tokenError(action, 'Do not know how to merge a Remove on top of a Remove!');
+    }
+    if ( oldMovingToken.action_type === TokenActionType.added ) {
+        return {...state, actingTokens: getTokensWithoutIndex(state.actingTokens, indexActingTokens)}
+    }
+    actingTokens[indexActingTokens] = {
+        ...oldMovingToken,
+        action_type: TokenActionType.removed,
+    }
+    return {...state, actingTokens};
+}
+
+
+export function endTokenAction(state: Tokens, token: ActingTokenState): Tokens {
+    const index = getTokenIndex(state.actingTokens, token);
+    if ( index < 0 ) {
+        tokenError(token, 'Moving token lost!');
+    }
+    const actingTokens = getTokensWithoutIndex(state.actingTokens, index);
+    if ( token.action_type === TokenActionType.removed ) {
+        return {...state, actingTokens: actingTokens};
+    } else {
+        const placedToken: TokenState = {...token};
+        const placedTokens = [...state.placedTokens, placedToken];
+        return {...state, actingTokens: actingTokens, placedTokens};
+    }
 }

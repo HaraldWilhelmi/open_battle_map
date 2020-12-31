@@ -1,6 +1,6 @@
 import {useDispatch, useSelector} from 'react-redux';
 import {TokenState} from '../../api/Types';
-import {RootState, GenericDispatch, MovingTokenState} from '../../redux/Types';
+import {RootState, GenericDispatch, ActingTokenState} from '../../redux/Types';
 import PlacedToken from '../components/PlacedToken';
 import {getTokenIdAsString} from '../tools/Token';
 import {useEffect, useState} from "react";
@@ -73,8 +73,8 @@ export function TokensLayer() {
         [tokenActionHistory, lastActionIndex, localTokenActionTrack, dispatch]
     )
 
-    const movingTokens = tokens.movingTokens.map(
-        (token: MovingTokenState) => <MovingToken token={token} key={getTokenIdAsString(token)}/>
+    const movingTokens = tokens.actingTokens.map(
+        (token: ActingTokenState) => <MovingToken token={token} key={getTokenIdAsString(token)}/>
     )
     const placedTokens = tokens.placedTokens.map(
         (token: TokenState) => <PlacedToken token={token} key={getTokenIdAsString(token)}/>

@@ -8,6 +8,7 @@ import {actions} from '../../redux/Store';
 import ClickMenuItem from '../components/ClickMenuItem';
 import TextInputMenuItem from '../components/TextInputMenuItem';
 import UploadMenuItem from '../components/UploadMenuItem';
+import MapScale from '../components/MapScale';
 
 
 export function Work() {
@@ -38,7 +39,7 @@ export function Work() {
     let myUploadBackground = async (file: File) => {
         dispatch(actions.messages.reset());
         await postImageData(battleMap, file, dispatch);
-        refreshMapBackground();
+        await refreshMapBackground();
         dispatch(actions.mapProperties.reset());
     };
 
@@ -49,7 +50,7 @@ export function Work() {
             map_set_uuid: mapSet.uuid,
         }
         dispatch(actions.battleMap.create(request));
-        refreshBattleMapSelector();
+        await refreshBattleMapSelector();
         dispatch(actions.mapProperties.reset());
     };
 
@@ -57,7 +58,7 @@ export function Work() {
         dispatch(actions.messages.reset());
         let changedMap: BattleMap = {...battleMap, name: name};
         dispatch(actions.battleMap.update(changedMap));
-        refreshBattleMapSelector();
+        await refreshBattleMapSelector();
     };
 
     let myDeleteBattleMap = async () => {
@@ -72,7 +73,7 @@ export function Work() {
                     break;
                 }
             }
-            refreshBattleMapSelector();
+            await refreshBattleMapSelector();
             dispatch(actions.mapProperties.reset());
         }
     };
@@ -86,11 +87,11 @@ export function Work() {
         <div>
             <ClickMenuItem label="Administration" doIt={mySwitchAdmin} />
 
-            <h4 className="menu-item">Background Set</h4>
-            <ClickMenuItem label="Export Background Set" doIt={myDownloadMapSet} />
-            <UploadMenuItem label="Import Background Set" doIt={myUploadMapSet} accept=".obm"/>
+            <h4 className="menu-item">Map Set</h4>
+            <ClickMenuItem label="Export" doIt={myDownloadMapSet} />
+            <UploadMenuItem label="Import" doIt={myUploadMapSet} accept=".obm"/>
 
-            <h4 className="menu-item">Battle Background</h4>
+            <h4 className="menu-item">Battle Map</h4>
             <TextInputMenuItem label="Create" placeholder="new map name" doIt={myCreateBattleMap} />
             <TextInputMenuItem label="Rename" initialValue={battleMap.name} doIt={myRenameBattleMap} disabled={noBattleMap} />
             <UploadMenuItem label="Upload Background Image" doIt={myUploadBackground} accept="image/*" disabled={noBattleMap} />
@@ -99,6 +100,7 @@ export function Work() {
                 - Zoom: {mapProperties.userZoomFactor.toFixed(1)}
                 - Mag.: {mapProperties.naturalToDisplayRatio.toFixed(1)})
             </div>
+            <MapScale />
             <ClickMenuItem label="Delete" doIt={myDeleteBattleMap} disabled={noBattleMap} />
         </div>
     );

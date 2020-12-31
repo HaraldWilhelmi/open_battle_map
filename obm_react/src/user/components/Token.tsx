@@ -1,50 +1,12 @@
 import {MouseEvent, WheelEvent, useEffect, useState} from "react";
-import styled, {FlattenSimpleInterpolation} from 'styled-components';
 import {useSelector} from 'react-redux';
 import {TokenId, TokenType} from '../../api/Types';
 import {RootState} from '../../redux/Types';
 import {getTokenType} from '../tools/Token';
 import {v4 as uuid} from 'uuid';
+import CSS from 'csstype';
 import './Token.css'
 
-
-interface RotatorProps {
-    readonly scale: number;
-    readonly rotation: number;
-}
-
-const Rotator = styled.div<RotatorProps>`
-    transform: scale(${props => props.scale}) rotate(${props => props.rotation}rad);
-    pointerEvents: none;
-`;
-
-interface AnimatedRotatorProps extends RotatorProps{
-    readonly animation: FlattenSimpleInterpolation;
-}
-
-const AnimatedRotator = styled.div<AnimatedRotatorProps>`
-    transform: scale(${props => props.scale}) rotate(${props => props.rotation}rad);
-    pointerEvents: none;
-    animation: ${props => props.animation}
-`;
-
-interface MarkProps {
-    readonly scale: number;
-    readonly color: string;
-    readonly size: string;
-}
-
-const Mark = styled.div<MarkProps>`
-    transform: translate(-50%, -50%) scale(${props => props.scale});
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 101;
-    color: ${props => props.color};
-    pointer-events: none;
-    font-size: ${props => props.size};
-    font-family: sans-serif;
-`;
 
 interface Props {
     tokenId: TokenId,
@@ -53,7 +15,6 @@ interface Props {
     onClick: (event: MouseEvent) => void,
     onWheel: (event: WheelEvent) => void,
     pointerEvents?: boolean,
-    animation?: FlattenSimpleInterpolation,
 }
 
 export function Token(props: Props) {
@@ -92,22 +53,31 @@ export function Token(props: Props) {
         </g>
     </svg>;
 
-    const mark = <Mark scale={scale} color={props.tokenId.mark_color} size={tokenType.mark_font_size}>
+    const rotatorStyle: CSS.Properties = {
+        transform: "scale(" + scale + ") rotate(" + props.rotation + "rad)",
+        pointerEvents: 'none',
+    };
+
+    const markStyle: CSS.Properties = {
+        transform: 'translate(-50%, -50%) scale(' + scale + ')',
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        zIndex: 101,
+        color: props.tokenId.mark_color,
+        pointerEvents: 'none',
+        fontSize: tokenType.mark_font_size,
+        fontFamily: 'sans-serif',
+    };
+
+    return <div className="token-frame">
+        <div style={rotatorStyle}>
+            {svg}
+        </div>
+        <div style={markStyle}>
             {props.tokenId.mark}
-    </Mark>;
-
-    let image;
-    if ( props.animation === undefined ) {
-        image = <Rotator rotation={props.rotation} scale={scale}>
-            {svg}
-        </Rotator>
-    } else {
-        image = <AnimatedRotator rotation={props.rotation} scale={scale} animation={props.animation}>
-            {svg}
-        </AnimatedRotator>
-    }
-
-    return <div className="token-frame">{image}{mark}</div>;
+        </div>
+    </div>;
 }
 
 export default Token;

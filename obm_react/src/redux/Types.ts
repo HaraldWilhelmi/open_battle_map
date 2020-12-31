@@ -1,7 +1,16 @@
 import {AnyAction} from 'redux';
 import {ThunkDispatch} from 'redux-thunk';
 import {AsyncThunk} from '@reduxjs/toolkit';
-import {MapSet, BattleMap, MapSetList, Coordinate, TokenState, TokenSet, TokenActionHistory} from '../api/Types';
+import {
+    MapSet,
+    BattleMap,
+    MapSetList,
+    Coordinate,
+    TokenState,
+    TokenSet,
+    TokenActionHistory,
+    TokenAction
+} from '../api/Types';
 
 
 // I really would like to write:
@@ -85,16 +94,16 @@ export interface MouseState {
     cursorStyle: string,
 }
 
-export interface MovingTokenState extends TokenState {
-    toPosition: Coordinate,
-    toRotation: number,
+export interface ActingTokenState extends TokenAction {
+    fromPosition: Coordinate,
+    fromRotation: number,
 }
 
 export interface Tokens {
     flyingToken: TokenState | null,
     flyingTokenIsNew: boolean,
     placedTokens: TokenState[],
-    movingTokens: MovingTokenState[],
+    actingTokens: ActingTokenState[],
 }
 
 export interface SyncStateItem {

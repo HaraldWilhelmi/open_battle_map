@@ -83,18 +83,24 @@ class BattleMapUpdateRequest(BaseModel):
     uuid: UUID
     map_set_uuid: UUID
     name: str
+    background_pixels_per_meter: float
     _check_name = validator('name', allow_reuse=True)(name_validator)
 
 
 @router.post('/', description='Update Battle Background.',
+             response_model=BattleMapInfo,
              responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND
              )
 async def update_battle_map(
         data: BattleMapUpdateRequest,
         manager: MapSetManager = Depends(get_map_set_manager),
-):
+) -> BattleMapInfo:
     map_set = get_map_set(manager, data.map_set_uuid)
     battle_map = get_battle_map(manager, data.map_set_uuid, data.uuid)
+
     battle_map.name = data.name
+    battle_map.background_pixels_per_meter = data.background_pixels_per_meter
+
     battle_map.revision += 1
     manager.save(map_set)
+    return BattleMapInfo(map_set_uuid=map_set.uuid, **battle_map.__dict__)

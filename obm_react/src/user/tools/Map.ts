@@ -138,3 +138,20 @@ export function calculateMapFrame(mapProperties: MapProperties): MapFrameParamet
         height,
     }
 }
+
+interface ScaleRuler {
+    parts: number,
+    total: number,
+}
+
+export function getNextNiceScaleExample(maxValue: number): ScaleRuler {
+    const digits = Math.floor(Math.log10(maxValue));
+    const candidate = Math.pow(10, digits);
+    if ( 5 * candidate < maxValue ) {
+        return {parts: 5, total: 5 * candidate};
+    }
+    if ( 3 * candidate < maxValue ) {
+        return {parts: 3, total: 3 * candidate};
+    }
+    return {parts: 2, total: candidate};
+}

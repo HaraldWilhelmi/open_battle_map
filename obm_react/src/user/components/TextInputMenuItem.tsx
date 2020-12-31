@@ -30,8 +30,8 @@ export function TextInputMenuItem(props: Props) {
     };
 
     let onSubmit = (event: React.FormEvent) => {
-        props.doIt(value);
         event.preventDefault();
+        props.doIt(value);
         setValue(props.initialValue === undefined ? '' : props.initialValue);
     };
 
