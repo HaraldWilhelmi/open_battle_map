@@ -1,12 +1,12 @@
-# Open Battle Background
+# Open Battle Map
 
 ## Project Status
 
 **This software is barely Alpha now ... expect breaking changes everywhere!**
 
-## What is Open Battle Background?
+## What is Open Battle Map?
 
-Open Battle Background is a small Web Service, which helps you to play role playing games,
+Open Battle Map is a small Web Service, which helps you to play role playing games,
 tactical board games etc. remotely with your friends (Corvid-19 ...). It should
 basically work with everything, where you move figures or tokens or whatever over
 some kind of map or game board.
