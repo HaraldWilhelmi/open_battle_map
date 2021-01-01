@@ -15,7 +15,7 @@ class Config(BaseModel, ):
 
 
 def get_config_file_name() -> str:
-    return join(expanduser('~'), '.open_battle_map_rc')
+    return join(expanduser('~'), 'open_battle_map_data', 'config')
 
 
 def get_config_for_production():
@@ -28,5 +28,5 @@ def get_config_for_production():
         config = Config(admin_secret=token_hex())
         umask(0o177)
         with open(file_name, 'w') as fp:
-            fp.write(config.json(indent=4))
+            fp.write(config.json(indent=4, include={'admin_secret'}))
         return config

@@ -4,9 +4,11 @@ venv
 .idea
 *.swp
 
+/deploy/build
+
 # dependencies
 /obm_react/node_modules
-/obm_reac/.pnp
+/obm_react/.pnp
 .pnp.js
 
 # testing
