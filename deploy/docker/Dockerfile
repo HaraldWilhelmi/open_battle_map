@@ -1,7 +1,6 @@
 FROM debian:latest
 
-VOLUME /home/app/open_battle_map_data
-VOLUME /home/www/tls
+VOLUME /data
 
 RUN apt-get update && apt-get install -y python3 python3-pip nginx bash && rm -rf /var/cache/apt
 RUN adduser --gecos 'Application User' --home /home/app --disabled-password app

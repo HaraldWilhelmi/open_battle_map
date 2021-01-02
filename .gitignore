@@ -3,8 +3,10 @@
 venv
 .idea
 *.swp
+.venv
 
 /deploy/docker/build
+/deploy/aws-ecs-public-dns
 
 # dependencies
 /obm_react/node_modules
