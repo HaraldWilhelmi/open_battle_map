@@ -19,3 +19,6 @@ rm -rf build/srv/app || true
 mkdir -p build/srv/{www,app}
 cp -r ../../obm_react/build/* build/srv/www
 cp -r ../../obm_server/{obm,data,requirements.txt} build/srv/app
+
+[[ -z $OBM_SSH_KEY ]] && OBM_SSH_KEY=~/.ssh/id_rsa.pub
+cp "$OBM_SSH_KEY" build/ssh_key.pub

@@ -19,6 +19,7 @@ fi
 [[ -L /home/app/open_battle_map_data ]] \
     || ln -s /data/obm_data /home/app/open_battle_map_data
 
+service ssh start
 service nginx start
 cd /srv/app
 su - app -c 'cd /srv/app && uvicorn obm.app:app'

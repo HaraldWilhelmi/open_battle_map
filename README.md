@@ -54,6 +54,11 @@ a docker image do this:
  * To build the image do this:
    * Git-clone the repository.
    * In the `obm_react` folder run: `npm install`
+   * Consider setting the environment variable OBM_SSH_KEY to a suitable SSH public key file.
+     This key will allow you to access your container e.g. to retrieve the Admin Secret.
+     You don't need it for local deployments where you can do `docker exec -it open_battle_map /bin/bash`
+     instead. But on e.g. AWS you will need it. If you don't either `~/.ssh/id_rsa.pub` will
+     be used, or the next step will fail.
    * In the `deploy` folder run: `./prepare_build.sh`
  * Now you have a few options:
    * To run the image locally just start `./run_image_local.sh`. The service will be started be
