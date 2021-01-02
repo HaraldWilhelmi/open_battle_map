@@ -56,6 +56,7 @@ def test_simple(ctx: DepContext):
             uuid=uuid4(),
             token_type=0, color=Color('Black'), mark='23', mark_color=Color('White'),
             position=Coordinate(x=17, y=27),
+            rotation=1.2
         )
     )
     map_set_manager.save(map_set)

@@ -41,31 +41,86 @@ some players. It tries nothing to hide. If you want to play games in which
 players have limited insight what is going own like poker, you need something
 completely different. 
 
-## How does it work?
+## How to run?
 
- * Install it on a server both you and your friends can reach. For me this was
-   AWS EC2 instance (TBD: sizing) worked. Of cause you can also install it on a
-   local machine and expose the port through your router with DNAT. In my experience
-   that is not worth the trouble.  
- * Get your admin secret from the configuration file written on the first run.
- * Visit your web server port 8000, enter the admin secret and bookmark
-   the admin link in your browser. You will need it to manage your map sets.
- * Create your first map set.
- * Configure your initial map by uploading a background image. You need the
-   image in a browser friendly format. SVG is best because it scales so nicely
-   but PNG, JPEG, or GIF will all do.
- * If you care for the measurement tools also set the map scale.
- * If you need more than the generic tokens define some custom tokens. This tokens are
-   always shared among all maps of the same map set. You want to do this especially if
-   your tokens don't have facing on the map. Most of generic tokens have this feature and are
-   cumbersome to move if you don't care about it.
- * When you are done, make a local backup of your map set by downloading it from the server.
- * Send the link to the map set to your friend, e.g. by email.
- * Roll the dice and move the tokens!
+The preferred way to run a Open Battle Map is as a docker container. To create
+a docker image do this:
+
+ * Before you start working, make sure you have:
+   * Linux (Is that a problem? ... https://dilbert.com/strip/1995-06-24)
+   * A reasonable up-to-date npm/NodeJS (the Debian Stable NodeJS is to old...).
+   * Typescript
+   * Docker 
+ * To build the image do this:
+   * Git-clone the repository.
+   * In the `obm_react` folder run: `npm install`
+   * In the `deploy` folder run: `./prepare_build.sh`
+ * Now you have a few options:
+   * To run the image locally just start `./run_image_local.sh`. The service will be started be
+     available on `http://localhost`. The Admin Secret will be written to the console on start.
+     This is not very useful because most likely your friends will not be able to reach the
+     service. However, it helps to test and also the scripts should you give a hint how to run the
+     image on your preferred Docker host.
+   * The image can then be deployed to e.g. to AWS with the cdk-Setup also found in the deploy folder. 
+     * TODO
  
 ## More features
 
-TBC
+TODO
+
+## How to change the code
+
+### DEV Setup
+
+ * Get a good IDE. PyCharm worked fine for me. With the Typescript stuff the
+   professional edition really helped.
+ * Clone the repository.
+ * Install the required software according to instructions of the project:
+   * npm/NodeJS (the on in your distro may be too old...)
+   * Python 3 >= 3.7 and pip3 in case it is not included. Usually the one in your distro will do - even for Debian Stable.
+   * Typescript
+ * Create a Python Virtual Environment (PyCharm may do that for you) and activate it.
+ * Install the dependencies:
+   * In `obm_server`: 
+     * `pip3 install -r /srv/app/requirements.txt`
+     * `pip3 install -r dev_requirements.txt`
+   * In `obm_react`: `npm install`
+   
+### Run Application in DEV:
+
+ * To run the Server API on Port 8000, start in `obm_server`: `./start_debug.py`
+   * You may also run this script in PyCharm's Debugger!
+ * To start the React Dev-Server on Port 3000 run: `./start_react_dev.sh`
+   * That one you will have stop/restart once in the while. After some time it will
+     tend to give strange and misleading warnings and error messages.
+ * Connect to http://localhost:3000 to access the application. The React DEV server is
+   configured to proxy the API calls to port 8000. Most of the time it does. Sometimes
+   you will see the 'connection reset' errors. That's actually an issue with the React DEV server.
+   It is very easy to overload.:
+ * The configuration (Admin Secret!) and the dynamic data can be found in
+   `~/open_battle_map_data`.
+   
+### Test
+
+This application comes with three sets of tests. All of them should run and
+updated before releasing:
+
+ * PyTest unit tests in `obm_server/tests`.
+ * PyTest integration tests in `obm_server/integration_tests`
+ * Jest unit tests in `obm_react`.
+
+
+## Roadmap
+
+ * January 2021:
+   * AWS Deployment
+ * February 2021:
+   * Vehicles: Tokens that carry/move tokens placed on them.
+   * Generic tokens without facing
+   * Environment Effect Tokens: Fire, Smoke, Mud
+ * Someday:
+   * Custom Token Sets: Collections of custom tokens, which can be loaded
+     into a Map Set.
 
 ## Project History
 

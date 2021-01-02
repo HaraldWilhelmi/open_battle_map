@@ -6,6 +6,8 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 cd docker
 
+docker build -t open_battle_map .
+
 (docker volume ls | grep -q obm_test_data) \
     || docker volume create obm_test_data
 
