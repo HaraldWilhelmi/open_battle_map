@@ -4,7 +4,7 @@ venv
 .idea
 *.swp
 
-/deploy/build
+/deploy/docker/build
 
 # dependencies
 /obm_react/node_modules
