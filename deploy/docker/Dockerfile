@@ -1,8 +1,8 @@
-FROM debian:latest
+FROM python:3.8-slim-buster
 
 VOLUME /data
 
-RUN apt-get update && apt-get install -y python3 python3-pip nginx bash && rm -rf /var/cache/apt
+RUN apt-get update && apt-get install -y nginx bash && rm -rf /var/cache/apt
 RUN adduser --gecos 'Application User' --home /home/app --disabled-password app
 RUN rm /etc/nginx/sites-enabled/default
 RUN mkdir -p /srv
