@@ -6,7 +6,6 @@ venv
 .venv
 
 /deploy/docker/build
-/deploy/aws-ecs-public-dns
 
 # dependencies
 /obm_react/node_modules
@@ -30,7 +29,3 @@ venv
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# CDK asset staging directory
-.cdk.staging
-cdk.out
