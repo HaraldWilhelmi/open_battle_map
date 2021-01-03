@@ -2,6 +2,8 @@ FROM python:3.8-slim-buster
 
 VOLUME /data
 
+ENV ENABLE_TLS yes
+
 RUN apt-get update && apt-get install -y nginx bash openssh-server && rm -rf /var/cache/apt
 RUN adduser --gecos 'Application User' --home /home/app --disabled-password app
 RUN mkdir -p /home/app/.ssh /var/www/.ssh /srv
@@ -10,6 +12,7 @@ RUN rm /etc/nginx/sites-enabled/default
 COPY build/srv /srv/
 RUN pip3 install -r /srv/app/requirements.txt
 
+COPY build/acme_tiny.py /bin/acme_tiny.py
 COPY vhost.conf /etc/nginx/sites-enabled/open_battle_map.conf
 COPY bootstrap.sh /bootstrap.sh
 COPY build/ssh_key.pub /home/app/.ssh/authorized_keys

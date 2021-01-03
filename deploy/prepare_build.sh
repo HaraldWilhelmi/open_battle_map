@@ -20,5 +20,7 @@ mkdir -p build/srv/{www,app}
 cp -r ../../obm_react/build/* build/srv/www
 cp -r ../../obm_server/{obm,data,requirements.txt} build/srv/app
 
+wget https://raw.githubusercontent.com/diafygi/acme-tiny/master/acme_tiny.py --output-document=build/acme_tiny.py
+
 [[ -z $OBM_SSH_KEY ]] && OBM_SSH_KEY=~/.ssh/id_rsa.pub
 cp "$OBM_SSH_KEY" build/ssh_key.pub
