@@ -136,7 +136,7 @@ test('calculateMapZoom - x 1.5', () => {
 
 test('calculateMapZoom - over zoom', () => {
     const mapZoom: MapZoom = {
-        zoomFactorRatio: 35.0,
+        zoomFactorRatio: 130.0,
         physicalFocusPoint: { x: 20, y: 30 },
     }
     const result = calculateMapZoom(SAMPLE, mapZoom);
@@ -144,16 +144,16 @@ test('calculateMapZoom - over zoom', () => {
     const expectedResult: MapProperties = {
         widthAvailable: 400,
         heightAvailable: 300,
-        zoomedWidth: 6400,
-        zoomedHeight: 4000,
+        zoomedWidth: 51200,
+        zoomedHeight: 32000,
         naturalWidth: 200,
         naturalHeight: 125,
         visibleWidth: 400,
         visibleHeight: 300,
-        xOffset: -300,
-        yOffset: -450,
-        userZoomFactor: 16.0,
-        totalZoomFactor: 32.0,
+        xOffset: -2540,
+        yOffset: -3810,
+        userZoomFactor: 128.0,
+        totalZoomFactor: 256.0,
         naturalToDisplayRatio: 2.0,
     };
     expect(result).toStrictEqual(expectedResult);

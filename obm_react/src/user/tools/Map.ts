@@ -6,7 +6,7 @@ const ZOOM_NOOP: MapZoom = {
     zoomFactorRatio: 1.0,
 }
 
-const MAX_ZOOM = 16.0;
+const MAX_ZOOM = 128.0;
 export const ZOOM_INCREMENT = Math.sqrt(2);
 
 const OFFSET_TOLERANCE = 0.3;
