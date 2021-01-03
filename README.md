@@ -48,7 +48,7 @@ a docker image do this:
 
  * Before you start working, make sure you have:
    * Linux (Is that a problem? ... https://dilbert.com/strip/1995-06-24)
-   * A reasonable up-to-date npm/NodeJS (the Debian Stable NodeJS is to old...).
+   * A reasonable up-to-date npm/NodeJS (the Debian 10 (Buster) NodeJS is too old...).
    * Typescript
    * Docker 
  * To build the image do this:
@@ -63,11 +63,13 @@ a docker image do this:
  * Now you have a few options:
    * To run the image locally just start `./run_image_local.sh`. The service will be started be
      available on `http://localhost`. The Admin Secret will be written to the console on start.
-     This is not very useful because most likely your friends will not be able to reach the
+     This is most likely not too useful because your friends will not be able to reach the
      service. However, it helps to test and also the scripts should you give a hint how to run the
      image on your preferred Docker host.
-   * The image can then be deployed to e.g. to AWS with the cdk-Setup also found in the deploy folder. 
-     * TODO
+   * Deploy the docker image instead to your preferred Docker Host. If you want to use
+     Amazon (AWS) have a look at:
+     
+     * https://github.com/HaraldWilhelmi/open_battle_map_cdk
  
 ## More features
 
@@ -87,7 +89,7 @@ TODO
  * Create a Python Virtual Environment (PyCharm may do that for you) and activate it.
  * Install the dependencies:
    * In `obm_server`: 
-     * `pip3 install -r /srv/app/requirements.txt`
+     * `pip3 install -r requirements.txt`
      * `pip3 install -r dev_requirements.txt`
    * In `obm_react`: `npm install`
    
