@@ -131,5 +131,6 @@ updated before releasing:
 
 ## Project History
 
+ * 2021-01-03: Scripted deployment on AWS works (open_battle_map_cdk project)
  * 2020-12-31: Minimal feature set done
  * 2020-12-02: First commit
