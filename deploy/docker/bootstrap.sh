@@ -65,7 +65,7 @@ function create_dhparam {
 
 
 function create_certificate {
-  /usr/bin/python3 /bin/acme_tiny.py \
+  python3 /bin/acme_tiny.py \
       --account-key "$account_secret_key" \
       --csr "$domain_csr" \
       --acme-dir "$challenge_dir/" \
@@ -95,6 +95,6 @@ service nginx start
 if [[ $TLS_DOMAIN != unset ]]
 then
     setup_tls
-    /srv/app/bin/renew_cert.py &
+    python3 /srv/app/bin/renew_cert.py &
 fi
 su - app -c 'cd /srv/app && uvicorn obm.app:app'

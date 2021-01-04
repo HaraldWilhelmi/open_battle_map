@@ -21,7 +21,7 @@ def get_new_certificate():
     info('Starting Certificate Renewal ...')
     process = run(
         [
-            '/usr/bin/python3',
+            'python3',
             '/bin/acme_tiny.py',
             '--account-key', '/data/tls/account_secret.pem'
             '--csr', '/data/tls/domain.csr',
