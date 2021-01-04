@@ -3,6 +3,7 @@ FROM python:3.8-slim-buster
 VOLUME /data
 
 ENV TLS_DOMAIN unset
+ENV LETSENCRYPT_URL 'https://acme-v02.api.letsencrypt.org/directory'
 
 RUN apt-get update \
     && apt-get install -y nginx bash openssh-server openssl \

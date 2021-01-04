@@ -82,6 +82,7 @@ function create_certificate {
         --account-key "$account_secret_key" \
         --csr "$domain_csr" \
         --acme-dir "$challenge_dir/" \
+        --directory-url "$LETSENCRYPT_URL" \
         > "${domain_chain}.tmp"
     if grep -q -F -- '-----BEGIN CERTIFICATE-----' "${domain_chain}.tmp"
     then
@@ -96,7 +97,7 @@ function enable_tls {
     if [[ -f "$domain_chain" ]]
     then
         mv /etc/nginx/sites-{available,enabled}/open_battle_map_tls.conf
-        service nginx restart
+        service nginx restart || true
     fi
 }
 
