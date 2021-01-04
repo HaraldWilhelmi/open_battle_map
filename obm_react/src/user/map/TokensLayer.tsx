@@ -46,8 +46,6 @@ export function TokensLayer() {
         () => {
             if ( tokenActionHistory === null ) { return undefined; }
             if ( tokenActionHistory?.battle_map_revision !== battleMap?.revision ) {
-                console.log("battle_map_revision " + (tokenActionHistory?.battle_map_revision ?? 'nix') + "/" + battleMap?.revision ?? 'nix');
-                console.log("battle_map_revision type " + typeof tokenActionHistory?.battle_map_revision + "/" + typeof battleMap?.revision);
                 if ( tokenActionHistory?.battle_map_revision > battleMap?.revision ) {
                     dispatch(actions.battleMap.get(battleMap))
                 }
