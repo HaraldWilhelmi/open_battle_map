@@ -60,7 +60,7 @@ function create_csr {
 
 
 function create_dhparam {
-    openssl dhparam -out "$domain_dhparam" 4096
+    openssl dhparam -dsaparam -out "$domain_dhparam" 4096
 }
 
 
