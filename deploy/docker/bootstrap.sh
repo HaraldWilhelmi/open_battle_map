@@ -14,6 +14,19 @@ domain_dhparam=/data/tls/domain_dhparam.pem
 challenge_dir=/srv/www/.well-known/acme-challenge
 
 
+function main {
+    setup_directories
+    service ssh start
+    disable_tls
+    service nginx start
+    if [[ $TLS_DOMAIN != unset ]]
+    then
+        setup_tls
+    fi
+    python3 /srv/app/bin/my_little_cron &
+    su - app -c 'cd /srv/app && uvicorn obm.app:app'
+}
+
 function setup_directories {
     if [[ ! -d /data/tls ]]
     then
@@ -86,15 +99,4 @@ function disable_tls {
     fi
 }
 
-
-setup_directories
-service ssh start
-set -x
-disable_tls
-service nginx start
-if [[ $TLS_DOMAIN != unset ]]
-then
-    setup_tls
-    python3 /srv/app/bin/renew_cert.py &
-fi
-su - app -c 'cd /srv/app && uvicorn obm.app:app'
+main | tee -a /var/log/bootstrap.log

@@ -8,7 +8,7 @@ RUN apt-get update \
     && apt-get install -y nginx bash openssh-server openssl \
     && rm -rf /var/cache/apt \
     && adduser --gecos 'Application User' --home /home/app --disabled-password app \
-    && mkdir -p /home/app /var/www/.well-known/acme-challenge /srv /root/.ssh \
+    && mkdir -p /home/app /srv/www/.well-known/acme-challenge /srv /root/.ssh \
     && rm /etc/nginx/sites-enabled/default
 
 COPY build/srv /srv/

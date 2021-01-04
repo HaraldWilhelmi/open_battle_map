@@ -5,6 +5,8 @@ from time import sleep
 from subprocess import run
 from datetime import datetime
 from os.path import getmtime
+from shutil import copyfile
+from os import environ
 
 
 MIN_SLEEP_SECONDS = 12 * 60 * 60
@@ -15,6 +17,13 @@ CERT_FILE = '/data/tls/domain_chain.pem'
 def info(message):
     now = datetime.now().isoformat()
     print(f"{now} {message}")
+
+
+def renew_certificate():
+    mtime = getmtime(CERT_FILE)
+    now = datetime.now().timestamp()
+    if now - mtime >= MIN_RENEWAL_WAIT_SECONDS:
+        try_to_renew_cert()
 
 
 def get_new_certificate():
@@ -57,9 +66,14 @@ def try_to_renew_cert():
             pass
 
 
+def rotate_logs():
+    copyfile('/var/log/bootstrap.log', '/var/log/bootstrap.log.old')
+    with open('/var/log/bootstrap.log', 'w') as fp:
+        fp.truncate()
+
+
 while True:
     sleep(MIN_SLEEP_SECONDS + randrange(MIN_SLEEP_SECONDS))
-    mtime = getmtime(CERT_FILE)
-    now = datetime.now().timestamp()
-    if now - mtime >= MIN_RENEWAL_WAIT_SECONDS:
-        try_to_renew_cert()
+    if environ.get('TLS_DOMAIN') != 'unset':
+        renew_certificate()
+    rotate_logs()
