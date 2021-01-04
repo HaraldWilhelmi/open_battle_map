@@ -23,7 +23,7 @@ function main {
     then
         setup_tls
     fi
-    python3 /srv/app/bin/my_little_cron &
+    python3 /srv/app/bin/my_little_cron.py &
     su - app -c 'cd /srv/app && uvicorn obm.app:app'
 }
 
