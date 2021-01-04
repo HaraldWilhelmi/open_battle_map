@@ -2,26 +2,29 @@ FROM python:3.8-slim-buster
 
 VOLUME /data
 
-ENV ENABLE_TLS yes
+ENV TLS_DOMAIN unset
 
-RUN apt-get update && apt-get install -y nginx bash openssh-server && rm -rf /var/cache/apt
-RUN adduser --gecos 'Application User' --home /home/app --disabled-password app
-RUN mkdir -p /home/app/.ssh /var/www/.ssh /srv
-RUN rm /etc/nginx/sites-enabled/default
+RUN apt-get update \
+    && apt-get install -y nginx bash openssh-server openssl \
+    && rm -rf /var/cache/apt \
+    && adduser --gecos 'Application User' --home /home/app --disabled-password app \
+    && mkdir -p /home/app /var/www/.well-known/acme-challenge /srv /root/.ssh \
+    && rm /etc/nginx/sites-enabled/default
 
 COPY build/srv /srv/
+
 RUN pip3 install -r /srv/app/requirements.txt
 
 COPY build/acme_tiny.py /bin/acme_tiny.py
 COPY vhost.conf /etc/nginx/sites-enabled/open_battle_map.conf
+COPY vhost_ssl.conf /etc/nginx/sites-available/open_battle_map_tls.conf
 COPY bootstrap.sh /bootstrap.sh
-COPY build/ssh_key.pub /home/app/.ssh/authorized_keys
-COPY build/ssh_key.pub /var/www/.ssh/authorized_keys
+COPY build/ssh_key.pub /root/.ssh/authorized_keys
 
-RUN chown -R app /srv/app /home/app
-RUN chmod -R g-rwx,o-rwx /srv/app
-RUN chown -R www-data:www-data /srv/www /var/www/.ssh
-RUN chmod -R g+rx-w,o-rwx /srv/www
-RUN chmod g-rwx,o-rwx /var/www/.ssh /home/app/.ssh
+RUN chmod g-rwx,o-rwx /root/.ssh \
+    && chown -R app /srv/app /home/app \
+    && chmod -R g-rwx,o-rwx /srv/app \
+    && chown -R www-data:www-data /srv/www \
+    && chmod -R g+rx-w,o-rwx /srv/www
 
 CMD /bin/bash /bootstrap.sh

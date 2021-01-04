@@ -22,6 +22,6 @@ docker container rm obm_test || true >/dev/null 2>&1
 docker run -it \
     --name obm_test \
     -p 127.0.0.1:80:80/tcp \
+    -p 127.0.0.1:122:22/tcp \
     --mount source=obm_test_data,target=/data \
-    --env ENABLE_TLS=no \
     open_battle_map

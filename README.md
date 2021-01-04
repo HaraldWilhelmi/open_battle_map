@@ -38,7 +38,7 @@ can use your server.
 
 The whole point of this tool is share information (a map or game board) between
 some players. It tries nothing to hide. If you want to play games in which
-players have limited insight what is going own like poker, you need something
+players have limited insight what is going on like poker, you need something
 completely different. 
 
 ## How to run?
@@ -109,17 +109,21 @@ TODO
    
 ### Test
 
-This application comes with three sets of tests. All of them should run and
-updated before releasing:
+This application comes with three sets of tests. They are run by `prepare_build.sh`
+but can and should be run more often:
 
- * PyTest unit tests in `obm_server/tests`.
+ * PyTest unit tests in `obm_server/tests`
  * PyTest integration tests in `obm_server/integration_tests`
- * Jest unit tests in `obm_react`.
+ * Jest unit tests in `obm_react`
+
+Also, I feel guilty that I only wrote so few of them yet.
 
 
 ## Roadmap
 
  * January 2021:
+   * Reducing network load for clients on idle Battle Maps be 2 orders of magnitude. 
+   * Improving response times for clients on busy Battle Maps by 1 order of magnitude.
    * AWS Deployment
  * February 2021:
    * Vehicles: Tokens that carry/move tokens placed on them.
@@ -134,3 +138,11 @@ updated before releasing:
  * 2021-01-03: Scripted deployment on AWS works (open_battle_map_cdk project)
  * 2020-12-31: Minimal feature set done
  * 2020-12-02: First commit
+
+## Credits
+
+There are a few people I would like thank:
+ * Sebastián Ramírez for FastAPI, which is just a fantastic idea.
+ * The countless contributors of countless JS/Typescript modules I used.
+ * Daniel Roesler for sharing https://github.com/diafygi/acme-tiny, which is used
+   in the Docker image if TLS is enabled.

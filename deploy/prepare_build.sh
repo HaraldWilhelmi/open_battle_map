@@ -18,7 +18,7 @@ rm -rf build/srv/www || true
 rm -rf build/srv/app || true
 mkdir -p build/srv/{www,app}
 cp -r ../../obm_react/build/* build/srv/www
-cp -r ../../obm_server/{obm,data,requirements.txt} build/srv/app
+cp -r ../../obm_server/{bin,obm,data,requirements.txt} build/srv/app
 
 wget https://raw.githubusercontent.com/diafygi/acme-tiny/master/acme_tiny.py --output-document=build/acme_tiny.py
 
