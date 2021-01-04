@@ -52,8 +52,8 @@ function setup_tls {
     [[ -f "$domain_secret_key" ]] || create_secret_key "$domain_secret_key"
     [[ -f "$domain_csr" ]] || create_csr
     [[ -f "$domain_dhparam" ]] || create_dhparam
-    # [[ -f "$domain_chain" ]] || create_certificate
-    # [[ -f /etc/nginx/sites-enabled/open_battle_map_ssl.conf ]] || enable_tls
+    [[ -f "$domain_chain" ]] || create_certificate
+    [[ -f /etc/nginx/sites-enabled/open_battle_map_ssl.conf ]] || enable_tls
 
 }
 
