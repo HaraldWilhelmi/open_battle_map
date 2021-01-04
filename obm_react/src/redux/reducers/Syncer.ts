@@ -1,10 +1,10 @@
-import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {ThunkApi, Timer, SyncDescriptor, SyncStateItem, SyncState} from '../Types';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {SyncDescriptor, SyncState, SyncStateItem, ThunkApi, Timer} from '../Types';
 
 interface TimerUpdate {
     syncKey: string,
     timer: Timer,
-};
+}
 
 const INITIAL_STATE: SyncState = {};
 
@@ -35,12 +35,11 @@ export const slice = createSlice({
         add: (state, action: PayloadAction<TimerUpdate>) => {
             let newState = {...state};
             const syncKey = action.payload.syncKey;
-            const item: SyncStateItem = {
+            newState[syncKey] = {
                 isSyncing: false,
                 isObsolete: false,
                 timer: action.payload.timer,
             };
-            newState[syncKey] = item;
             return newState;
         },
         remove: (state, action: PayloadAction<string>) => {

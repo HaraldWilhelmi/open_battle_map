@@ -75,11 +75,11 @@ class ManagedBattleMap(BattleMap):
         key = action.get_lookup_key()
         if key not in self.tokens_by_id_str:
             raise IllegalMove(f"Trying to move unknown token '{key}!")
-        newToken = TokenState(**action.__dict__)
+        new_token = TokenState(**action.__dict__)
         for index, token in enumerate(self.tokens):
             if action.is_same_token(token):
-                self.tokens[index] = newToken
-        self.tokens_by_id_str[key] = newToken
+                self.tokens[index] = new_token
+        self.tokens_by_id_str[key] = new_token
         self._do_house_keeping(action)
 
     def get_history(self, since: int) -> List[TokenAction]:
