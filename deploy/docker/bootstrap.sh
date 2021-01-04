@@ -78,17 +78,26 @@ function create_dhparam {
 
 
 function create_certificate {
-  python3 /bin/acme_tiny.py \
-      --account-key "$account_secret_key" \
-      --csr "$domain_csr" \
-      --acme-dir "$challenge_dir/" \
-      > "$domain_chain"
+    python3 /bin/acme_tiny.py \
+        --account-key "$account_secret_key" \
+        --csr "$domain_csr" \
+        --acme-dir "$challenge_dir/" \
+        > "${domain_chain}.tmp"
+    if grep -q -F -- '-----BEGIN CERTIFICATE-----' "${domain_chain}.tmp"
+    then
+        mv "${domain_chain}.tmp" "$domain_chain"
+    else
+        echo "Certificate creation silently  failed - continue without TLS to allow debugging!"
+    fi
 }
 
 
 function enable_tls {
-    mv /etc/nginx/sites-{available,enabled}/open_battle_map_tls.conf
-    service nginx restart
+    if [[ -f "$domain_chain" ]]
+    then
+        mv /etc/nginx/sites-{available,enabled}/open_battle_map_tls.conf
+        service nginx restart
+    fi
 }
 
 
