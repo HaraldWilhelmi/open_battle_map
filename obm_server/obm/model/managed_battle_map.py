@@ -1,11 +1,14 @@
+from asyncio import Task
 from typing import Optional, List, Dict, Any
 from uuid import UUID
+import asyncio
 
 from obm.data.battle_map import BattleMap
 from obm.data.map_set import MapSet
 from obm.data.token_state import TokenState, TokenAction, TokenActionType
 
 _MAX_TOKEN_LOGS = 100
+_MAX_HISTORY_WAIT_SECONDS = 30
 
 
 class IllegalMove(Exception):
@@ -23,6 +26,7 @@ class ManagedBattleMap(BattleMap):
     logs: List[TokenAction] = []
     logs_by_uuid: Dict[UUID, TokenAction] = {}
     tokens_by_id_str: Dict[str, TokenState] = {}
+    _all_update_waiters: List[Task] = []
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -43,6 +47,7 @@ class ManagedBattleMap(BattleMap):
         else:
             self._move_token(action)
         self.token_action_count += 1
+        self._release_waiters()
 
     def _add_token(self, action: TokenAction) -> None:
         new_token = TokenState(**action.__dict__)
@@ -75,11 +80,11 @@ class ManagedBattleMap(BattleMap):
         key = action.get_lookup_key()
         if key not in self.tokens_by_id_str:
             raise IllegalMove(f"Trying to move unknown token '{key}!")
-        newToken = TokenState(**action.__dict__)
+        new_token = TokenState(**action.__dict__)
         for index, token in enumerate(self.tokens):
             if action.is_same_token(token):
-                self.tokens[index] = newToken
-        self.tokens_by_id_str[key] = newToken
+                self.tokens[index] = new_token
+        self.tokens_by_id_str[key] = new_token
         self._do_house_keeping(action)
 
     def get_history(self, since: int) -> List[TokenAction]:
@@ -87,6 +92,30 @@ class ManagedBattleMap(BattleMap):
             raise LogsExpired('Requested data to old.')
         first_index = since - self.log_offset
         return self.logs[first_index:]
+
+    @staticmethod
+    async def _history_waiting():
+        try:
+            await asyncio.sleep(_MAX_HISTORY_WAIT_SECONDS)
+        except asyncio.CancelledError:
+            pass
+
+    async def wait_for_history_update(self, since: int) -> List[TokenAction]:
+        updates = self.get_history(since)
+        if len(updates) > 0:
+            return updates
+
+        waiter = asyncio.create_task(
+            self._history_waiting()
+        )
+        self._all_update_waiters.append(waiter)
+        await waiter
+
+        return self.get_history(since)
+
+    def _release_waiters(self):
+        for waiter in self._all_update_waiters:
+            waiter.cancel()
 
     def get_background_image(self) -> Optional[bytes]:
         return self.background_image
@@ -97,3 +126,7 @@ class ManagedBattleMap(BattleMap):
 
     def get_clean_data(self):
         return BattleMap(**self.__dict__)
+
+    def signal_update(self):
+        self.revision += 1
+        self._release_waiters()

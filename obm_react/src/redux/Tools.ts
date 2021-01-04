@@ -72,13 +72,12 @@ export function createReadonlySyncReducer<DATA>(
     );
 
     // Please note: Temporary failures during background sync are ignored.
-    const sync = createAsyncThunk<DATA, undefined, ThunkApi>(
+    const sync = createAsyncThunk<DATA, () => void, ThunkApi>(
         name + '/sync',
-        async (_: undefined, thunkApi) => {
+        async (finishSync, thunkApi) => {
             const dispatch = thunkApi.dispatch;
             const getState = thunkApi.getState;
             const rejectWithValue = thunkApi.rejectWithValue;
-
             try {
                 const data = await descriptor.api.get();
                 const stateAfter = getState().syncer[name];
@@ -89,6 +88,9 @@ export function createReadonlySyncReducer<DATA>(
             }
             catch (error) {
                 return rejectWithValue(handleError(error as Error, Operation.GET, dispatch));
+            }
+            finally {
+                finishSync();
             }
         }
     );
@@ -119,7 +121,7 @@ export function createReadonlySyncReducer<DATA>(
 
 function getStartSyncThunk<DATA>(
     descriptor: GenericSyncDescriptor<DATA>,
-    syncThunk: AsyncThunk<DATA, undefined, ThunkApi>,
+    syncThunk: AsyncThunk<DATA, () => void, ThunkApi>,
 ):
     AsyncThunk<void, undefined, ThunkApi>
 {
@@ -183,7 +185,7 @@ interface SyncWithIdHelper<ID, DATA extends ID> {
     handleError(error: Error, operation: Operation, id: ID|undefined, dispatch: GenericDispatch): ThunkRejectReasons,
     getIdOfLoadedData(state: RootState): ID | undefined,
     get: AsyncThunk<DATA, ID, ThunkApi>,
-    sync: AsyncThunk<DATA, undefined, ThunkApi>,
+    sync: AsyncThunk<DATA, () => void, ThunkApi>,
     startSync: AsyncThunk<void, undefined, ThunkApi>,
     stopSync: AsyncThunk<void, undefined, ThunkApi>,
 }
@@ -222,9 +224,9 @@ function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
         }
     );
 
-    const sync = createAsyncThunk<DATA, undefined, ThunkApi>(
+    const sync = createAsyncThunk<DATA, () => void, ThunkApi>(
         name + '/sync',
-        async (_: undefined, thunkApi) => {
+        async (finishSync, thunkApi) => {
             const dispatch = thunkApi.dispatch;
             const getState = thunkApi.getState;
             const rejectWithValue = thunkApi.rejectWithValue;
@@ -245,6 +247,9 @@ function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
             }
             catch (error) {
                 return rejectWithValue(handleError(error as Error, Operation.GET, id, dispatch));
+            }
+            finally {
+                finishSync();
             }
         }
     );

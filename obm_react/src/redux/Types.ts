@@ -151,5 +151,5 @@ export interface ThunkApi {
 export interface SyncDescriptor<DATA> {
     syncKey: string,
     syncPeriodInMs: number,
-    syncThunk: AsyncThunk<DATA, undefined, ThunkApi>,
+    syncThunk: AsyncThunk<DATA, () => void, ThunkApi>,
 }

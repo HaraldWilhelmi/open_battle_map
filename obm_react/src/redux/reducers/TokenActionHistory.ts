@@ -19,7 +19,7 @@ const setup = createReadonlySyncWithIdReducer({
     name: 'tokenActionHistory',
     api: tokenActionHistoryApi,
     getMyOwnState: (state: RootState) => state.tokenActionHistory,
-    syncPeriodInMs: 1000,
+    syncPeriodInMs: 100,
     errorHandler
 });
 

@@ -1,10 +1,10 @@
-import {createSlice, PayloadAction, createAsyncThunk} from '@reduxjs/toolkit';
-import {ThunkApi, Timer, SyncDescriptor, SyncStateItem, SyncState} from '../Types';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {SyncDescriptor, SyncState, SyncStateItem, ThunkApi, Timer} from '../Types';
 
 interface TimerUpdate {
     syncKey: string,
     timer: Timer,
-};
+}
 
 const INITIAL_STATE: SyncState = {};
 
@@ -35,12 +35,11 @@ export const slice = createSlice({
         add: (state, action: PayloadAction<TimerUpdate>) => {
             let newState = {...state};
             const syncKey = action.payload.syncKey;
-            const item: SyncStateItem = {
+            newState[syncKey] = {
                 isSyncing: false,
                 isObsolete: false,
                 timer: action.payload.timer,
             };
-            newState[syncKey] = item;
             return newState;
         },
         remove: (state, action: PayloadAction<string>) => {
@@ -66,15 +65,17 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
         const delay = descriptor.syncPeriodInMs;
         const syncKey = descriptor.syncKey;
 
-        function doSync() {
-            dispatch(slice.actions.startSync(syncKey));
-            try { dispatch(descriptor.syncThunk()); }
-            finally { dispatch(slice.actions.stopSync(syncKey)); }
-
+        function finishSync() {
+            dispatch(slice.actions.stopSync(syncKey));
             const timer = window.setTimeout(doSync, delay);
             dispatch(slice.actions.setTimer({syncKey, timer,}));
         }
 
+        function doSync() {
+            dispatch(slice.actions.startSync(syncKey));
+            dispatch(descriptor.syncThunk(finishSync));
+        }
+        console.log('Syncer ' + syncKey + ' started.');
         const syncerState = getState().syncer;
         if ( syncKey in syncerState ) {
             const message = 'Syncer "' + syncKey + '" already active!"';
@@ -91,9 +92,14 @@ const remove = createAsyncThunk<void, string, ThunkApi>(
     async (syncKey: string, thunkApi) => {
         const dispatch = thunkApi.dispatch;
         const getState = thunkApi.getState;
+        console.log('Syncer ' + syncKey + ' is stopping ...');
         const syncStateItem: SyncStateItem = getState().syncer[syncKey];
-        window.clearTimeout(syncStateItem.timer);
-        dispatch(slice.actions.remove(syncKey));
+        if ( syncStateItem ) {
+            window.clearTimeout(syncStateItem.timer);
+            dispatch(slice.actions.remove(syncKey));
+        } else {
+            console.log('Syncer ' + syncKey + ' was stopped already!');
+        }
     }
 );
 

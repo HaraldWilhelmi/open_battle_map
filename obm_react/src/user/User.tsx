@@ -74,10 +74,12 @@ export function User() {
     );
 
     useEffect( () => {
-        dispatch(actions.mapSet.startSync());
-        dispatch(actions.battleMap.startSync());
-        dispatch(actions.defaultTokenSet.startSync());
-        dispatch(actions.tokenActionHistory.startSync());
+        if ( mapSet !== null && defaultTokenSet !== null && ( battleMap !== null || mapSet.battle_maps.length === 0 ) ) {
+            dispatch(actions.mapSet.startSync());
+            dispatch(actions.battleMap.startSync());
+            dispatch(actions.defaultTokenSet.startSync());
+            dispatch(actions.tokenActionHistory.startSync());
+        }
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());

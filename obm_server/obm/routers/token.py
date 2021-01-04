@@ -85,14 +85,14 @@ RESPONSE_LOGS_EXPIRED = {
             responses=RESPONSE_MAP_SET_OR_BATTLE_MAP_NOT_FOUND,
             response_model=HistoryResponse,
             )
-def get_history(
+async def get_history(
         map_set_uuid: UUID, battle_map_uuid: UUID, since: int,
         response: Response,
         manager: MapSetManager = Depends(get_map_set_manager),
 ):
     battle_map = get_battle_map(manager, map_set_uuid, battle_map_uuid)
     try:
-        actions = battle_map.get_history(since)
+        actions = await battle_map.wait_for_history_update(since)
     except LogsExpired as e:
         raise HTTPException(status.HTTP_410_GONE, str(e))
     response.headers['Cache-Control'] = 'no-cache'

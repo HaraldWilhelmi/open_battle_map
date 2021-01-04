@@ -101,6 +101,6 @@ async def update_battle_map(
     battle_map.name = data.name
     battle_map.background_pixels_per_meter = data.background_pixels_per_meter
 
-    battle_map.revision += 1
+    battle_map.signal_update()
     manager.save(map_set)
     return BattleMapInfo(map_set_uuid=map_set.uuid, **battle_map.__dict__)
