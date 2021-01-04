@@ -96,7 +96,7 @@ function enable_tls {
     if [[ -f "$domain_chain" ]]
     then
         mv /etc/nginx/sites-{available,enabled}/open_battle_map_tls.conf
-        service nginx restart
+        service nginx restart || true
     fi
 }
 
