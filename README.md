@@ -124,7 +124,6 @@ Also, I feel guilty that I only wrote so few of them yet.
  * January 2021:
    * Reducing network load for clients on idle Battle Maps be 2 orders of magnitude. 
    * Improving response times for clients on busy Battle Maps by 1 order of magnitude.
-   * AWS Deployment
  * February 2021:
    * Vehicles: Tokens that carry/move tokens placed on them.
    * Generic tokens without facing
@@ -135,6 +134,7 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Project History
 
+ * 2021-01-05: **v0.1** - Added Letsencrypt to AWS deployment - verified for Letsencrypt staging
  * 2021-01-03: Scripted deployment on AWS works (open_battle_map_cdk project)
  * 2020-12-31: Minimal feature set done
  * 2020-12-02: First commit
