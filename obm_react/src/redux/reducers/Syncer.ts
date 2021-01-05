@@ -29,7 +29,7 @@ export const slice = createSlice({
         ),
         setTimer: (state, action: PayloadAction<TimerUpdate>) => patchState(
             state, action.payload.syncKey, (x) => {
-                return {...x, timer: action.payload.timer };
+                return {...x, timer: action.payload.timer};
             }
         ),
         add: (state, action: PayloadAction<TimerUpdate>) => {

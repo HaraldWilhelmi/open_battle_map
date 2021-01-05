@@ -233,12 +233,12 @@ function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
 
             const stateBefore = getState();
             const id = getIdOfLoadedData(stateBefore);
-            if ( id === undefined ) {
-                return rejectWithValue(ThunkRejectReasons.NothingToSync);
-            }
-            try {
-                const data = await descriptor.api.get(id);
 
+            try {
+                if ( id === undefined ) {
+                    return rejectWithValue(ThunkRejectReasons.NothingToSync);
+                }
+                const data = await descriptor.api.get(id);
                 const stateAfter = getState();
                 if (checkIfSyncIsObsolete(stateAfter)) {
                     return rejectWithValue(ThunkRejectReasons.ObsoleteSync);
