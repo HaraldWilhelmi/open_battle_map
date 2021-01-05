@@ -1,6 +1,7 @@
 from glob import glob
 from os.path import isfile
 from os import makedirs, unlink, rmdir
+from subprocess import run
 from uuid import UUID
 from typing import List, Optional
 import json
@@ -9,6 +10,7 @@ from obm.common.dep_context import DepContext, get_context
 from obm.data.map_set import MapSet, MapSetEntry
 from obm.data.battle_map import BattleMap
 from obm.fileio.map_set_paths import MapSetPaths
+from obm.fileio.static_data import DEFAULT_MAP
 
 
 class MapSetLoadError(Exception):
@@ -107,6 +109,16 @@ class MapSetIO:
                 return fp.read()
         else:
             return None
+
+    def get_image_dimensions(self, map_set: MapSet, battle_map_uuid: UUID) -> (int, int):
+        background_path = self._map_set_paths.get_background_path(map_set.uuid, battle_map_uuid)
+        if not isfile(background_path):
+            background_path = DEFAULT_MAP
+        process = run(['identify', '-format', '%w %h', background_path], capture_output=True, encoding='ascii')
+        if process.returncode != 0:
+            raise Exception('Failed to identify dimensions of image!')
+        width, height = process.stdout.split(' ')
+        return int(width), int(height)
 
     def delete_map_set(self, map_set: MapSet):
         for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):

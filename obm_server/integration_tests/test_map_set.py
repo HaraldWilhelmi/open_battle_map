@@ -14,6 +14,16 @@ from obm.model.map_set_cache import MapSetCache
 from obm.model.map_set_manager import MapSetManager
 
 
+SOME_SVG = b"""<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+	version="1.1" baseProfile="full"
+	width="30px" height="20px" viewBox="0 0 29 19"
+>
+    <circle cx="15" cy="10" r="7" fill="black"/>
+</svg>
+"""
+
+
 @fixture
 def ctx(tmpdir):
     ctx = DepContext()
@@ -49,7 +59,7 @@ def test_simple(ctx: DepContext):
 
     map_set.name = 'Changed1'
     battle_maps[0].name = 'Changed2'
-    battle_maps[0].set_background_image(media_type='nonsense', image_data=b'trash')
+    battle_maps[0].set_background_image(media_type='image/svg+xml', image_data=SOME_SVG)
     battle_maps[0].process_action(
         TokenAction(
             action_type=TokenActionType.Added,
@@ -68,7 +78,7 @@ def test_simple(ctx: DepContext):
     fresh_battle_maps = fresh_map_set.get_battle_maps()
     assert len(fresh_battle_maps) == 1
     assert fresh_battle_maps[0].name == 'Changed2'
-    assert fresh_battle_maps[0].get_background_image() == b'trash'
+    assert fresh_battle_maps[0].get_background_image() == SOME_SVG
     assert len(fresh_battle_maps[0].tokens)
     assert fresh_battle_maps[0].tokens[0].mark == '23'
 
