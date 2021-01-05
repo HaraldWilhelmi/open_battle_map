@@ -13,6 +13,8 @@ domain_dhparam=/data/tls/domain_dhparam.pem
 
 challenge_dir=/srv/www/.well-known/acme-challenge
 
+dns_check_result=/tmp/dns_check_result
+
 
 function main {
     setup_directories
@@ -78,18 +80,43 @@ function create_dhparam {
 
 
 function create_certificate {
-    python3 /bin/acme_tiny.py \
-        --account-key "$account_secret_key" \
-        --csr "$domain_csr" \
-        --acme-dir "$challenge_dir/" \
-        --directory-url "$LETSENCRYPT_URL" \
-        > "${domain_chain}.tmp"
+    wait_for_dns
+    echo "Creating TLS Certificate"
+
+    (
+        umask 022
+        python3 /bin/acme_tiny.py \
+            --account-key "$account_secret_key" \
+            --csr "$domain_csr" \
+            --acme-dir "$challenge_dir/" \
+            --directory-url "$LETSENCRYPT_URL" \
+            | tee "${domain_chain}.tmp"
+    )
     if grep -q -F -- '-----BEGIN CERTIFICATE-----' "${domain_chain}.tmp"
     then
         mv "${domain_chain}.tmp" "$domain_chain"
     else
-        echo "Certificate creation silently  failed - continue without TLS to allow debugging!"
+        echo "Certificate creation failed - continue without TLS to allow debugging!"
     fi
+}
+
+
+function wait_for_dns {
+    typeset me=$(uname -n)
+    echo "$me" >/srv/www/.my_true_self
+    chown www-data:www-data /srv/www/.my_true_self
+    rm "$dns_check_result" || true
+    while true
+    do
+        echo "Waiting for DNS ..."
+        sleep 10
+        curl -o "$dns_check_result" --silent --connect-timeout 1 "http://$TLS_DOMAIN/.my_true_self" || true
+        if grep -q "$me" "$dns_check_result"
+        then
+            rm /srv/www/.my_true_self
+            return
+        fi
+    done
 }
 
 
@@ -108,5 +135,6 @@ function disable_tls {
         mv /etc/nginx/sites-{enabled,available}/open_battle_map_tls.conf
     fi
 }
+
 
 main | tee -a /var/log/bootstrap.log
