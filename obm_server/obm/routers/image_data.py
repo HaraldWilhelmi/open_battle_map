@@ -57,5 +57,5 @@ async def upload_image_data(
     battle_map = get_battle_map(manager, map_set_uuid, uuid)
     data = await image_data.read()
     battle_map.set_background_image(data, image_data.content_type)
-    battle_map.revision += 1
+    battle_map.signal_update()
     manager.save(map_set)

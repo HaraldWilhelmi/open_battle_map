@@ -29,7 +29,7 @@ export function MapLegend() {
     let partLines = [];
     for ( let i = 0; i < ruler.parts; i++ ) {
         const css = isBlack ? "legend-black" : "legend-white";
-        partLines[i] = <line x1={x} y1={8} x2={x+partLengthInPixel-1} y2={8} className={css} />
+        partLines[i] = <line x1={x} y1={8} x2={x+partLengthInPixel-1} y2={8} className={css} key={i}/>
         isBlack = ! isBlack;
         x += partLengthInPixel;
     }

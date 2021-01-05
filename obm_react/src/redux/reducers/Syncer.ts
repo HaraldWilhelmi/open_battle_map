@@ -29,7 +29,7 @@ export const slice = createSlice({
         ),
         setTimer: (state, action: PayloadAction<TimerUpdate>) => patchState(
             state, action.payload.syncKey, (x) => {
-                return {...x, timer: action.payload.timer };
+                return {...x, timer: action.payload.timer};
             }
         ),
         add: (state, action: PayloadAction<TimerUpdate>) => {
@@ -65,15 +65,17 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
         const delay = descriptor.syncPeriodInMs;
         const syncKey = descriptor.syncKey;
 
-        function doSync() {
-            dispatch(slice.actions.startSync(syncKey));
-            try { dispatch(descriptor.syncThunk()); }
-            finally { dispatch(slice.actions.stopSync(syncKey)); }
-
+        function finishSync() {
+            dispatch(slice.actions.stopSync(syncKey));
             const timer = window.setTimeout(doSync, delay);
             dispatch(slice.actions.setTimer({syncKey, timer,}));
         }
 
+        function doSync() {
+            dispatch(slice.actions.startSync(syncKey));
+            dispatch(descriptor.syncThunk(finishSync));
+        }
+        console.log('Syncer ' + syncKey + ' started.');
         const syncerState = getState().syncer;
         if ( syncKey in syncerState ) {
             const message = 'Syncer "' + syncKey + '" already active!"';
@@ -90,9 +92,14 @@ const remove = createAsyncThunk<void, string, ThunkApi>(
     async (syncKey: string, thunkApi) => {
         const dispatch = thunkApi.dispatch;
         const getState = thunkApi.getState;
+        console.log('Syncer ' + syncKey + ' is stopping ...');
         const syncStateItem: SyncStateItem = getState().syncer[syncKey];
-        window.clearTimeout(syncStateItem.timer);
-        dispatch(slice.actions.remove(syncKey));
+        if ( syncStateItem ) {
+            window.clearTimeout(syncStateItem.timer);
+            dispatch(slice.actions.remove(syncKey));
+        } else {
+            console.log('Syncer ' + syncKey + ' was stopped already!');
+        }
     }
 );
 
