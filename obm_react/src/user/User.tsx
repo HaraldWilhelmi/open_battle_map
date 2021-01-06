@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import {BattleMapId} from '../api/Types';
+import {BattleMapId, TokenActionHistoryId} from '../api/Types';
 import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
@@ -23,6 +23,10 @@ export function User() {
     );
     let defaultTokenSet = useSelector(
         (state: RootState) => state.defaultTokenSet
+    );
+
+    let tokenActionHistory = useSelector(
+        (state: RootState) => state.tokenActionHistory
     );
 
     useEffect( // Initial load of MapSet
@@ -62,6 +66,30 @@ export function User() {
             return undefined;
         },
         [mapSet, battleMap, dispatch]
+    );
+
+    useEffect( // Load Token History
+        () => {
+            if (battleMap === null) {
+                if (tokenActionHistory !== null) {
+                    dispatch(actions.tokenActionHistory.invalidate());
+                }
+            } else {
+                if (
+                    tokenActionHistory === null
+                    || tokenActionHistory.map_set_uuid !== battleMap.map_set_uuid
+                    || tokenActionHistory.uuid !== battleMap.uuid
+                ) {
+                    const tokenActionHistoryId: TokenActionHistoryId = {
+                        ...battleMap,
+                        since: battleMap.token_action_count
+                    };
+                    dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
+                }
+            }
+            return undefined;
+        },
+        [battleMap, tokenActionHistory, dispatch]
     );
 
     useEffect(() => {

@@ -109,6 +109,8 @@ export interface Tokens {
 export interface SyncStateItem {
     isSyncing: boolean,
     isObsolete: boolean,
+    isActive: boolean,
+    uuid: string,
     timer: Timer,
 }
 
@@ -148,8 +150,10 @@ export interface ThunkApi {
     rejectValue: ThunkRejectReasons,
 }
 
+export type SyncFinisher = () => boolean;
+
 export interface SyncDescriptor<DATA> {
     syncKey: string,
     syncPeriodInMs: number,
-    syncThunk: AsyncThunk<DATA, () => void, ThunkApi>,
+    syncThunk: AsyncThunk<DATA, SyncFinisher, ThunkApi>,
 }
