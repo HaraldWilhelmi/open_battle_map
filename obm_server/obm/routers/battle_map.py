@@ -25,7 +25,7 @@ class BattleMapInfo(BaseModel):
     revision: int
     token_action_count: int
 
-    background_pixels_per_meter: int
+    background_pixels_per_meter: float
     background_media_type: Optional[str]
 
 

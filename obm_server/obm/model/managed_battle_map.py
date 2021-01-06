@@ -1,4 +1,5 @@
 from asyncio import Task
+from random import randrange
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 import asyncio
@@ -34,6 +35,11 @@ class ManagedBattleMap(BattleMap):
             token.get_lookup_key(): token
             for token in self.tokens
         }
+        self._reset_logs()
+
+    def _reset_logs(self):
+        self.logs = []
+        self.logs_by_uuid = {}
         self.log_offset = self.token_action_count
 
     def process_action(self, action: TokenAction) -> None:
@@ -123,6 +129,13 @@ class ManagedBattleMap(BattleMap):
     def set_background_image(self, image_data: bytes, media_type: str) -> None:
         self.background_image = image_data
         self.background_media_type = media_type
+
+    def sanitize_token_positions(self, width, height):
+        for token in self.tokens:
+            if token.position.x > width or token.position.y > height:
+                token.position.x = int(0.8 * width) + randrange(int(0.2 * width))
+                token.position.y = int(0.8 * height) + randrange(int(0.2 * height))
+        self._reset_logs()
 
     def get_clean_data(self):
         return BattleMap(**self.__dict__)

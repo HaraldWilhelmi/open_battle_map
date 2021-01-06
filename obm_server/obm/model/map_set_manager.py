@@ -61,6 +61,11 @@ class MapSetManager:
             self.save_background(battle_map)
         map_set.saved_flag = True
 
+    def sanitize_token_positions(self, battle_map: ManagedBattleMap):
+        map_set_io = self._map_set_io
+        width, height = map_set_io.get_image_dimensions(map_set=battle_map.map_set, battle_map_uuid=battle_map.uuid)
+        battle_map.sanitize_token_positions(width, height)
+
     def save_battle_map(self, battle_map: ManagedBattleMap):
         map_set_io = self._map_set_io
         map_set_io.save_battle_map(battle_map.map_set, battle_map.get_clean_data())

@@ -8,7 +8,7 @@ ENV LETSENCRYPT_URL 'https://acme-v02.api.letsencrypt.org/directory'
 HEALTHCHECK CMD curl -f http://localhost/ || exit 1
 
 RUN apt-get update \
-    && apt-get install -y nginx bash openssh-server openssl curl \
+    && apt-get install -y nginx bash openssh-server openssl curl imagemagick \
     && rm -rf /var/cache/apt \
     && adduser --gecos 'Application User' --home /home/app --disabled-password app \
     && mkdir -p /home/app /srv/www/.well-known/acme-challenge /srv /root/.ssh \
