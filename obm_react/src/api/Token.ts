@@ -8,8 +8,8 @@ import {
     TokenActionHistoryExpired
 } from './Types';
 import {GenericDispatch} from '../redux/Types';
-import {handleResponse} from '../common/Tools';
 import {createReadonlyApiWithId} from "./Tools";
+import {UnpackedResponse, unpackCheckedResponse} from "./UnpackResponse";
 
 
 interface Request extends TokenAction {
@@ -18,35 +18,30 @@ interface Request extends TokenAction {
 }
 
 
-export async function postTokenAction(battleMapId: BattleMapId, action: TokenAction, dispatch: GenericDispatch) {
+export async function postTokenAction(battleMapId: BattleMapId, action: TokenAction) {
     const body: Request = {...action,
         map_set_uuid: battleMapId.map_set_uuid,
         battle_map_uuid: battleMapId.uuid,
     };
-    const response = await(
-        fetch('/api/token/action', {
+    await unpackCheckedResponse(
+        await fetch('/api/token/action', {
             method:'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body),
         })
     )
-    handleResponse(dispatch, response);
 }
 
 export async function getAllTokens(battleMapId: BattleMapId, dispatch: GenericDispatch): Promise<AllTokenStatesResponse> {
     const url = '/api/token/all/' + battleMapId.map_set_uuid + '/' + battleMapId.uuid;
-    const response = await(
-        fetch(url, {method:'GET'})
+    const response = await unpackCheckedResponse(
+        await fetch(url, {method:'GET'})
     )
-    if ( response.ok ) {
-        return response.json()
-    }
-    handleResponse(dispatch, response);
-    throw new Error('Should not happen');
+    return response.json
 }
 
 
-function detectSpecialErrors(response: Response, operation: Operation, id: TokenActionHistoryId|undefined): void {
+function detectSpecialErrors(response: UnpackedResponse, _operation: Operation, _id: TokenActionHistoryId|undefined): void {
     if ( response.status === 410 ) {
         throw new TokenActionHistoryExpired();
     }

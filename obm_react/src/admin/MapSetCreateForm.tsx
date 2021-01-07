@@ -8,6 +8,7 @@ import {MapSetCreate} from '../api/Types';
 import {mapSetApi} from '../api/MapSet';
 import {GenericDispatch} from '../redux/Types';
 import {actions} from '../redux/Store';
+import {handleUserAction} from "../common/Tools";
 
 export function MapSetCreateForm() {
     let [name, setName] = useState('');
@@ -19,12 +20,14 @@ export function MapSetCreateForm() {
         setName(event.target.value);
     };
 
-    let myCreate = (event: React.FormEvent) => {
-        let request: MapSetCreate = {name};
-        mapSetApi.create(request);
-        updateMapSetList();
-        setName('');
+    let myCreate = async (event: React.FormEvent) => {
         event.preventDefault();
+        await handleUserAction(() => {
+            const request: MapSetCreate = {name};
+            mapSetApi.create(request);
+            updateMapSetList();
+            setName('');
+        }, dispatch);
     };
 
     return (

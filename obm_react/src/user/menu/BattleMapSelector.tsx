@@ -1,7 +1,9 @@
+import {ChangeEvent} from "react";
 import {useDispatch, useSelector} from 'react-redux';
 import {actions} from '../../redux/Store';
 import {RootState, GenericDispatch} from '../../redux/Types';
 import {MapSet, BattleMap, BattleMapId} from '../../api/Types';
+import {handleUserAction} from "../../common/Tools";
 
 
 export function BattleMapSelector() {
@@ -27,15 +29,18 @@ export function BattleMapSelector() {
 
     }
 
-    let changeBattleMap = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    let changeBattleMap = async (event: ChangeEvent<HTMLSelectElement>) => {
         event.preventDefault();
-        if ( mapSet === null ) {
-            return;
+        if ( mapSet !== null ) {
+            const id: BattleMapId = {uuid: event.target.value, map_set_uuid: mapSet.uuid};
+            await handleUserAction(
+                () => {
+                    dispatch(actions.battleMap.get(id));
+                    dispatch(actions.mapProperties.reset());
+                },
+                dispatch
+            );
         }
-        const id: BattleMapId = { uuid: event.target.value, map_set_uuid: mapSet.uuid };
-        dispatch(actions.messages.reset());
-        dispatch(actions.battleMap.get(id));
-        dispatch(actions.mapProperties.reset());
     };
 
     return (

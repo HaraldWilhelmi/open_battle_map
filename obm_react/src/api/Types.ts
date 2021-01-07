@@ -1,3 +1,4 @@
+import {UnpackedResponse} from "./UnpackResponse";
 
 export enum Operation {
     GET = 'fetch',
@@ -155,14 +156,14 @@ export interface  GenericApiDescriptor {
 }
 
 export interface ReadonlyApiDescriptor extends GenericApiDescriptor {
-    detectSpecialErrors?: (response: Response, operation: Operation) => void,
+    detectSpecialErrors?: (response: UnpackedResponse, operation: Operation) => void,
 }
 
 export interface IdDescriptor<ID, ID_LIKE extends ID> {
     isIdOf: (id: ID, idLike: ID_LIKE) => boolean,
     getIdOf: (idLike: ID_LIKE) => ID,
     getFetchUri: (id: ID) => string,
-    detectSpecialErrors?: (response: Response, operation: Operation, id: ID|undefined) => void,
+    detectSpecialErrors?: (response: UnpackedResponse, operation: Operation, id: ID | undefined) => void,
 }
 
 export interface ApiWithIdDescriptor<ID, ID_LIKE extends  ID>
@@ -175,7 +176,7 @@ export interface ReadonlyApi<DATA> extends ReadonlyApiDescriptor {
 
 export interface ReadonlyApiWithId<ID, ID_LIKE extends ID, DATA extends ID_LIKE> extends ApiWithIdDescriptor<ID, ID_LIKE> {
     get: (id: ID) => Promise<DATA>,
-    checkForErrors: (response: Response, operation: Operation, id: ID|undefined) => void,
+    myCheckedUnpack: (response: Response, operation: Operation, id: ID|undefined) => any,
 }
 
 export interface UpdatableApiWithId<

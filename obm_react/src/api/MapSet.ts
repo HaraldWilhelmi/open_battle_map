@@ -3,9 +3,10 @@ import {
     AdminSecretRequired, MapSetNotFound
 } from './Types';
 import {createUpdatableApiWithId} from './Tools';
+import {UnpackedResponse} from "./UnpackResponse";
 
 
-function detectSpecialErrors(response: Response, _op: Operation, _id: MapSetId|undefined) {
+function detectSpecialErrors(response: UnpackedResponse, _op: Operation, _id: MapSetId|undefined) {
     if ( response.status === 404 ) {
         throw new MapSetNotFound();
     }

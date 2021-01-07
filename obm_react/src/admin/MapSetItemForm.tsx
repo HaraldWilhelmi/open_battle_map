@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {ChangeEvent, FormEvent, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -8,6 +8,7 @@ import {MapSet, MapSetId, MapSetListItem} from '../api/Types';
 import {mapSetApi} from '../api/MapSet';
 import {GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
+import {handleUserAction} from "../common/Tools";
 
 
 interface Props {
@@ -21,33 +22,38 @@ export function MapSetItemRow(props: Props) {
 
     let updateMapSetList = async () => await dispatch(actions.mapSetList.get());
 
-    let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let onChange = (event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     };
 
-    let myRename = async (event: React.FormEvent) => {
+    let myRename = async (event: FormEvent) => {
         event.preventDefault();
-        const id: MapSetId = {uuid: props.item.uuid};
-        let mapSet: MapSet = await mapSetApi.get(id);
-        mapSet = {...mapSet, name};
-        await mapSetApi.update(mapSet);
-        updateMapSetList();
+        await handleUserAction( async () => {
+            const id: MapSetId = {uuid: props.item.uuid};
+            let mapSet: MapSet = await mapSetApi.get(id);
+            mapSet = {...mapSet, name};
+            await mapSetApi.update(mapSet);
+            await updateMapSetList();
+        }, dispatch);
     };
 
     let myDelete = async () => {
         let warning = 'Really delete Background Set "' + item.name + '" ('
             + item.uuid + ')?'
         if (window.confirm(warning)) {
-            const id: MapSetId = {uuid: props.item.uuid};
-            await mapSetApi.remove(id);
-            updateMapSetList();
+            await handleUserAction( async () => {
+                const id: MapSetId = {uuid: props.item.uuid};
+                await mapSetApi.remove(id);
+                await updateMapSetList();
+            }, dispatch);
         }
     };
 
-    let myOpen = () => {
-        dispatch(actions.messages.reset());
-        dispatch(actions.mode.set(Mode.User));
-        window.location.href = '/' + item.uuid;
+    let myOpen = async () => {
+        await handleUserAction( async () => {
+            dispatch(actions.mode.set(Mode.User));
+            window.location.href = '/' + item.uuid;
+        }, dispatch);
     }
 
     return (

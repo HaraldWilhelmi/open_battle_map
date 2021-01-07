@@ -155,7 +155,7 @@ const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
 
 async function logAction(state: RootState, action: TokenAction, dispatch: GenericDispatch) {
     try {
-        await postTokenAction(state.battleMap, action, dispatch);
+        await postTokenAction(state.battleMap, action);
         dispatch(localTokenActionTrackActions.log(action.uuid));
     } catch (e) {
         console.log("Warning: Failed to send token action - will reload everything from server!")

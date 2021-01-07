@@ -5,6 +5,7 @@ import Messages from '../common/Messages';
 import {GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import './Admin.css';
+import {handleUserAction} from "../common/Tools";
 
 
 export function AdminLogin() {
@@ -15,15 +16,18 @@ export function AdminLogin() {
         setSecret(event.target.value);
     };
 
-    let myLogin = (event: React.FormEvent) => {
-        dispatch(actions.messages.reset());
-        dispatch(actions.cookies.setAdminSecret(secret));
-        dispatch(actions.mode.set(Mode.Admin));
+    let myLogin = async (event: React.FormEvent) => {
         event.preventDefault();
+        await handleUserAction( () => {
+            dispatch(actions.cookies.setAdminSecret(secret));
+            dispatch(actions.mode.set(Mode.Admin));
+        }, dispatch);
     };
 
-    let myCancel = () => {
-        dispatch(actions.mode.set(Mode.User));
+    let myCancel = async () => {
+        await handleUserAction( () => {
+            dispatch(actions.mode.set(Mode.User));
+        }, dispatch);
     };
 
     return (

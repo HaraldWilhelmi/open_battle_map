@@ -3,9 +3,10 @@ import {
     BattleMapNotFound,
 } from './Types';
 import {createUpdatableApiWithId} from './Tools';
+import {UnpackedResponse} from "./UnpackResponse";
 
 
-function detectSpecialErrors(response: Response, _op: Operation, _id: BattleMapId|undefined) {
+function detectSpecialErrors(response: UnpackedResponse, _op: Operation, _id: BattleMapId|undefined) {
     if ( response.status === 404 ) {
         throw new BattleMapNotFound();
     }

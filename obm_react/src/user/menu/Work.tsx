@@ -9,6 +9,7 @@ import ClickMenuItem from '../components/ClickMenuItem';
 import TextInputMenuItem from '../components/TextInputMenuItem';
 import UploadMenuItem from '../components/UploadMenuItem';
 import MapScale from '../components/MapScale';
+import {handleUserAction} from "../../common/Tools";
 
 
 export function Work() {
@@ -29,52 +30,57 @@ export function Work() {
     let myDownloadMapSet = () => window.location.assign('/api/backup/' + mapSet.uuid);
 
     let myUploadMapSet = async (file: File) => {
-        dispatch(actions.messages.reset());
-        await uploadMapSetArchive(mapSet, file, dispatch);
-        await refreshBattleMapSelector();
-        await refreshMapBackground();
-        dispatch(actions.mapProperties.reset());
+        await handleUserAction(async () => {
+            await uploadMapSetArchive(mapSet, file, dispatch);
+            await refreshBattleMapSelector();
+            await refreshMapBackground();
+            dispatch(actions.mapProperties.reset());
+        }, dispatch);
     }
 
     let myUploadBackground = async (file: File) => {
-        dispatch(actions.messages.reset());
-        await postImageData(battleMap, file, dispatch);
-        await refreshMapBackground();
-        dispatch(actions.mapProperties.reset());
+        await handleUserAction(async () => {
+            await postImageData(battleMap, file, dispatch);
+            await refreshMapBackground();
+            dispatch(actions.mapProperties.reset());
+        }, dispatch);
     };
 
     let myCreateBattleMap = async (name: string) => {
-        dispatch(actions.messages.reset());
-        const request: BattleMapCreate = {
-            name,
-            map_set_uuid: mapSet.uuid,
-        }
-        dispatch(actions.battleMap.create(request));
-        await refreshBattleMapSelector();
-        dispatch(actions.mapProperties.reset());
+        await handleUserAction(async () => {
+            const request: BattleMapCreate = {
+                name,
+                map_set_uuid: mapSet.uuid,
+            }
+            dispatch(actions.battleMap.create(request));
+            await refreshBattleMapSelector();
+            dispatch(actions.mapProperties.reset());
+        }, dispatch);
     };
 
     let myRenameBattleMap = async (name: string) => {
-        dispatch(actions.messages.reset());
-        let changedMap: BattleMap = {...battleMap, name: name};
-        dispatch(actions.battleMap.update(changedMap));
-        await refreshBattleMapSelector();
+        await handleUserAction(async () => {
+            let changedMap: BattleMap = {...battleMap, name: name};
+            dispatch(actions.battleMap.update(changedMap));
+            await refreshBattleMapSelector();
+        }, dispatch);
     };
 
     let myDeleteBattleMap = async () => {
-        dispatch(actions.messages.reset());
         let warning = 'Really delete Battle Background "' + battleMap.name + '" (' + battleMap.uuid + ')?'
         if (window.confirm(warning)) {
-            dispatch(actions.battleMap.remove(battleMap));
-            for ( let item of mapSet.battle_maps ) {
-                if ( item.uuid !== battleMap.uuid ) {
-                    let id: BattleMapId = {uuid: item.uuid, map_set_uuid: mapSet.uuid};
-                    dispatch(actions.battleMap.get(id));
-                    break;
+            await handleUserAction(async () => {
+                dispatch(actions.battleMap.remove(battleMap));
+                for (let item of mapSet.battle_maps) {
+                    if (item.uuid !== battleMap.uuid) {
+                        let id: BattleMapId = {uuid: item.uuid, map_set_uuid: mapSet.uuid};
+                        dispatch(actions.battleMap.get(id));
+                        break;
+                    }
                 }
-            }
-            await refreshBattleMapSelector();
-            dispatch(actions.mapProperties.reset());
+                await refreshBattleMapSelector();
+                dispatch(actions.mapProperties.reset());
+            }, dispatch);
         }
     };
 

@@ -1,30 +1,36 @@
 import {
-    Operation, ReadonlyApiDescriptor, ReadonlyApi, ApiWithIdDescriptor, UpdatableApiWithId, ReadonlyApiWithId
+    ApiWithIdDescriptor,
+    Operation,
+    ReadonlyApi,
+    ReadonlyApiDescriptor,
+    ReadonlyApiWithId,
+    UpdatableApiWithId
 } from './Types';
+import {unpackCheckedResponse, UnpackedResponse} from "./UnpackResponse";
 
 
 export function createReadonlyApi<DATA>(
     descriptor: ReadonlyApiDescriptor
 ): ReadonlyApi<DATA> {
 
-    function checkForErrors(
+    async function myCheckedUnpack(
         response: Response, operation: Operation
-    ): void {
-        if ( descriptor.detectSpecialErrors !== undefined ) {
-            descriptor.detectSpecialErrors(response, operation);
-        }
-        if (! response.ok) {
-            throw new Error(
-                'Failed to ' + operation + ' ' + descriptor.name + ': '
-                + response.status + ' ' + response.statusText
-            );
-        }
+    ): Promise<UnpackedResponse> {
+        const context = operation + ' ' + descriptor.name;
+        const errorHandler = (r: UnpackedResponse, context: any) => {
+              if ( descriptor.detectSpecialErrors !== undefined ) {
+                  descriptor.detectSpecialErrors(r, context);
+              }
+        };
+        return unpackCheckedResponse(response, context, errorHandler);
     }
 
     async function get(): Promise<DATA> {
-        let response = await(fetch(descriptor.baseUrl + '/'));
-        checkForErrors(response, Operation.GET);
-        return response.json();
+        const response = await myCheckedUnpack(
+            await fetch(descriptor.baseUrl + '/'),
+            Operation.GET
+        );
+        return response.json;
     }
 
     return {...descriptor, get}
@@ -39,26 +45,29 @@ export function createReadonlyApiWithId<
     descriptor: ApiWithIdDescriptor<ID, ID_LIKE>
 ): ReadonlyApiWithId<ID, ID_LIKE, DATA> {
 
-    function checkForErrors(
+    async function myCheckedUnpack(
         response: Response, operation: Operation, id: ID|undefined
-    ): void {
-        if ( descriptor.detectSpecialErrors !== undefined ) {
-            descriptor.detectSpecialErrors(response, operation, id);
-        }
-        if (! response.ok) {
-            const what = id === undefined ? descriptor.name : descriptor.name + ' ' + id;
-            throw new Error('Failed to ' + operation + ' ' + what + ': ' + response.status + ' ' + response.statusText);
-        }
+    ): Promise<UnpackedResponse> {
+        const context = operation + ' ' + descriptor.name;
+        const errorHandler = (r: UnpackedResponse, context: any) => {
+              if ( descriptor.detectSpecialErrors !== undefined ) {
+                  descriptor.detectSpecialErrors(r, context ,id);
+              }
+        };
+        return unpackCheckedResponse(response, context, errorHandler);
     }
 
     async function get(id: ID): Promise<DATA> {
         const url = descriptor.baseUrl + descriptor.getFetchUri(id);
-        let response = await(fetch(url));
-        checkForErrors(response, Operation.GET, id);
-        return response.json();
+        const response = await myCheckedUnpack(
+            await fetch(url),
+            Operation.GET,
+            id
+        );
+        return response.json;
     }
 
-    return {...descriptor, get, checkForErrors};
+    return {...descriptor, get, myCheckedUnpack};
 }
 
 
@@ -71,41 +80,43 @@ export function createUpdatableApiWithId<
     descriptor: ApiWithIdDescriptor<ID, UPDATE>
 ): UpdatableApiWithId<ID, UPDATE, CREATE, DATA> {
     const readOnlyApi = createReadonlyApiWithId<ID, UPDATE, DATA>(descriptor);
-    const checkForErrors = readOnlyApi.checkForErrors;
+    const myCheckedUnpack = readOnlyApi.myCheckedUnpack;
 
     const create: (body: CREATE) => Promise<DATA> = async (body) => {
-        const response = await(
-            fetch(descriptor.baseUrl + '/', {
+        const response = await myCheckedUnpack(
+            await fetch(descriptor.baseUrl + '/', {
                 method:'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(body),
-            })
+            }),
+            Operation.PUT,
+            undefined
         );
-        checkForErrors(response, Operation.PUT, undefined);
-        return response.json();
+        return response.json;
     };
 
     const update: (body: UPDATE) => Promise<void> = async (body) => {
-        const response = await(
-            fetch(descriptor.baseUrl + '/', {
+        await myCheckedUnpack(
+            await fetch(descriptor.baseUrl + '/', {
                 method:'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(body),
-            })
+            }),
+            Operation.POST,
+            descriptor.getIdOf(body)
         );
-        const id = descriptor.getIdOf(body);
-        checkForErrors(response, Operation.POST, id);
     };
 
     const remove: (id: ID) => Promise<void> = async (id) => {
-        const response = await(
-            fetch(descriptor.baseUrl + '/', {
+        await myCheckedUnpack(
+            await fetch(descriptor.baseUrl + '/', {
                 method:'DELETE',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(id),
-            })
+            }),
+            Operation.DELETE,
+            id
         );
-        checkForErrors(response, Operation.DELETE, id);
     };
 
     return {...readOnlyApi, create, update, remove};

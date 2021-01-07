@@ -4,6 +4,8 @@ import {Operation, ReadonlyApi, ReadonlyApiWithId, UpdatableApiWithId} from '../
 import {GenericDispatch, RootState, SyncDescriptor, ThunkApi, ThunkRejectReasons, SyncFinisher} from './Types';
 import {syncerActions} from './reducers/Syncer';
 import {messagesActions} from './reducers/Messages';
+import {ApiError} from "../api/UnpackResponse";
+import {internalError} from "../common/Tools";
 
 
 export interface GenericSyncDescriptor<DATA> {
@@ -204,8 +206,12 @@ function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
         if ( handler !== undefined ) {
             handler(error, operation, id, dispatch);
         }
-        dispatch(messagesActions.reportError(error.message));
-        return ThunkRejectReasons.ApiError;
+        if ( error instanceof ApiError ) {
+            dispatch(messagesActions.reportError(error.message));
+            return ThunkRejectReasons.ApiError;
+        } else {
+            internalError(error.toString());
+        }
     }
 
     const get = createAsyncThunk<DATA, ID, ThunkApi>(
