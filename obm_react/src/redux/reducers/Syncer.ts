@@ -12,6 +12,7 @@ interface AddSyncer extends TimerUpdate {
 }
 
 const INITIAL_STATE: SyncState = {};
+const DEBUG = false;
 
 export const slice = createSlice({
     name: 'syncer',
@@ -62,7 +63,9 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
         const syncKey = descriptor.syncKey;
 
         const uuid = uuidV4();
-        console.log('Syncer ' + syncKey + ' started - ' + uuid);
+        if ( DEBUG ) {
+            console.log('Syncer ' + syncKey + ' started - ' + uuid);
+        }
         const syncerState = getState().syncer;
         if ( syncKey in syncerState && syncerState[syncKey].isActive ) {
             const message = 'Syncer "' + syncKey + '" already active!"';
@@ -73,14 +76,18 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
         function finishSync() {
             const myStateAfter = getState().syncer[syncKey];
             if ( ! myStateAfter.isActive || myStateAfter.uuid !== uuid ) {
-                console.log('Syncer ' + syncKey + ' terminates obsolete run - ' + uuid);
+                if ( DEBUG ) {
+                    console.log('Syncer ' + syncKey + ' terminates obsolete run - ' + uuid);
+                }
                 return false;
             }
             dispatch(slice.actions.stopSync(syncKey));
             const timer = window.setTimeout(doSync, delay);
             dispatch(slice.actions.setTimer({syncKey, timer}));
-            console.log('Syncer ' + syncKey + ' has run - ' + uuid);
-            console.log('Syncer ' + syncKey + ' isObsolte ' + myStateAfter.isObsolete + ' - '+ uuid);
+            if ( DEBUG ) {
+                console.log('Syncer ' + syncKey + ' has run - ' + uuid);
+                console.log('Syncer ' + syncKey + ' isObsolete ' + myStateAfter.isObsolete + ' - ' + uuid);
+            }
             return ! myStateAfter.isObsolete;
         }
 
@@ -103,10 +110,14 @@ const remove = createAsyncThunk<void, string, ThunkApi>(
         if ( ! mySyncState || ! mySyncState.isActive ) {
             return;
         }
-        console.log('Syncer ' + syncKey + ' is stopping - ' + mySyncState.uuid);
+        if ( DEBUG ) {
+            console.log('Syncer ' + syncKey + ' is stopping - ' + mySyncState.uuid);
+        }
         if ( ! mySyncState.isSyncing ) {
             window.clearTimeout(mySyncState.timer);
-            console.log('Syncer ' + syncKey + ' prevents future runs - ' + mySyncState.uuid);
+            if ( DEBUG ) {
+                console.log('Syncer ' + syncKey + ' prevents future runs - ' + mySyncState.uuid);
+            }
         }
         dispatch(slice.actions.remove(syncKey));
     }

@@ -122,8 +122,10 @@ Also, I feel guilty that I only wrote so few of them yet.
 ## Roadmap
 
  * January 2021:
-   * Reducing network load for clients on idle Battle Maps be 2 orders of magnitude. 
-   * Improving response times for clients on busy Battle Maps by 1 order of magnitude.
+   * Implement some Quick Wins after doing UX-Testing:
+     * More tokens, including some large ones for vehicles (yet without special features)
+     * Simple measurement functions
+     * Add buttons to turn map
  * February 2021:
    * Vehicles: Tokens that carry/move tokens placed on them.
    * Generic tokens without facing
@@ -134,6 +136,8 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Project History
 
+ * 2021-01-07: Switched polling from "1 poll per second per client" to "client polls after 0.1
+   seconds but answer is delayed up to 30s if nothing happens". 
  * 2021-01-05: **v0.1** - Added Letsencrypt to AWS deployment - verified for Letsencrypt staging
  * 2021-01-03: Scripted deployment on AWS works (open_battle_map_cdk project)
  * 2020-12-31: Minimal feature set done

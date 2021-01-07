@@ -25,10 +25,6 @@ export function User() {
         (state: RootState) => state.defaultTokenSet
     );
 
-    let tokenActionHistory = useSelector(
-        (state: RootState) => state.tokenActionHistory
-    );
-
     useEffect( // Initial load of MapSet
         () => {
             if ( uuidFromPath.length < 10 ) {
@@ -47,14 +43,13 @@ export function User() {
             if ( mapSet === null || mapSet.battle_maps.length === 0) {
                 if ( battleMap !== null ) {
                     dispatch(actions.battleMap.invalidate());
+                    dispatch(actions.tokenActionHistory.invalidate());
                 }
                 return undefined;
             }
 
-            if ( battleMap !== null ) {
-                if ( battleMap.map_set_uuid === mapSet.uuid ) {
-                    return undefined;
-                }
+            if ( battleMap !== null && battleMap.map_set_uuid === mapSet.uuid ) {
+                return undefined;
             }
 
             const battleMapId: BattleMapId = {
@@ -71,25 +66,16 @@ export function User() {
     useEffect( // Load Token History
         () => {
             if (battleMap === null) {
-                if (tokenActionHistory !== null) {
-                    dispatch(actions.tokenActionHistory.invalidate());
-                }
-            } else {
-                if (
-                    tokenActionHistory === null
-                    || tokenActionHistory.map_set_uuid !== battleMap.map_set_uuid
-                    || tokenActionHistory.uuid !== battleMap.uuid
-                ) {
-                    const tokenActionHistoryId: TokenActionHistoryId = {
-                        ...battleMap,
-                        since: battleMap.token_action_count
-                    };
-                    dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
-                }
+                return undefined;
             }
+            const tokenActionHistoryId: TokenActionHistoryId = {
+                ...battleMap,
+                since: battleMap.token_action_count
+            };
+            dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
             return undefined;
         },
-        [battleMap, tokenActionHistory, dispatch]
+        [battleMap, dispatch]
     );
 
     useEffect(() => {

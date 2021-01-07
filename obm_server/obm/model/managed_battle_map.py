@@ -9,7 +9,7 @@ from obm.data.map_set import MapSet
 from obm.data.token_state import TokenState, TokenAction, TokenActionType
 
 _MAX_TOKEN_LOGS = 100
-_MAX_HISTORY_WAIT_SECONDS = 3  # TODO: 30
+_MAX_HISTORY_WAIT_SECONDS = 30
 
 
 class IllegalMove(Exception):
