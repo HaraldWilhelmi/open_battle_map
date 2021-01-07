@@ -136,7 +136,7 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Project History
 
- * 2021-01-07: Switched polling from "1 poll per second per client" to "client polls after 0.1
+ * 2021-01-07: **v0.2** - Switched polling from "1 poll per second per client" to "client polls after 0.1
    seconds but answer is delayed up to 30s if nothing happens". 
  * 2021-01-05: **v0.1** - Added Letsencrypt to AWS deployment - verified for Letsencrypt staging
  * 2021-01-03: Scripted deployment on AWS works (open_battle_map_cdk project)
