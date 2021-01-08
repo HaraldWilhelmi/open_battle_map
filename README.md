@@ -73,7 +73,8 @@ a docker image do this:
  
 ## More features
 
-TODO
+ * Press 'm' on the map to do length measurements. Also displays the Gurps range modifier
+   (assuming that 1 m = 1 yd - good enough for game purpose I guess).
 
 ## How to change the code
 

@@ -45,7 +45,7 @@ export function FlyingTokenLayer(props: Props) {
                 layer.style.cursor = mouse.cursorStyle;
             }
             if ( tokens.flyingToken !== null && mouse.mode === MouseMode.MoveToken ) {
-                setPosition(tokens.flyingToken.position);
+                setPosition(tokens.flyingToken.positionOverGround);
                 setRotation(tokens.flyingToken.rotation);
             }
             return undefined;
@@ -56,7 +56,7 @@ export function FlyingTokenLayer(props: Props) {
     const moveToken = (event: MouseEvent) => {
         switch ( mouse.mode ) {
             case MouseMode.MoveToken: {
-                event.stopPropagation();
+                // event.stopPropagation();
                 const newPosition: Coordinate = {
                     x: event.nativeEvent.clientX,
                     y: event.nativeEvent.clientY,

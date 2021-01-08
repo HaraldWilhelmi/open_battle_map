@@ -1,9 +1,14 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {Coordinate, TokenAction, TokenActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
-import {postTokenAction, getAllTokens} from '../../api/Token';
-import {GenericDispatch, MouseMode, ActingTokenState, RootState, ThunkApi, Tokens} from '../Types';
-import {getFreeMarkForToken, getTokensWithout, startTokenAction, endTokenAction} from '../../user/tools/Token';
-import {v4 as uuidV4} from "uuid";
+import {getAllTokens, postTokenAction} from '../../api/Token';
+import {ActingTokenState, FlyingToken, GenericDispatch, MouseMode, RootState, ThunkApi, Tokens} from '../Types';
+import {
+    endTokenAction,
+    getFreeMarkForToken,
+    pickupTokenFromBox,
+    pickupTokenFromMap,
+    startTokenAction
+} from '../../user/tools/Token';
 import {mouseActions} from "./Mouse";
 import {localTokenActionTrackActions} from "./LocalTokenActionTrack";
 import {actions} from "../Store";
@@ -11,7 +16,6 @@ import {actions} from "../Store";
 
 const INITIAL_STATE: Tokens = {
     flyingToken: null,
-    flyingTokenIsNew: false,
     placedTokens: [],
     actingTokens: [],
 };
@@ -21,14 +25,8 @@ export const slice = createSlice({
     name: 'tokens',
     initialState: INITIAL_STATE,
     reducers: {
-        pickupFromMap: (state, action: PayloadAction<TokenState>) => {
-            const placedTokens = getTokensWithout(state.placedTokens, action.payload);
-            const flyingToken: TokenState = {...action.payload};
-            return {...state, placedTokens, flyingToken, flyingTokenIsNew: false};
-        },
-        pickupFromBox: (state, action: PayloadAction<TokenState>) => {
-            return {...state, flyingToken: action.payload, flyingTokenIsNew: true};
-        },
+        pickupFromMap: (state, action: PayloadAction<FlyingToken>) => pickupTokenFromMap(state, action.payload),
+        pickupFromBox: (state, action: PayloadAction<FlyingToken>) => pickupTokenFromBox(state, action.payload),
         positionOnMapForAdjustment: (state, action: PayloadAction<Coordinate>) => {
             if ( state.flyingToken !== null ) {
                 return {...state,
@@ -42,7 +40,6 @@ export const slice = createSlice({
         placeOnMap: (state, action: PayloadAction<TokenState>) => {
             return {...state,
                 flyingToken: null,
-                flyingTokenIsNew: false,
                 placedTokens: [...state.placedTokens, action.payload],
             };
         },
@@ -52,7 +49,6 @@ export const slice = createSlice({
         loadTokensFromServer: (state, action: PayloadAction<TokenState[]>) => {
             return {
                 flyingToken: null,
-                flyingTokenIsNew: false,
                 placedTokens: action.payload,
                 actingTokens: [],
             };
@@ -63,30 +59,30 @@ export const slice = createSlice({
 });
 
 
-const pickupFromMap = createAsyncThunk<void, TokenState, ThunkApi>(
+const pickupFromMap = createAsyncThunk<void, FlyingToken, ThunkApi>(
     'tokens/pickupFromMap',
-    async (token: TokenState, thunkApi) => {
+    async (token: FlyingToken, thunkApi) => {
         const getState = thunkApi.getState;
         const dispatch = thunkApi.dispatch;
         const state = getState();
         if ( state.mouse.mode !== MouseMode.Default ) {
             return;
         }
-        dispatch(mouseActions.grabToken());
+        dispatch(mouseActions.grabToken(token.position));
         dispatch(slice.actions.pickupFromMap(token));
     }
 );
 
-const pickupFromBox = createAsyncThunk<void, TokenState, ThunkApi>(
+const pickupFromBox = createAsyncThunk<void, FlyingToken, ThunkApi>(
     'tokens/pickupFromBox',
-    async (token: TokenState, thunkApi) => {
+    async (token: FlyingToken, thunkApi) => {
         const getState = thunkApi.getState;
         const dispatch = thunkApi.dispatch;
         const state = getState();
         if ( state.mouse.mode !== MouseMode.Default ) {
             return;
         }
-        dispatch(mouseActions.grabToken());
+        dispatch(mouseActions.grabToken(null));
         dispatch(slice.actions.pickupFromBox(token));
     }
 );
@@ -127,7 +123,7 @@ const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
 
 const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
     'tokens/placeOnMap',
-    async (rotation, thunkApi) => {
+    async (newRotation, thunkApi) => {
         const getState = thunkApi.getState;
         const dispatch = thunkApi.dispatch;
         const state = getState();
@@ -137,16 +133,13 @@ const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
             return;
         }
 
-        let actionType = TokenActionType.moved;
         let mark = token.mark;
-        if ( state.tokens.flyingTokenIsNew ) {
-            actionType = TokenActionType.added;
+        if ( token.action_type === TokenActionType.added ) {
             mark = getFreeMarkForToken(state.tokens.placedTokens, token);
         }
-        const uuid = uuidV4();
-        const newRotation = rotation === null ? token.rotation : rotation;
-        const newToken: TokenState = {...token, mark, rotation: newRotation};
-        const action: TokenAction = {...newToken, action_type: actionType, uuid};
+        const rotation = newRotation ?? token.rotation;
+        const newToken: TokenState = {...token, rotation, mark};
+        const action: TokenAction = {...token, rotation, mark};
         dispatch(slice.actions.placeOnMap(newToken));
         dispatch(mouseActions.releaseToken());
         await logAction(state, action, dispatch);
@@ -175,11 +168,9 @@ const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
         }
         dispatch(slice.actions.dropIntoBox());
         dispatch(mouseActions.releaseToken());
-        if (!state.tokens.flyingTokenIsNew) {
-            const action: TokenAction = {
-                ...token,
+        if ( token.action_type === TokenActionType.moved ) {
+            const action: TokenAction = {...token,
                 action_type: TokenActionType.removed,
-                uuid: uuidV4(),
             };
             await logAction(state, action, dispatch);
         }

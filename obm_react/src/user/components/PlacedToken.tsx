@@ -2,7 +2,7 @@ import {MouseEvent, WheelEvent} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import CSS from 'csstype';
 import {Coordinate, TokenState} from '../../api/Types';
-import {GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
+import {FlyingToken, GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {
     getMapFramePositionFromMapPosition,
@@ -40,12 +40,12 @@ export function PlacedToken(props: Props) {
         if ( mouse.mode === MouseMode.Default ) {
             event.stopPropagation();
             event.preventDefault();
-            const position: Coordinate = {
+            const positionOverGround: Coordinate = {
                 x: event.nativeEvent.clientX,
                 y: event.nativeEvent.clientY,
             };
-            const flyingToken: TokenState = {...props.token,
-                position
+            const flyingToken: FlyingToken = {...props.token,
+                positionOverGround
             };
             dispatch(actions.tokens.pickupFromMap(flyingToken));
         }

@@ -1,18 +1,37 @@
+import {v4 as uuidV4} from "uuid";
 import {internalError} from "../../common/Tools";
 import {TokenAction, TokenActionType, TokenId, TokenSet, TokenState, TokenType} from '../../api/Types';
-import {ActingTokenState, Tokens} from "../../redux/Types";
+import {ActingFlyingToken, ActingTokenState, FlyingToken, Tokens} from "../../redux/Types";
 
 
 export function isSameToken(a: TokenId, b: TokenId): boolean {
     return a.token_type === b.token_type && a.color === b.color && a.mark === b.mark && a.mark_color === b.mark_color;
 }
 
-export function getTokensWithout<T0 extends TokenId, T1 extends TokenId>(tokens: T0[], token: T1): T0[] {
-    const index = getTokenIndex(tokens, token);
+
+export function pickupTokenFromMap(state: Tokens, tokenState: FlyingToken): Tokens {
+    const index = getTokenIndex(state.placedTokens, tokenState);
     if ( index < 0 ) {
-        tokenError(token, "Failed to remove from list - not found!");
+        tokenError(tokenState,'Trying to move non-existing token!');
     }
-    return getTokensWithoutIndex(tokens, index)
+    const flyingToken: ActingFlyingToken = {...tokenState,
+        action_type: TokenActionType.moved,
+        uuid: uuidV4(),
+        fromPosition: tokenState.position,
+        fromRotation: tokenState.rotation,
+    };
+    const placedTokens = getTokensWithoutIndex(state.placedTokens, index);
+    return {...state, placedTokens, flyingToken};
+}
+
+export function pickupTokenFromBox(state: Tokens, tokenState: FlyingToken): Tokens {
+    const flyingToken: ActingFlyingToken = {...tokenState,
+        action_type: TokenActionType.added,
+        uuid: uuidV4(),
+        fromPosition: null,
+        fromRotation: null,
+    };
+    return {...state, flyingToken};
 }
 
 function tokenError(token: TokenId, message: string): never {

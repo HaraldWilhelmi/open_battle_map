@@ -86,6 +86,8 @@ export enum MouseMode {
     MoveToken,
     TurnToken,
     MoveMap,
+    MeasureFrom,
+    MeasureTo
 }
 
 export interface MouseState {
@@ -95,13 +97,18 @@ export interface MouseState {
 }
 
 export interface ActingTokenState extends TokenAction {
-    fromPosition: Coordinate,
-    fromRotation: number,
+    fromPosition: Coordinate | null,
+    fromRotation: number | null,
 }
 
+export interface FlyingToken extends TokenState {
+    positionOverGround: Coordinate,
+}
+
+export interface ActingFlyingToken extends FlyingToken, ActingTokenState {}
+
 export interface Tokens {
-    flyingToken: TokenState | null,
-    flyingTokenIsNew: boolean,
+    flyingToken: ActingFlyingToken | null,
     placedTokens: TokenState[],
     actingTokens: ActingTokenState[],
 }

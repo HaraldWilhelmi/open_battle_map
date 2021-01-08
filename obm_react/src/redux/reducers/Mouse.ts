@@ -26,14 +26,31 @@ export const slice = createSlice({
             };
         },
 
-        grabToken: (state) => {
-            return {...state, mode: MouseMode.MoveToken, cursorStyle: 'move'};
+        grabToken: (state, action:PayloadAction<Coordinate|null>) => {
+            return {...state,
+                mode: MouseMode.MoveToken,
+                cursorStyle: 'move',
+                lastSeen: action.payload,
+            };
         },
         placeToken: (state) => {
             return {...state, mode: MouseMode.TurnToken, cursorStyle: 'crosshair'};
         },
         releaseToken: (state) => {
-            return {...state,mode: MouseMode.Default, cursorStyle: 'default'};
+            return {...state,
+                mode: MouseMode.Default,
+                cursorStyle: 'default',
+                lastSeen: null,
+            };
+        },
+        startMeasurement: (state) => {
+            return {...state, mode: MouseMode.MeasureFrom, cursorStyle: 'crosshair', lastSeen: null};
+        },
+        selectMeasurementPostion: (state, action:PayloadAction<Coordinate>) => {
+            return {...state, mode: MouseMode.MeasureTo, lastSeen: action.payload};
+        },
+        stopMeasurement: (state) => {
+            return {...state, mode: MouseMode.Default, cursorStyle: 'default', lastSeen: null};
         },
     },
     extraReducers: builder => {

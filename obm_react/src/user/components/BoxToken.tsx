@@ -1,8 +1,8 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import CSS from 'csstype';
-import {TokenType, ColorCombo, TokenState, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
-import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
+import {TokenType, ColorCombo, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
+import {RootState, GenericDispatch, MouseMode, MouseState, FlyingToken} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {Token} from './Token';
 import {getTokenType} from "../tools/Token";
@@ -31,15 +31,16 @@ export function BoxToken(props: Props) {
         if ( mouse.mode === MouseMode.Default ) {
             event.stopPropagation();
             event.preventDefault();
-            const position: Coordinate = {
+            const positionOverGround: Coordinate = {
                 x: event.nativeEvent.clientX,
                 y: event.nativeEvent.clientY,
             };
-            const token: TokenState = {...props.colorCombo,
+            const token: FlyingToken = {...props.colorCombo,
                 token_type: props.tokenType.token_type,
                 mark: NEW_TOKEN_MARK,
-                position,
+                position: {x: 0, y: 0},
                 rotation: 0.0,
+                positionOverGround,
             };
             dispatch(actions.tokens.pickupFromBox(token));
         }

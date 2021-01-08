@@ -1,18 +1,27 @@
-import {WheelEvent, MouseEvent} from 'react';
+import {MouseEvent, useEffect, useState, WheelEvent} from 'react';
 import CSS from 'csstype';
-import {useSelector, useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {Coordinate} from '../../api/Types';
-import {
-    RootState, MapProperties, GenericDispatch, MapZoom, MouseMode, MouseState, Tokens
-} from '../../redux/Types';
+import {GenericDispatch, MapProperties, MapZoom, MouseMode, MouseState, RootState, Tokens} from '../../redux/Types';
 import {actions} from '../../redux/Store';
-import {ZOOM_INCREMENT, getMapPositionFromPhysicalPosition, calculateMapFrame, getRotationFromTarget} from '../tools/Map';
+import {
+    calculateMapFrame,
+    getMapPositionFromPhysicalPosition,
+    getRotationFromTarget,
+    ZOOM_INCREMENT
+} from '../tools/Map';
+import Measurement from "../components/Measurement";
+
+
+const INITIAL_MEASUREMENT_POSITION: Coordinate | null = null;
+
 
 interface Props {
   children: JSX.Element[] | JSX.Element
 }
 
 export function MapFrame(props: Props) {
+    const [measurementPosition, setMeasurementPosition] = useState(INITIAL_MEASUREMENT_POSITION);
     const dispatch: GenericDispatch = useDispatch();
 
     const mapProperties: MapProperties = useSelector(
@@ -34,15 +43,35 @@ export function MapFrame(props: Props) {
         dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
-    const placeToken = (event: MouseEvent) => {
+    const getMouseMapPosition = (event: MouseEvent) => getMapPositionFromPhysicalPosition(mapProperties, {
+        x: event.nativeEvent.offsetX,
+        y: event.nativeEvent.offsetY,
+    });
+
+
+    const doKeyboard = (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if ( event.key === 'm' ) {
+            if ( mouse.mode === MouseMode.Default ) {
+                dispatch(actions.mouse.startMeasurement());
+            } else if ( mouse.mode === MouseMode.MeasureFrom || mouse.mode === MouseMode.MeasureTo ) {
+                dispatch(actions.mouse.stopMeasurement());
+            }
+        }
+    };
+
+    useEffect(
+        () => {
+            document.addEventListener('keydown', doKeyboard);
+            return () => document.removeEventListener('keydown', doKeyboard);
+        }
+    )
+
+    const doClick = (event: MouseEvent) => {
         switch ( mouse.mode ) {
             case MouseMode.MoveToken: {
                 event.stopPropagation();
-                const physicalPosition: Coordinate = {
-                    x: event.nativeEvent.offsetX,
-                    y: event.nativeEvent.offsetY,
-                };
-                const position = getMapPositionFromPhysicalPosition(mapProperties, physicalPosition);
+                const position = getMouseMapPosition(event);
                 dispatch(actions.tokens.positionOnMapForAdjustment(position));
                 break;
             }
@@ -50,20 +79,47 @@ export function MapFrame(props: Props) {
                 event.stopPropagation();
                 let token = tokens.flyingToken;
                 if ( token !== null ) {  // Always true
-                    const target: Coordinate = getMapPositionFromPhysicalPosition(mapProperties, {
-                        x: event.nativeEvent.offsetX,
-                        y: event.nativeEvent.offsetY,
-                    });
+                    const target = getMouseMapPosition(event);
                     const rotation = getRotationFromTarget(token.position, target);
                     token = {...token, rotation};
                     dispatch(actions.tokens.placeOnMap(rotation));
                 }
                 dispatch(actions.mouse.releaseToken());
+                setMeasurementPosition(null);
+                break;
+            }
+            case MouseMode.MeasureFrom: {
+                const mapFrom = getMouseMapPosition(event);
+                dispatch(actions.mouse.selectMeasurementPostion(mapFrom));
+                break;
+            }
+            case MouseMode.MeasureTo: {
+                dispatch(actions.mouse.stopMeasurement());
                 break;
             }
             default: {break}
         }
     }
+
+    const trackDistance = (event: MouseEvent) => {
+        if (
+            mouse.mode === MouseMode.MoveToken
+            || mouse.mode === MouseMode.MeasureFrom
+            || mouse.mode === MouseMode.MeasureTo
+        ) {
+            setMeasurementPosition(getMouseMapPosition(event));
+        } else if ( mouse.mode === MouseMode.TurnToken ) {
+            // Do nothing!
+        } else {
+            stopTrackDistance();
+        }
+    }
+
+    const stopTrackDistance = () => {
+        if ( measurementPosition !== null ) {
+            setMeasurementPosition(null);
+        }
+    };
 
 
     const geometry = calculateMapFrame(mapProperties);
@@ -81,10 +137,13 @@ export function MapFrame(props: Props) {
         <div
             style={style}
             onWheel={doZoom}
-            onClick={placeToken}
-            onDragStart={placeToken}
+            onClick={doClick}
+            onDragStart={doClick}
+            onMouseMove={trackDistance}
+            onMouseLeave={stopTrackDistance}
         >
             {props.children}
+            <Measurement position={measurementPosition} />
         </div>
     );
 }

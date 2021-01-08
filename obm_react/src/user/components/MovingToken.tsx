@@ -5,7 +5,7 @@ import {GenericDispatch, MapProperties, RootState, ActingTokenState} from '../..
 import {actions} from '../../redux/Store';
 import {getMapFramePositionFromMapPosition} from '../tools/Map';
 import Token from './Token';
-import {TokenActionType} from "../../api/Types";
+import {TokenActionType, Coordinate} from "../../api/Types";
 import {getTokenIdAsKeyframesName, getTokenType} from "../tools/Token";
 
 
@@ -16,8 +16,9 @@ function getKeyFrames(token: ActingTokenState): string {
                     100% { transform: scale(1); opacity: 100%; }`;
         }
         case TokenActionType.moved: {
-            const dx = token.fromPosition.x - token.position.x;
-            const dy = token.fromPosition.y - token.position.y;
+            const fromPosition: Coordinate = token.fromPosition ?? {x: 0, y: 0};
+            const dx = fromPosition.x - token.position.x;
+            const dy = fromPosition.y - token.position.y;
             return `0% { transform: translate(${dx}px, ${dy}px); };
                     100% { transform: translate(0, 0); }`;
         }

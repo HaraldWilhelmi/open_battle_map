@@ -12,3 +12,33 @@
     height: 100%;
     background-color: #e0e0e0;
 }
+
+.measurement-band {
+    stroke-width: 5px;
+    stroke: black;
+    stroke-linecap: round;
+}
+
+.measurement-line {
+    stroke-width: 3px;
+    stroke: orange;
+    stroke-dasharray: 10px 10px;
+}
+
+.measurement-label {
+    font-size: 30px;
+    opacity: 70%;
+    stroke: black;
+}
+
+.measurement-tag {
+    fill: white;
+    opacity: 70%;
+}
+
+.measurement-box {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+}
