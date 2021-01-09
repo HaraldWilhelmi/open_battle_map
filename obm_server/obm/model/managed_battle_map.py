@@ -29,7 +29,7 @@ class ManagedBattleMap(BattleMap):
     tokens_by_id_str: Dict[str, TokenState] = {}
     _all_update_waiters: List[Task] = []
 
-    def __init__(self, **data: Any):
+    def __init__(self, **data: Any) -> object:
         super().__init__(**data)
         self.tokens_by_id_str: Dict[str, TokenState] = {
             token.get_lookup_key(): token

@@ -1,13 +1,7 @@
 from typing import List
 from pydantic import BaseModel
 
-from obm.data.common import ColorCombo, ActiveAreaShape
-
-
-# noinspection SpellCheckingInspection
-class ActiveArea(BaseModel):
-    shape: ActiveAreaShape
-    coords: List[int]
+from obm.data.common import ColorCombo
 
 
 class TokenDescriptor(BaseModel):
@@ -17,3 +11,4 @@ class TokenDescriptor(BaseModel):
     width: int
     height: int
     color_combos: List[ColorCombo]
+

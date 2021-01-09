@@ -10,7 +10,6 @@ import mapSetListReducer, {mapSetListActions} from './reducers/MapSetList';
 import mapPropertiesReducer, {mapPropertiesActions} from './reducers/MapProperties';
 import mouseReducer, {mouseActions} from './reducers/Mouse';
 import tokensReducer, {tokensActions} from './reducers/Tokens';
-import defaultTokenSetReducer, {defaultTokenSetActions} from "./reducers/DefaultTokenSet";
 import localTokenActionTrackReducer, {localTokenActionTrackActions} from "./reducers/LocalTokenActionTrack";
 import tokenActionHistoryReducer, {tokenActionHistoryActions} from "./reducers/TokenActionHistory";
 
@@ -26,7 +25,6 @@ export const store = configureStore({
         mapProperties: mapPropertiesReducer,
         mouse: mouseReducer,
         tokens: tokensReducer,
-        defaultTokenSet: defaultTokenSetReducer,
         localTokenActionTrack: localTokenActionTrackReducer,
         tokenActionHistory: tokenActionHistoryReducer,
     })
@@ -43,7 +41,6 @@ export const actions = {
     mapProperties: mapPropertiesActions,
     mouse: mouseActions,
     tokens: tokensActions,
-    defaultTokenSet: defaultTokenSetActions,
     localTokenActionTrack: localTokenActionTrackActions,
     tokenActionHistory: tokenActionHistoryActions,
 };

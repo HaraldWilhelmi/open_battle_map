@@ -22,6 +22,8 @@ export function Work() {
 
     let refreshMapBackground = async () => await dispatch(actions.battleMap.get(battleMap));
 
+    let refreshTokens = async () => await dispatch(actions.tokens.loadTokensFromServer());
+
     let mySwitchAdmin = () => {
         dispatch(actions.messages.reset());
         dispatch(actions.mode.set(Mode.Admin));
@@ -34,6 +36,7 @@ export function Work() {
             await uploadMapSetArchive(mapSet, file, dispatch);
             await refreshBattleMapSelector();
             await refreshMapBackground();
+            await refreshTokens();
             dispatch(actions.mapProperties.reset());
         }, dispatch);
     }

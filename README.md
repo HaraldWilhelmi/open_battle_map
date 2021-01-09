@@ -74,7 +74,7 @@ a docker image do this:
 ## More features
 
  * Press 'm' on the map to do length measurements. Also displays the Gurps range modifier
-   (assuming that 1 m = 1 yd - good enough for game purpose I guess).
+   (assuming that 1 my = 1 yd - good enough for game purpose I guess).
 
 ## How to change the code
 
@@ -125,7 +125,6 @@ Also, I feel guilty that I only wrote so few of them yet.
  * January 2021:
    * Implement some Quick Wins after doing UX-Testing:
      * More tokens, including some large ones for vehicles (yet without special features)
-     * Simple measurement functions
      * Add buttons to turn map
  * February 2021:
    * Vehicles: Tokens that carry/move tokens placed on them.

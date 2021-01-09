@@ -7,6 +7,7 @@ import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
 import Map from './map/Map';
 import FlyingTokenLayer from './FlyingTokenLayer';
+import TokenImages from './TokenImages';
 import Menu from './menu/Menu';
 import './User.css'
 
@@ -20,9 +21,6 @@ export function User() {
     );
     let battleMap = useSelector(
         (state: RootState) => state.battleMap
-    );
-    let defaultTokenSet = useSelector(
-        (state: RootState) => state.defaultTokenSet
     );
 
     useEffect( // Initial load of MapSet
@@ -78,26 +76,15 @@ export function User() {
         [battleMap, dispatch]
     );
 
-    useEffect(() => {
-            if ( defaultTokenSet === null ) {
-                dispatch(actions.defaultTokenSet.get());
-            }
-            return undefined;
-        },
-        [defaultTokenSet, dispatch]
-    );
-
     useEffect( () => {
-        if ( mapSet !== null && defaultTokenSet !== null && ( battleMap !== null || mapSet.battle_maps.length === 0 ) ) {
+        if ( mapSet !== null && ( battleMap !== null || mapSet.battle_maps.length === 0 ) ) {
             dispatch(actions.mapSet.startSync());
             dispatch(actions.battleMap.startSync());
-            dispatch(actions.defaultTokenSet.startSync());
             dispatch(actions.tokenActionHistory.startSync());
         }
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
-            dispatch(actions.defaultTokenSet.stopSync());
             dispatch(actions.tokenActionHistory.stopSync());
         };
     });
@@ -120,6 +107,19 @@ export function User() {
     }
     return (
         <div>
+            <svg display="none">
+                <symbol id="token0">
+                    <polygon points="10,23 45,3 80,23" className="background"/>
+                    <circle cx="45" cy="45" r="35" className="background"/>
+                    <circle cx="45" cy="45" r="30"/>
+
+                    <line x1="17" y1="21" x2="45" y2="6" className="outline"/>
+                    <line x1="73" y1="21" x2="45" y2="6" className="outline"/>
+                    <line x1="39" y1="12" x2="45" y2="9" className="outline"/>
+                    <line x1="51" y1="12" x2="45" y2="9" className="outline"/>
+                </symbol>
+            </svg>
+            <TokenImages />
             <FlyingTokenLayer>
                 <div className="main-layer">
                     <Map />

@@ -1,30 +1,25 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import CSS from 'csstype';
-import {TokenType, ColorCombo, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
+import {TokenDescriptor, ColorCombo, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
 import {RootState, GenericDispatch, MouseMode, MouseState, FlyingToken} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {Token} from './Token';
-import {getTokenType} from "../tools/Token";
 
 
 const BOX_TOKEN_WIDTH = 45;
 
 
 interface Props {
-    tokenType: TokenType,
+    tokenDescriptor: TokenDescriptor,
     colorCombo: ColorCombo,
 }
 
 export function BoxToken(props: Props) {
     const dispatch: GenericDispatch = useDispatch();
 
-    const mouse: MouseState = useSelector(
+    const mouse = useSelector(
         (state: RootState) => state.mouse
-    );
-
-    const defaultTokenSet: TokenType[] = useSelector(
-        (state: RootState) => state.defaultTokenSet
     );
 
     function pickupToken(event: MouseEvent) {
@@ -36,7 +31,7 @@ export function BoxToken(props: Props) {
                 y: event.nativeEvent.clientY,
             };
             const token: FlyingToken = {...props.colorCombo,
-                token_type: props.tokenType.token_type,
+                token_type: props.tokenDescriptor.token_type,
                 mark: NEW_TOKEN_MARK,
                 position: {x: 0, y: 0},
                 rotation: 0.0,
@@ -47,16 +42,16 @@ export function BoxToken(props: Props) {
     }
 
     const tokenId: TokenId = {...props.colorCombo,
-        token_type: props.tokenType.token_type,
+        token_type: props.tokenDescriptor.token_type,
         mark: '0',
     };
 
-    const tokenType = getTokenType(defaultTokenSet, tokenId);
+    const height = props.tokenDescriptor.height * BOX_TOKEN_WIDTH / props.tokenDescriptor.width;
 
     const boxTokenOuterFrameStyle: CSS.Properties = {
         position: 'relative',
         width: BOX_TOKEN_WIDTH + 'px',
-        height: (tokenType.height * BOX_TOKEN_WIDTH / tokenType.width) + 'px',
+        height: height + 'px',
         pointerEvents: 'none',
     }
 

@@ -3,9 +3,10 @@ from datetime import datetime
 
 from obm.common.dep_context import DepContext, get_context
 from obm.data.map_set import MapSet
+from obm.fileio.token_set_io import TokenSetIO
+from obm.fileio.map_set_io import MapSetIO, CorruptedImageData
 from obm.model.managed_map_set import ManagedMapSet
 from obm.model.map_set_cache import MapSetCache
-from obm.fileio.map_set_io import MapSetIO, CorruptedImageData
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.managed_battle_map import ManagedBattleMap
 
@@ -13,6 +14,7 @@ from obm.model.managed_battle_map import ManagedBattleMap
 class MapSetManager:
     def __init__(self, ctx: DepContext = get_context()):
         self._map_set_io: MapSetIO = ctx.get(MapSetIO)
+        self._token_set_io: TokenSetIO = ctx.get(TokenSetIO)
         self._map_set_cache: MapSetCache = ctx.get(MapSetCache)
         self._map_set_directory: MapSetDirectory = ctx.get(MapSetDirectory)
 
@@ -22,6 +24,8 @@ class MapSetManager:
             uuid=uuid4(),
             saved_flag=False,
             last_access=datetime.now(),
+            token_set=self._token_set_io.load_descriptors(None),
+            token_set_html=self._token_set_io.load_html(None),
         )
         self._map_set_cache.update(map_set)
         self._map_set_directory.add(map_set)
@@ -54,11 +58,16 @@ class MapSetManager:
 
     def save(self, map_set: ManagedMapSet) -> None:
         map_set_io = self._map_set_io
+        token_set_io = self._token_set_io
+
         clean_map_set = map_set.get_clean_data()
         map_set_io.save_map_set(clean_map_set)
         for battle_map in map_set.get_battle_maps():
             self.save_battle_map(battle_map)
             self.save_background(battle_map)
+        token_set_io.save_descriptors(map_set, map_set.token_set)
+        token_set_io.save_html(map_set, map_set.token_set_html)
+
         map_set.saved_flag = True
 
     def sanitize_token_positions(self, battle_map: ManagedBattleMap):
@@ -78,6 +87,8 @@ class MapSetManager:
 
     def load(self, uuid: UUID) -> ManagedMapSet:
         map_set_io = self._map_set_io
+        token_set_io = self._token_set_io
+
         map_set = map_set_io.load_map_set(uuid)
         battle_map_uuids = map_set_io.scan_disk_for_battle_maps(map_set)
         battle_maps = [
@@ -86,8 +97,10 @@ class MapSetManager:
         ]
 
         result = ManagedMapSet(
+            **map_set.__dict__,
             battle_maps=battle_maps,
-            **map_set.__dict__
+            token_set=token_set_io.load_descriptors(map_set),
+            token_set_html=token_set_io.load_html(map_set),
         )
         result.saved_flag = True
         return result

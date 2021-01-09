@@ -3,12 +3,15 @@ from typing import List, Optional, Dict, Any
 from uuid import UUID, uuid4
 
 from obm.data.map_set import MapSet
+from obm.data.token_descriptor import TokenDescriptor
 from obm.model.managed_battle_map import ManagedBattleMap
 
 
 class ManagedMapSet(MapSet):
     battle_maps: List[ManagedBattleMap] = []
     battle_maps_by_uuid: Dict[UUID, ManagedBattleMap] = {}
+    token_set: Optional[List[TokenDescriptor]]
+    token_set_html: str
     last_access: Optional[datetime] = None
     saved_flag: bool = False
 
@@ -44,4 +47,4 @@ class ManagedMapSet(MapSet):
         return self.battle_maps_by_uuid[uuid]
 
     def get_clean_data(self):
-        return  MapSet(**self.__dict__)
+        return MapSet(**self.__dict__)

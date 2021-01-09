@@ -124,6 +124,12 @@ class MapSetIO:
         for battle_map_uuid in self.scan_disk_for_battle_maps(map_set):
             self.delete_battle_map(map_set, battle_map_uuid)
         unlink(self._map_set_paths.get_map_set_path(map_set.uuid))
+        for path in [
+            self._map_set_paths.get_token_set_json_path(map_set),
+            self._map_set_paths.get_token_set_html_path(map_set),
+        ]:
+            if isfile(path):
+                unlink(path)
         rmdir(self._map_set_paths.get_map_set_dir(map_set.uuid))
 
     def delete_battle_map(self, map_set: MapSet, uuid: UUID):

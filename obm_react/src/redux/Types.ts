@@ -7,7 +7,6 @@ import {
     MapSetList,
     Coordinate,
     TokenState,
-    TokenSet,
     TokenActionHistory,
     TokenAction
 } from '../api/Types';
@@ -136,7 +135,6 @@ export interface RootState {
     mapSetList: MapSetList,
     mouse: MouseState,
     tokens: Tokens,
-    defaultTokenSet: TokenSet,
     localTokenActionTrack: string[],
     tokenActionHistory: TokenActionHistory,
 }

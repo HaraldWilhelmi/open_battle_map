@@ -1,11 +1,13 @@
 from typing import List
 from uuid import UUID
 from fastapi import Depends, APIRouter, status, Response, Cookie
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, validator
 
 from obm.data.config import Config
 from obm.common.api_tools import RESPONSE_MAP_SET_NOT_FOUND, get_map_set
 from obm.common.validators import name_validator
+from obm.data.token_descriptor import TokenDescriptor
 from obm.dependencies import get_map_set_manager, get_map_set_directory, get_config
 from obm.data.map_set import MapSet
 from obm.model.admin import check_admin_secret
@@ -26,6 +28,20 @@ ADMIN_RESPONSES = {
 router = APIRouter()
 
 
+@router.get(
+    '/{uuid}/tokens.html',
+    description='Get HTML with an SVG which defines a symbol for each token of the Token Set '
+                + 'belonging to the Map Set. The symbol most have the id field token<Token Type>.',
+    response_class=HTMLResponse,
+)
+async def get_token_set_html(
+        uuid: UUID,
+        manager: MapSetManager = Depends(get_map_set_manager),
+):
+    map_set = get_map_set(manager, uuid)
+    return map_set.token_set_html
+
+
 class BattleMapItem(BaseModel):
     uuid: UUID
     name: str
@@ -35,13 +51,15 @@ class MapSetInfoResponse(BaseModel):
     name: str
     uuid: UUID
     battle_maps: List[BattleMapItem]
+    token_set: List[TokenDescriptor]
 
 
-@router.get('/{uuid}',
-            description='Get information about a map set. The battle map items are sorted by name.',
-            response_model=MapSetInfoResponse,
-            responses=RESPONSE_MAP_SET_NOT_FOUND,
-            )
+@router.get(
+    '/{uuid}',
+    description='Get information about a map set. The battle map items are sorted by name.',
+    response_model=MapSetInfoResponse,
+    responses=RESPONSE_MAP_SET_NOT_FOUND,
+)
 async def map_set_info(
         uuid: UUID,
         response: Response,
@@ -62,7 +80,8 @@ async def map_set_info(
     return MapSetInfoResponse(
         name=map_set.name,
         uuid=map_set.uuid,
-        battle_maps=_get_battle_maps(map_set)
+        battle_maps=_get_battle_maps(map_set),
+        token_set=map_set.token_set
     )
 
 

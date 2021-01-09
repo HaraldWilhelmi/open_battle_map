@@ -6,7 +6,7 @@ import {actions} from '../../redux/Store';
 import {getMapFramePositionFromMapPosition} from '../tools/Map';
 import Token from './Token';
 import {TokenActionType, Coordinate} from "../../api/Types";
-import {getTokenIdAsKeyframesName, getTokenType} from "../tools/Token";
+import {getTokenIdAsKeyframesName} from "../tools/Token";
 
 
 function getKeyFrames(token: ActingTokenState): string {
@@ -73,8 +73,8 @@ export function MovingToken(props: Props) {
         (state: RootState) => state.battleMap
     );
 
-    const defaultTokenSet = useSelector(
-        (state: RootState) => state.defaultTokenSet
+    const mapSet = useSelector(
+        (state: RootState) => state.mapSet
     );
 
     if ( keyframesName === '' ) { return <div />; }
@@ -86,9 +86,9 @@ export function MovingToken(props: Props) {
     }
 
     let positionOnScreen = getMapFramePositionFromMapPosition(mapProperties, props.token.position);
-    const tokenType = getTokenType(defaultTokenSet, props.token);
+    const tokenDescriptor = mapSet.token_set[props.token.token_type];
     const width = 1.1 * Math.max(
-        tokenType.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
+        tokenDescriptor.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
         30
     );
 

@@ -1,8 +1,7 @@
 import {MouseEvent, WheelEvent, useEffect, useState} from "react";
 import {useSelector} from 'react-redux';
-import {TokenId, TokenType} from '../../api/Types';
+import {TokenId} from '../../api/Types';
 import {RootState} from '../../redux/Types';
-import {getTokenType} from '../tools/Token';
 import {v4 as uuid} from 'uuid';
 import CSS from 'csstype';
 import './Token.css'
@@ -20,8 +19,8 @@ interface Props {
 export function Token(props: Props) {
     const [mapTag, setMapTag]= useState('');
 
-    const defaultTokenSet: TokenType[] = useSelector(
-        (state: RootState) => state.defaultTokenSet
+    const mapSet = useSelector(
+        (state: RootState) => state.mapSet
     );
 
     useEffect(() => {
@@ -31,9 +30,13 @@ export function Token(props: Props) {
         return undefined;
     }, [mapTag]);
 
-    const tokenType = getTokenType(defaultTokenSet, props.tokenId);
-    const scale = props.width / tokenType.width;
+    const tokenDescriptor = mapSet.token_set[props.tokenId.token_type];
+    const scale = props.width / tokenDescriptor.width;
     const pointerEvents = props.pointerEvents ?? true ? 'visible' : 'none';
+
+    const tokenStyle: CSS.Properties = {
+        fill: props.tokenId.color,
+    };
 
     const svg = <svg width="89" height="89" pointerEvents="None">
         <g
@@ -42,14 +45,7 @@ export function Token(props: Props) {
             onDragStart={props.onClick}
             onWheel={props.onWheel}
         >
-            <polygon points="10,23 45,3 80,23" className="background"/>
-            <circle cx="45" cy="45" r="35" className="background"/>
-            <circle cx="45" cy="45" r="30" fill={props.tokenId.color}/>
-
-            <line x1="17" y1="21" x2="45" y2="6" className="outline"/>
-            <line x1="73" y1="21" x2="45" y2="6" className="outline"/>
-            <line x1="39" y1="12" x2="45" y2="9" className="outline"/>
-            <line x1="51" y1="12" x2="45" y2="9" className="outline"/>
+            <use href="#token0" style={tokenStyle} />
         </g>
     </svg>;
 
@@ -66,7 +62,7 @@ export function Token(props: Props) {
         zIndex: 101,
         color: props.tokenId.mark_color,
         pointerEvents: 'none',
-        fontSize: tokenType.mark_font_size,
+        fontSize: tokenDescriptor.mark_font_size,
         fontFamily: 'sans-serif',
     };
 

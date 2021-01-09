@@ -1,6 +1,6 @@
 import {v4 as uuidV4} from "uuid";
 import {internalError} from "../../common/Tools";
-import {TokenAction, TokenActionType, TokenId, TokenSet, TokenState, TokenType} from '../../api/Types';
+import {TokenAction, TokenActionType, TokenId, TokenState} from '../../api/Types';
 import {ActingFlyingToken, ActingTokenState, FlyingToken, Tokens} from "../../redux/Types";
 
 
@@ -59,16 +59,6 @@ export function getTokenIdAsString(tokenId: TokenId): string {
 export function getTokenIdAsKeyframesName(tokenId: TokenId): string {
     let raw: string = getTokenIdAsString(tokenId);
     return raw.replace(/[^a-zA-Z0-9-]/g, '-');
-}
-
-
-export function getTokenType(tokenSet: TokenSet, tokenId: TokenId): TokenType {
-    for ( let candidate of tokenSet ) {
-        if ( candidate.token_type === tokenId.token_type ) {
-            return candidate;
-        }
-    }
-    tokenError(tokenId, 'Unknown token_type!');
 }
 
 export function getFreeMarkForToken(state: TokenState[], token: TokenState): string {

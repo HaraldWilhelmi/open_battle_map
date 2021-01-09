@@ -10,7 +10,6 @@ import {
     ZOOM_INCREMENT
 } from '../tools/Map';
 import Token from './Token';
-import {getTokenType} from "../tools/Token";
 
 
 interface Props {
@@ -32,8 +31,8 @@ export function PlacedToken(props: Props) {
         (state: RootState) => state.mapProperties
     );
 
-    const defaultTokenSet = useSelector(
-        (state: RootState) => state.defaultTokenSet
+    const mapSet = useSelector(
+        (state: RootState) => state.mapSet
     );
 
     function pickupToken(event: MouseEvent) {
@@ -60,9 +59,9 @@ export function PlacedToken(props: Props) {
     }
 
     const positionOnScreen = getMapFramePositionFromMapPosition(mapProperties, props.token.position);
-    const tokenType = getTokenType(defaultTokenSet, props.token);
+    const tokeDescriptor = mapSet.token_set[props.token.token_type];
     const width = Math.max(
-        tokenType.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
+        tokeDescriptor.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
         25
     );
 

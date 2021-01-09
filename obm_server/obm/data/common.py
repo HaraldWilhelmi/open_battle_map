@@ -8,11 +8,6 @@ class ColorCombo(BaseModel):
     mark_color: Color
 
 
-class ActiveAreaShape(Enum):
-    RECT = 'rect'
-    CIRCLE = 'circle'
-
-
 class Coordinate(BaseModel):
     x: int
     y: int

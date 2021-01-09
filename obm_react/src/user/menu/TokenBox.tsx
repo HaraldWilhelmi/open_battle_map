@@ -1,7 +1,6 @@
 import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {TokenType} from "../../api/Types";
-import {RootState, GenericDispatch, MouseMode, MouseState} from '../../redux/Types';
+import {RootState, GenericDispatch, MouseMode} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import BoxToken from '../components/BoxToken';
 
@@ -9,21 +8,21 @@ import BoxToken from '../components/BoxToken';
 export function TokenBox() {
     const dispatch: GenericDispatch = useDispatch();
 
-    const mouse: MouseState = useSelector(
+    const mouse = useSelector(
         (state: RootState) => state.mouse
     );
 
-    const defaultTokenSet: TokenType[] = useSelector(
-        (state: RootState) => state.defaultTokenSet
+    const mapSet = useSelector(
+        (state: RootState) => state.mapSet
     );
 
     let tokens: JSX.Element[] = [];
-    if ( defaultTokenSet !== null ) {
-        for (let tokenType of defaultTokenSet) {
-            for (let colorCombo of tokenType.color_combos) {
-                const key = tokenType.token_type + '/' + colorCombo.color + '/' + colorCombo.mark_color;
+    if ( mapSet !== null ) {
+        for ( let tokenDescriptor of mapSet.token_set ) {
+            for (let colorCombo of tokenDescriptor.color_combos) {
+                const key = tokenDescriptor.token_type + '/' + colorCombo.color + '/' + colorCombo.mark_color;
                 tokens.push(
-                    <BoxToken tokenType={tokenType} colorCombo={colorCombo} key={key}/>
+                    <BoxToken tokenDescriptor={tokenDescriptor} colorCombo={colorCombo} key={key}/>
                 );
             }
         }

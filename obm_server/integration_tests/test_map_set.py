@@ -9,6 +9,7 @@ from obm.data.config import Config
 from obm.data.token_state import TokenAction, TokenActionType
 from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.map_set_io import MapSetIO
+from obm.fileio.token_set_io import TokenSetIO
 from obm.model.map_set_directory import MapSetDirectory
 from obm.model.map_set_cache import MapSetCache
 from obm.model.map_set_manager import MapSetManager
@@ -30,6 +31,7 @@ def ctx(tmpdir):
     ctx.register(Config(admin_secret='bla', data_dir=str(tmpdir)))
     ctx.register(MapSetPaths(ctx=ctx))
     ctx.register(MapSetIO(ctx=ctx))
+    ctx.register(TokenSetIO(ctx=ctx))
     ctx.register(MapSetCache(ctx=ctx))
     ctx.register(MapSetDirectory(ctx=ctx))
     ctx.register(MapSetManager(ctx=ctx))

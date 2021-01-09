@@ -49,6 +49,7 @@ export interface BattleMapItem {
 
 export interface MapSet extends MapSetUpdate, BattleMapCreate {
     battle_maps: BattleMapItem[];
+    token_set: TokenSet;
 }
 
 
@@ -137,7 +138,7 @@ export interface TokenActionHistory extends TokenActionHistoryId {
 }
 
 
-export interface TokenType {
+export interface TokenDescriptor {
     token_type: number,
     width_in_m: number,
     mark_font_size: string,
@@ -146,7 +147,7 @@ export interface TokenType {
     color_combos: ColorCombo[],
 }
 
-export type TokenSet = TokenType[];
+export type TokenSet = TokenDescriptor[];
 
 
 
