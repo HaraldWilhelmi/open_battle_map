@@ -74,7 +74,7 @@ a docker image do this:
 ## More features
 
  * Press 'm' on the map to do length measurements. Also displays the Gurps range modifier
-   (assuming that 1 my = 1 yd - good enough for game purpose I guess).
+   (assuming that 1 m = 1 yd - good enough for game purpose I guess).
 
 ## How to change the code
 
@@ -124,7 +124,6 @@ Also, I feel guilty that I only wrote so few of them yet.
 
  * January 2021:
    * Implement some Quick Wins after doing UX-Testing:
-     * More tokens, including some large ones for vehicles (yet without special features)
      * Add buttons to turn map
  * February 2021:
    * Vehicles: Tokens that carry/move tokens placed on them.
@@ -135,7 +134,7 @@ Also, I feel guilty that I only wrote so few of them yet.
      into a Map Set.
 
 ## Project History
-
+ * 2021-01-10: **v0.3** - More tokens and measurement functions.
  * 2021-01-07: **v0.2** - Switched polling from "1 poll per second per client" to "client polls after 0.1
    seconds but answer is delayed up to 30s if nothing happens". 
  * 2021-01-05: **v0.1** - Added Letsencrypt to AWS deployment - verified for Letsencrypt staging
