@@ -50,6 +50,7 @@ input[type="file"] {
 
 .token-in-box {
     flex: 0 0 auto;
+    margin-bottom: 3px;
 }
 
 .box-token-inner-frame {
