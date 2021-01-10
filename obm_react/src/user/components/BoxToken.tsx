@@ -2,7 +2,7 @@ import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import CSS from 'csstype';
 import {TokenDescriptor, ColorCombo, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
-import {RootState, GenericDispatch, MouseMode, MouseState, FlyingToken} from '../../redux/Types';
+import {RootState, GenericDispatch, MouseMode, FlyingToken} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {Token} from './Token';
 

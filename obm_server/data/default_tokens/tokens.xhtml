@@ -11,7 +11,12 @@
                     stroke-width: 1px;
                     fill: none;
                 }
+                .glass {
+                    stroke: none;
+                    fill: Gray;
+                }
             </style>
+            <!-- Default Token -->
             <symbol id="token0">
                 <polygon points="10,23 45,3 80,23" class="background" />
                 <circle cx="45" cy="45" r="35" class="background" />
@@ -22,6 +27,7 @@
                 <line x1="51" y1="12" x2="45" y2="9" class="outline" />
             </symbol>
             <use href="#token0" x="0" y="0"/>
+            <!-- Jeep -->
             <symbol id="token1">
                 <rect x="25" y="0" width="100" height="8" />
                 <rect x="45" y="5" width="10" height="18" />
@@ -51,35 +57,28 @@
                 <line x1="110" y1="220" x2="143" y2="220" class="outline" />
             </symbol>
             <use href="#token1" x="100" y="0"/>
+            <!-- Limousine -->
             <symbol id="token2">
-                <rect x="25" y="0" width="100" height="8" />
-                <rect x="45" y="5" width="10" height="18" />
-                <rect x="95" y="5" width="10" height="18" />
-
-                <rect x="5" y="10" width="25" height="50" rx="10" ry="10"/>
-                <rect x="120" y="10" width="25" height="50" rx="10" ry="10"/>
-                <rect x="65" y="310" width="70" height="25" rx="10" ry="10"/>
-                <rect x="15" y="310" width="48" height="25" />
-
-                <rect x="5" y="125" width="140" height="185" rx="10" ry="10"/>
-                <rect x="7" y="127" width="136" height="181" rx="10" ry="10" class="outline" />
-                <rect x="5" y="23" width="140" height="105" rx="20" ry="20"/>
-                <rect x="7" y="25" width="136" height="101" rx="20" ry="20" class="outline"/>
-
-                <rect x="15" y="128" width="58" height="12" class="outline" />
-                <rect x="75" y="128" width="58" height="12" class="outline" />
-                <ellipse cx="45" cy="153" rx="20" ry="12" class="outline"/>
-
-                <rect x="25" y="153" width="40" height="40" class="outline" />
-                <rect x="85" y="153" width="40" height="40" class="outline" />
-                <rect x="25" y="193" width="40" height="15" class="outline" />
-                <rect x="85" y="193" width="40" height="15" class="outline" />
-                <line x1="40" y1="220" x2="40" y2="308" class="outline" />
-                <line x1="110" y1="220" x2="110" y2="308" class="outline" />
-                <line x1="7" y1="220" x2="40" y2="220" class="outline" />
-                <line x1="110" y1="220" x2="143" y2="220" class="outline" />
+                <rect x="0" y="0" width="185" height="495" rx="20" ry="20"/>
+                <rect x="15" y="150" width="155" height="60" rx="10" ry="10" class="glass" />
+                <rect x="15" y="150" width="155" height="60" rx="10" ry="10" class="outline" />
+                <rect x="30" y="375" width="125" height="50" rx="10" ry="10" class="glass" />
+                <rect x="30" y="375" width="125" height="50" rx="10" ry="10" class="outline" />
+                <rect x="5" y="180" width="5" height="90" class="glass" />
+                <rect x="5" y="180" width="5" height="90" class="outline" />
+                <rect x="8" y="280" width="5" height="90" class="glass" />
+                <rect x="8" y="280" width="5" height="90" class="outline" />
+                <rect x="175" y="180" width="5" height="90" class="glass" />
+                <rect x="175" y="180" width="5" height="90" class="outline" />
+                <rect x="173" y="280" width="5" height="90" class="glass" />
+                <rect x="173" y="280" width="5" height="90" class="outline" />
+                <line x1="15" y1="212" x2="20" y2="372" class="outline" />
+                <line x1="170" y1="212" x2="165" y2="372" class="outline" />
+                <line x1="35" y1="10" x2="20" y2="140" class="outline" />
+                <line x1="150" y1="10" x2="165" y2="140" class="outline" />
             </symbol>
             <use href="#token2" x="250" y="0"/>
+            <!-- Army Truck -->
             <symbol id="token3">
                 <rect x="32" y="0" width="160" height="12" />
                 <rect x="77" y="12" width="10" height="12" />
@@ -120,6 +119,8 @@
                 <line x1="380" y1="242" x2="380" y2="638" class="outline" />
             </symbol>
             <use href="#token3" x="500" y="0"/>
+
+            <!-- Truck with 40ft container -->
             <symbol id="token4">
                 <rect x="26" y="0" width="188" height="205" rx="5" ry="5" />
                 <rect x="22" y="48" width="5" height="18" />

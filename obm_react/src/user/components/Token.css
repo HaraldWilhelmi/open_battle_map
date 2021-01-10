@@ -11,3 +11,8 @@
     stroke: White;
     stroke-width: 1px;
 }
+
+.glass {
+    stroke: none;
+    fill: Gray;
+}

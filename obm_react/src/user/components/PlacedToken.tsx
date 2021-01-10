@@ -10,7 +10,7 @@ import {
     ZOOM_INCREMENT
 } from '../tools/Map';
 import Token from './Token';
-import {getTokenWidthOnMap, MIN_WIDTH_ON_MAP} from "../tools/Token";
+import {getTokenWidthOnMap} from "../tools/Token";
 
 
 interface Props {
