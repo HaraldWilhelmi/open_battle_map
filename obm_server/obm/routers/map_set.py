@@ -36,6 +36,7 @@ router = APIRouter()
 )
 async def get_token_set_html(
         uuid: UUID,
+        response: Response,
         manager: MapSetManager = Depends(get_map_set_manager),
 ):
     map_set = get_map_set(manager, uuid)

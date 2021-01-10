@@ -1,7 +1,10 @@
 import {v4 as uuidV4} from "uuid";
 import {internalError} from "../../common/Tools";
-import {TokenAction, TokenActionType, TokenId, TokenState} from '../../api/Types';
-import {ActingFlyingToken, ActingTokenState, FlyingToken, Tokens} from "../../redux/Types";
+import {BattleMap, TokenAction, TokenActionType, TokenDescriptor, TokenId, TokenState} from '../../api/Types';
+import {ActingFlyingToken, ActingTokenState, FlyingToken, MapProperties, Tokens} from "../../redux/Types";
+
+
+export const MIN_WIDTH_ON_MAP = 15;
 
 
 export function isSameToken(a: TokenId, b: TokenId): boolean {
@@ -203,4 +206,11 @@ export function endTokenAction(state: Tokens, token: ActingTokenState): Tokens {
         const placedTokens = [...state.placedTokens, placedToken];
         return {...state, actingTokens: actingTokens, placedTokens};
     }
+}
+
+export function getTokenWidthOnMap(tokeDescriptor: TokenDescriptor, battleMap: BattleMap, mapProperties: MapProperties): number {
+    return Math.max(
+        tokeDescriptor.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
+        MIN_WIDTH_ON_MAP
+    );
 }

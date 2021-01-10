@@ -5,6 +5,7 @@ import {MapProperties, MouseMode, MouseState, RootState, Tokens} from '../redux/
 import {getRotationFromTarget} from './tools/Map';
 import Token from './components/Token';
 import CSS from 'csstype';
+import {getTokenWidthOnMap} from "./tools/Token";
 
 const INITIAL_TOKEN_POSITION: Coordinate = {x: 0, y: 0};
 
@@ -87,10 +88,7 @@ export function FlyingTokenLayer(props: Props) {
 
     if ( tokens.flyingToken !== null ) {
         const tokenDescriptor = mapSet.token_set[tokens.flyingToken.token_type];
-        const width = 1.1 * Math.max(
-            tokenDescriptor.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
-            25
-        );
+        const width = 1.1 * getTokenWidthOnMap(tokenDescriptor, battleMap, mapProperties);
         const divStyle: CSS.Properties = {
             position: 'absolute',
             transform: 'translate(-50%, -50%)',

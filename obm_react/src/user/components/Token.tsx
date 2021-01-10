@@ -38,14 +38,14 @@ export function Token(props: Props) {
         fill: props.tokenId.color,
     };
 
-    const svg = <svg width="89" height="89" pointerEvents="None">
+    const svg = <svg width={tokenDescriptor.width} height={tokenDescriptor.height} pointerEvents="None">
         <g
             pointerEvents={pointerEvents}
             onClick={props.onClick}
             onDragStart={props.onClick}
             onWheel={props.onWheel}
         >
-            <use href="#token0" style={tokenStyle} />
+            <use href={"#token" + tokenDescriptor.token_type} style={tokenStyle} />
         </g>
     </svg>;
 

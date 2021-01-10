@@ -45,6 +45,7 @@ input[type="file"] {
     flex-wrap: wrap;
     display: flex;
     background-color: #e0e0e0;
+    overflow: hidden;
 }
 
 .token-in-box {

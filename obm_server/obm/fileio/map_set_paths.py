@@ -22,7 +22,7 @@ _VALIDATE_PATHS = [
 class MapSetPaths:
     DEFAULT_TOKEN_SET_DIR = join(dirname(dirname(dirname(__file__))), 'data', 'default_tokens')
     TOKENS_JSON = 'tokens.json'
-    TOKENS_HTML = 'tokens.html'
+    TOKENS_HTML = 'tokens.xhtml'
 
     def __init__(self, ctx: DepContext = get_context()):
         self._config: Config = ctx.get(Config)

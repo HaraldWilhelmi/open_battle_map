@@ -10,6 +10,7 @@ import {
     ZOOM_INCREMENT
 } from '../tools/Map';
 import Token from './Token';
+import {getTokenWidthOnMap, MIN_WIDTH_ON_MAP} from "../tools/Token";
 
 
 interface Props {
@@ -59,11 +60,8 @@ export function PlacedToken(props: Props) {
     }
 
     const positionOnScreen = getMapFramePositionFromMapPosition(mapProperties, props.token.position);
-    const tokeDescriptor = mapSet.token_set[props.token.token_type];
-    const width = Math.max(
-        tokeDescriptor.width_in_m * battleMap.background_pixels_per_meter * mapProperties.totalZoomFactor,
-        25
-    );
+    const tokenDescriptor = mapSet.token_set[props.token.token_type];
+    const width = getTokenWidthOnMap(tokenDescriptor, battleMap, mapProperties);
 
     const style: CSS.Properties = {
         position: 'absolute',

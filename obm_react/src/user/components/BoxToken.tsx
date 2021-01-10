@@ -50,7 +50,7 @@ export function BoxToken(props: Props) {
 
     const boxTokenOuterFrameStyle: CSS.Properties = {
         position: 'relative',
-        width: BOX_TOKEN_WIDTH + 'px',
+        width: BOX_TOKEN_WIDTH / 2 + 'px',
         height: height + 'px',
         pointerEvents: 'none',
     }

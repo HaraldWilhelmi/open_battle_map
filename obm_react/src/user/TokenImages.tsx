@@ -18,13 +18,19 @@ export function TokenImages() {
 
             const url = '/api/map_set/' + mapSet.uuid + '/tokens.html';
             let xhr = new XMLHttpRequest();
+            xhr.responseType = 'document';
             xhr.open('get',url,true);
             xhr.onreadystatechange = function(){
                 if ( xhr.readyState !== 4 ) return;
-                let svg = xhr.responseXML?.documentElement;
-                if ( svg ) {
-                    svg = document.importNode(svg,true);
+                let doc = xhr.responseXML?.documentElement;
+                if ( doc ) {
+                    const svg = document.importNode(doc,true);
+                    while (div.lastChild) {
+                        div.removeChild(div.lastChild);
+                    }
                     div.appendChild(svg);
+                } else {
+                    console.log("Failed to load token images!")
                 }
             };
             xhr.send();
