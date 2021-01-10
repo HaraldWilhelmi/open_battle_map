@@ -27,13 +27,13 @@
 
 .measurement-label {
     font-size: 30px;
-    opacity: 70%;
+    opacity: 0.7;
     stroke: black;
 }
 
 .measurement-tag {
     fill: white;
-    opacity: 70%;
+    opacity: 0.7;
 }
 
 .measurement-box {
