@@ -1,6 +1,11 @@
-from fastapi import FastAPI
+import traceback
+
+from fastapi import FastAPI, Request, status
+from fastapi.exception_handlers import http_exception_handler
+from starlette.exceptions import HTTPException
 
 from obm.common.dep_context import get_context
+from obm.common.logging import error
 from obm.data.config import get_config_for_production, get_config_file_name
 from obm.fileio.map_set_paths import MapSetPaths
 from obm.fileio.token_set_io import TokenSetIO
@@ -84,6 +89,15 @@ ctx.register(MapSetManager())
 ctx.register(MagicColorSvg())
 
 app = FastAPI(openapi_tags=TAGS_META_DATA)
+
+
+@app.exception_handler(HTTPException)
+async def error_handler(request: Request, exc: HTTPException):
+    if exc.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR:
+        error(traceback.format_exc())
+    return await http_exception_handler(request, exc)
+
+
 app.include_router(map_set_list_router, prefix='/api/map_set_list', tags=['Background Set List'])
 app.include_router(map_set_router, prefix='/api/map_set', tags=['Background Set'])
 app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Background'])

@@ -21,3 +21,7 @@ def info(message):
 
 def warning(message):
     OurLogger.get_logger().warning(message)
+
+
+def error(message):
+    OurLogger.get_logger().error(message)

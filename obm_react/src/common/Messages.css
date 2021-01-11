@@ -29,7 +29,7 @@
 }
 
 @keyframes fade-away {
-    from {opacity: 100%;}
+    from {opacity: 1;}
     to {opacity: 0;}
 }
 
