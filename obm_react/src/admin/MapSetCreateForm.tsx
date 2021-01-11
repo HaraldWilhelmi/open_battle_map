@@ -20,11 +20,11 @@ export function MapSetCreateForm() {
         setName(event.target.value);
     };
 
-    let myCreate = async (event: React.FormEvent) => {
+    let myCreate = (event: React.FormEvent) => {
         event.preventDefault();
-        await handleUserAction(() => {
+        handleUserAction(async () => {
             const request: MapSetCreate = {name};
-            mapSetApi.create(request);
+            await mapSetApi.create(request);
             updateMapSetList();
             setName('');
         }, dispatch);

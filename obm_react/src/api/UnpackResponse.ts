@@ -46,6 +46,6 @@ export async function unpackCheckedResponse(
         if ( context !== undefined ) {
             message = 'Failed to ' + context.toString() + ': ' + message;
         }
-        throw new ApiError(message);
+        return Promise.reject(new ApiError(message));
     }
 }

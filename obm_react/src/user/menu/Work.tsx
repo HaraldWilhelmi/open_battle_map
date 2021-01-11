@@ -31,8 +31,8 @@ export function Work() {
 
     let myDownloadMapSet = () => window.location.assign('/api/backup/' + mapSet.uuid);
 
-    let myUploadMapSet = async (file: File) => {
-        await handleUserAction(async () => {
+    let myUploadMapSet = (file: File) => {
+        handleUserAction(async () => {
             await uploadMapSetArchive(mapSet, file, dispatch);
             await refreshBattleMapSelector();
             await refreshMapBackground();
@@ -41,16 +41,16 @@ export function Work() {
         }, dispatch);
     }
 
-    let myUploadBackground = async (file: File) => {
-        await handleUserAction(async () => {
+    let myUploadBackground = (file: File) => {
+        handleUserAction(async () => {
             await postImageData(battleMap, file, dispatch);
             await refreshMapBackground();
             dispatch(actions.mapProperties.reset());
         }, dispatch);
     };
 
-    let myCreateBattleMap = async (name: string) => {
-        await handleUserAction(async () => {
+    let myCreateBattleMap = (name: string) => {
+        handleUserAction(async () => {
             const request: BattleMapCreate = {
                 name,
                 map_set_uuid: mapSet.uuid,
@@ -61,18 +61,18 @@ export function Work() {
         }, dispatch);
     };
 
-    let myRenameBattleMap = async (name: string) => {
-        await handleUserAction(async () => {
+    let myRenameBattleMap = (name: string) => {
+        handleUserAction(async () => {
             let changedMap: BattleMap = {...battleMap, name: name};
             dispatch(actions.battleMap.update(changedMap));
             await refreshBattleMapSelector();
         }, dispatch);
     };
 
-    let myDeleteBattleMap = async () => {
+    let myDeleteBattleMap = () => {
         let warning = 'Really delete Battle Background "' + battleMap.name + '" (' + battleMap.uuid + ')?'
         if (window.confirm(warning)) {
-            await handleUserAction(async () => {
+            handleUserAction(async () => {
                 dispatch(actions.battleMap.remove(battleMap));
                 for (let item of mapSet.battle_maps) {
                     if (item.uuid !== battleMap.uuid) {

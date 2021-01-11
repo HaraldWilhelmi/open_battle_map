@@ -9,13 +9,12 @@ export function internalError(message: string): never {
     throw  e;
 }
 
-export async function handleUserAction(action: () => void, dispatch: GenericDispatch) {
-    try {
-        dispatch(actions.messages.reset());
-        await action();
-    }
-    catch (error) {
-        const message = error.toString();
-        dispatch(actions.messages.reportError(message));
-    }
+export function handleUserAction(action: () => Promise<void>, dispatch: GenericDispatch): void {
+    dispatch(actions.messages.reset());
+    action().catch(
+        error => {
+            const message = error.toString();
+            dispatch(actions.messages.reportError(message));
+        }
+    );
 }

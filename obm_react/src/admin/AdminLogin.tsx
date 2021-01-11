@@ -16,16 +16,16 @@ export function AdminLogin() {
         setSecret(event.target.value);
     };
 
-    let myLogin = async (event: React.FormEvent) => {
+    let myLogin = (event: React.FormEvent) => {
         event.preventDefault();
-        await handleUserAction( () => {
+        handleUserAction( async () => {
             dispatch(actions.cookies.setAdminSecret(secret));
             dispatch(actions.mode.set(Mode.Admin));
         }, dispatch);
     };
 
-    let myCancel = async () => {
-        await handleUserAction( () => {
+    let myCancel = () => {
+        handleUserAction( async () => {
             dispatch(actions.mode.set(Mode.User));
         }, dispatch);
     };

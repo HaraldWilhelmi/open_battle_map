@@ -29,12 +29,12 @@ export function BattleMapSelector() {
 
     }
 
-    let changeBattleMap = async (event: ChangeEvent<HTMLSelectElement>) => {
+    let changeBattleMap = (event: ChangeEvent<HTMLSelectElement>) => {
         event.preventDefault();
         if ( mapSet !== null ) {
             const id: BattleMapId = {uuid: event.target.value, map_set_uuid: mapSet.uuid};
-            await handleUserAction(
-                () => {
+            handleUserAction(
+                async () => {
                     dispatch(actions.battleMap.get(id));
                     dispatch(actions.mapProperties.reset());
                 },

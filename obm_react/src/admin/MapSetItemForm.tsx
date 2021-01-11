@@ -26,9 +26,9 @@ export function MapSetItemRow(props: Props) {
         setName(event.target.value);
     };
 
-    let myRename = async (event: FormEvent) => {
+    let myRename = (event: FormEvent) => {
         event.preventDefault();
-        await handleUserAction( async () => {
+        handleUserAction( async () => {
             const id: MapSetId = {uuid: props.item.uuid};
             let mapSet: MapSet = await mapSetApi.get(id);
             mapSet = {...mapSet, name};
@@ -37,11 +37,11 @@ export function MapSetItemRow(props: Props) {
         }, dispatch);
     };
 
-    let myDelete = async () => {
+    let myDelete = () => {
         let warning = 'Really delete Background Set "' + item.name + '" ('
             + item.uuid + ')?'
         if (window.confirm(warning)) {
-            await handleUserAction( async () => {
+            handleUserAction( async () => {
                 const id: MapSetId = {uuid: props.item.uuid};
                 await mapSetApi.remove(id);
                 await updateMapSetList();
@@ -49,8 +49,8 @@ export function MapSetItemRow(props: Props) {
         }
     };
 
-    let myOpen = async () => {
-        await handleUserAction( async () => {
+    let myOpen = () => {
+        handleUserAction( async () => {
             dispatch(actions.mode.set(Mode.User));
             window.location.href = '/' + item.uuid;
         }, dispatch);

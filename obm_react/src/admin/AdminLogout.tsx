@@ -9,8 +9,8 @@ import {handleUserAction} from "../common/Tools";
 export function AdminLogout() {
     const dispatch = useDispatch();
 
-    let myLogout = async () => {
-        await handleUserAction( () => {
+    let myLogout = () => {
+        handleUserAction( async () => {
             dispatch(actions.mode.set(Mode.User));
             dispatch(actions.cookies.setAdminSecret(undefined));
         }, dispatch);
