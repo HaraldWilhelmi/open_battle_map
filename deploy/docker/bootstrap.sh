@@ -26,7 +26,6 @@ function main {
         setup_tls
     fi
     python3 /srv/app/bin/my_little_cron.py &
-    umask 077
     su - app -c 'cd /srv/app && uvicorn obm.app:app'
 }
 

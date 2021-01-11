@@ -26,7 +26,7 @@ def get_config_for_production():
             return Config(**raw_data)
     else:
         config = Config(admin_secret=token_hex())
-        umask(0o177)
+        umask(0o77)
         with open(file_name, 'w') as fp:
             fp.write(config.json(indent=4, include={'admin_secret'}))
         return config
