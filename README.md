@@ -142,6 +142,11 @@ Also, I feel guilty that I only wrote so few of them yet.
  * 2020-12-31: Minimal feature set done
  * 2020-12-02: First commit
 
+## Copyright
+
+This software was written by Harald Wilhelmi. It may be used and distributed
+under the terms of the GNU GENERAL PUBLIC LICENSE Version 3.
+
 ## Credits
 
 There are a few people I would like thank:
