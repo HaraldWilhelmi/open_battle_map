@@ -30,7 +30,7 @@ export function Measurement(props: Props) {
     }
     const to = getMapFramePositionFromMapPosition(mapProperties, toMap);
 
-    const xyTagText = 'x=' + toMap.x + '/y=' + toMap.y;
+    const xyTagText = 'x=' + toMap.x.toFixed(0) + '/y=' + toMap.y.toFixed(0);
     const xyTagWidth = 20 * xyTagText.length;
     let xyLabelPosition: Coordinate = {x: to.x, y: to.y - 33};
     let xyTagPosition: Coordinate = {x: to.x - xyTagWidth/2, y: to.y - 60};

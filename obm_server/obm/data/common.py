@@ -9,5 +9,5 @@ class ColorCombo(BaseModel):
 
 
 class Coordinate(BaseModel):
-    x: int
-    y: int
+    x: float
+    y: float

@@ -100,8 +100,8 @@ export function getMapFramePositionFromMapPosition(mapProperties: MapProperties,
 export function getMapPositionFromPhysicalPosition(mapProperties: MapProperties, physicalPosition: Coordinate): Coordinate {
     const totalZoomFactor = mapProperties.totalZoomFactor;
     return {
-        x: Math.round(physicalPosition.x / totalZoomFactor),
-        y: Math.round(physicalPosition.y / totalZoomFactor),
+        x: physicalPosition.x / totalZoomFactor,
+        y: physicalPosition.y / totalZoomFactor,
     }
 }
 
