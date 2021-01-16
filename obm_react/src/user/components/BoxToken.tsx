@@ -2,12 +2,14 @@ import {MouseEvent} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import CSS from 'csstype';
 import {TokenDescriptor, ColorCombo, Coordinate, NEW_TOKEN_MARK, TokenId} from '../../api/Types';
-import {RootState, GenericDispatch, MouseMode, FlyingToken} from '../../redux/Types';
+import {RootState, GenericDispatch, FlyingToken} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {Token} from './Token';
+import {isEasyExitMouseMode} from "../tools/Mouse";
 
 
-const BOX_TOKEN_WIDTH = 45;
+const MAX_BOX_TOKEN_WIDTH = 45;
+const MAX_BOX_TOKEN_HEIGHT = 60;
 
 
 interface Props {
@@ -23,7 +25,7 @@ export function BoxToken(props: Props) {
     );
 
     function pickupToken(event: MouseEvent) {
-        if ( mouse.mode === MouseMode.Default ) {
+        if ( isEasyExitMouseMode(mouse.mode) ) {
             event.stopPropagation();
             event.preventDefault();
             const positionOverGround: Coordinate = {
@@ -46,11 +48,16 @@ export function BoxToken(props: Props) {
         mark: '0',
     };
 
-    const height = props.tokenDescriptor.height * BOX_TOKEN_WIDTH / props.tokenDescriptor.width;
+    let width = MAX_BOX_TOKEN_WIDTH;
+    let height = props.tokenDescriptor.height * width / props.tokenDescriptor.width;
+    if ( height > MAX_BOX_TOKEN_HEIGHT ) {
+        height = MAX_BOX_TOKEN_HEIGHT;
+        width = props.tokenDescriptor.width * height / props.tokenDescriptor.height;
+    }
 
     const boxTokenOuterFrameStyle: CSS.Properties = {
         position: 'relative',
-        width: BOX_TOKEN_WIDTH / 2 + 'px',
+        width: MAX_BOX_TOKEN_WIDTH / 2 + 'px',
         height: height + 'px',
         pointerEvents: 'none',
     }
@@ -58,7 +65,7 @@ export function BoxToken(props: Props) {
     return <div className="token-in-box">
             <div style={boxTokenOuterFrameStyle}>
                 <div className="box-token-inner-frame">
-                    <Token tokenId={tokenId} width={45} rotation={0.0} onClick={pickupToken} onWheel={() => { return; }} />
+                    <Token tokenId={tokenId} width={width} rotation={0.0} onClick={pickupToken} onWheel={() => { return; }} />
                 </div>
             </div>
         </div>

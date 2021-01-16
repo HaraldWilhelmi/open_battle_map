@@ -7,7 +7,7 @@ import {
     MapSetList,
     Coordinate,
     TokenState,
-    TokenActionHistory,
+    ActionHistory,
     TokenAction
 } from '../api/Types';
 
@@ -86,13 +86,16 @@ export enum MouseMode {
     TurnToken,
     MoveMap,
     MeasureFrom,
-    MeasureTo
+    MeasureTo,
+    Pointer,
 }
 
 export interface MouseState {
     mode: MouseMode,
     lastSeen: Coordinate | null,
     cursorStyle: string,
+    pointerColor: string | null,
+    pointerUuid: string | null,
 }
 
 export interface ActingTokenState extends TokenAction {
@@ -136,7 +139,7 @@ export interface RootState {
     mouse: MouseState,
     tokens: Tokens,
     localTokenActionTrack: string[],
-    tokenActionHistory: TokenActionHistory,
+    actionHistory: ActionHistory,
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;

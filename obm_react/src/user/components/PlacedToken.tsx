@@ -1,6 +1,5 @@
 import {MouseEvent, WheelEvent} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import CSS from 'csstype';
 import {Coordinate, TokenState} from '../../api/Types';
 import {FlyingToken, GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
@@ -9,8 +8,9 @@ import {
     getScaledBackgroundPositionFromMapPosition,
     ZOOM_INCREMENT
 } from '../tools/Map';
-import Token from './Token';
 import {getTokenWidthOnMap} from "../tools/Token";
+import Token from './Token';
+import Positioner from "./Positioner";
 
 
 interface Props {
@@ -63,15 +63,7 @@ export function PlacedToken(props: Props) {
     const tokenDescriptor = mapSet.token_set[props.token.token_type];
     const width = getTokenWidthOnMap(tokenDescriptor, battleMap, mapProperties);
 
-    const style: CSS.Properties = {
-        position: 'absolute',
-        transform: 'translate(-50%, -50%)',
-        left: positionOnScreen.x + 'px',
-        top: positionOnScreen.y + 'px',
-        pointerEvents: 'none',
-    };
-
-    return <div style={style}>
+    return <Positioner position={positionOnScreen}>
         <Token
             tokenId={props.token}
             width={width}
@@ -80,7 +72,7 @@ export function PlacedToken(props: Props) {
             onWheel={doZoom}
             pointerEvents={mouse.mode === MouseMode.Default}
         />
-    </div>
+    </Positioner>;
 }
 
 export default PlacedToken;

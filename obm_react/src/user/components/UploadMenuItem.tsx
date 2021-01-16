@@ -11,7 +11,7 @@
 //    But this seems to work. Beside that the label is styled like
 //    Bootstrap button.
 //
-// 2. Usually a <input type="file"> needs two user actions:
+// 2. Usually a <input type="file"> needs two user token_actions:
 //      A) Select the file (-> onChange event)
 //      B) Press the 'Upload' button
 //    This component needs only A). That can only work if the

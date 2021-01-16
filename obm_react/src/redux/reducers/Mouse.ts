@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {v4 as uuidV4} from 'uuid';
 import {Coordinate} from '../../api/Types';
 import {MouseState, MouseMode} from '../Types';
 import {mapPropertiesActions} from './MapProperties';
@@ -7,51 +8,46 @@ const INITIAL_STATE: MouseState = {
     mode: MouseMode.Default,
     lastSeen: null,
     cursorStyle: 'default',
+    pointerColor: null,
+    pointerUuid: null,
 }
 
 export const slice = createSlice({
     name: 'mouse',
     initialState: INITIAL_STATE,
     reducers: {
-        grabMap: (state, action: PayloadAction<Coordinate>) => {
-            return {...state,
-                mode: MouseMode.MoveMap, lastSeen: action.payload,
-                cursorStyle: 'move',
-            };
-        },
-        releaseMap: (state) => {
-            return {...state,
-                mode: MouseMode.Default,
-                cursorStyle: 'default',
-            };
-        },
-
-        grabToken: (state, action:PayloadAction<Coordinate|null>) => {
-            return {...state,
-                mode: MouseMode.MoveToken,
-                cursorStyle: 'move',
-                lastSeen: action.payload,
-            };
-        },
-        placeToken: (state) => {
-            return {...state, mode: MouseMode.TurnToken, cursorStyle: 'crosshair'};
-        },
-        releaseToken: (state) => {
-            return {...state,
-                mode: MouseMode.Default,
-                cursorStyle: 'default',
-                lastSeen: null,
-            };
-        },
-        startMeasurement: (state) => {
-            return {...state, mode: MouseMode.MeasureFrom, cursorStyle: 'crosshair', lastSeen: null};
-        },
-        selectMeasurementPostion: (state, action:PayloadAction<Coordinate>) => {
-            return {...state, mode: MouseMode.MeasureTo, lastSeen: action.payload};
-        },
-        stopMeasurement: (state) => {
-            return {...state, mode: MouseMode.Default, cursorStyle: 'default', lastSeen: null};
-        },
+        grabMap: (state, action: PayloadAction<Coordinate>) => ({
+            ...state, mode: MouseMode.MoveMap, lastSeen: action.payload, cursorStyle: 'move',
+        }),
+        releaseMap: (state) => ({
+            ...state, mode: MouseMode.Default, cursorStyle: 'default',
+        }),
+        grabToken: (state, action: PayloadAction<Coordinate | null>) => ({
+            ...state, mode: MouseMode.MoveToken, cursorStyle: 'move', lastSeen: action.payload,
+        }),
+        placeToken: (state) => ({
+            ...state, mode: MouseMode.TurnToken, cursorStyle: 'crosshair'
+        }),
+        releaseToken: (state) => ({
+            ...state, mode: MouseMode.Default, cursorStyle: 'default', lastSeen: null,
+        }),
+        startMeasurement: (state) => ({
+            ...state, mode: MouseMode.MeasureFrom, cursorStyle: 'crosshair', lastSeen: null
+        }),
+        selectMeasurementPostion: (state, action: PayloadAction<Coordinate>) => ({
+            ...state, mode: MouseMode.MeasureTo, lastSeen: action.payload
+        }),
+        stopMeasurement: (state) => ({
+            ...state, mode: MouseMode.Default, cursorStyle: 'default', lastSeen: null
+        }),
+        startPointer: (state, action: PayloadAction<string>) => ({
+            ...state, mode: MouseMode.Pointer, cursorStyle: 'pointer',
+            pointerColor: action.payload, pointerUuid: uuidV4()
+        }),
+        stopPointer: (state) => ({
+            ...state, mode: MouseMode.Default, cursorStyle: 'default',
+            pointerColor: null
+        }),
     },
     extraReducers: builder => {
         builder.addCase(

@@ -35,16 +35,16 @@ def get_test_move(data=None):
 
 def test_trivial(battle_map: ManagedBattleMap):
     assert len(battle_map.get_history(0)) == 0
-    assert battle_map.token_action_count == 0
+    assert battle_map.action_count == 0
     assert len(battle_map.tokens) == 0
 
 
 def test_simple(battle_map: ManagedBattleMap):
     move = get_test_move()
 
-    battle_map.process_action(move)
+    battle_map.process_token_action(move)
 
-    assert battle_map.token_action_count == 1
+    assert battle_map.action_count == 1
     assert len(battle_map.tokens) == 1
     assert battle_map.tokens[0].mark == '23'
 
@@ -59,10 +59,10 @@ def test_overflow(battle_map: ManagedBattleMap):
     test_moves = []
     for i in range(120):
         move = get_test_move({'mark': str(i)})
-        battle_map.process_action(move)
+        battle_map.process_token_action(move)
         test_moves.append(move)
 
-    assert battle_map.token_action_count == 120
+    assert battle_map.action_count == 120
     assert len(battle_map.tokens) == 120
 
     history = battle_map.get_history(20)
@@ -77,13 +77,13 @@ def test_overflow(battle_map: ManagedBattleMap):
 def test_move(battle_map: ManagedBattleMap):
     add = get_test_move()
 
-    battle_map.process_action(add)
+    battle_map.process_token_action(add)
 
     move = get_test_move({
         'action_type': TokenActionType.Moved,
         'position': Coordinate(x=100, y=45)
     })
-    battle_map.process_action(move)
+    battle_map.process_token_action(move)
 
     assert battle_map.tokens[0].position.x == 100
     assert battle_map.tokens[0].position.y == 45
@@ -97,10 +97,10 @@ def test_move(battle_map: ManagedBattleMap):
 def test_remove(battle_map: ManagedBattleMap):
     add = get_test_move()
 
-    battle_map.process_action(add)
+    battle_map.process_token_action(add)
 
     remove = get_test_move({'action_type': TokenActionType.Removed})
-    battle_map.process_action(remove)
+    battle_map.process_token_action(remove)
 
     assert len(battle_map.tokens) == 0
 
@@ -113,25 +113,25 @@ def test_remove(battle_map: ManagedBattleMap):
 def test_duplicated_move(battle_map: ManagedBattleMap):
     move = get_test_move()
 
-    battle_map.process_action(move)
+    battle_map.process_token_action(move)
     move.action_type = TokenActionType.Moved
     with raises(IllegalMove):
-        battle_map.process_action(move)
+        battle_map.process_token_action(move)
 
 
 def test_illegal_add(battle_map: ManagedBattleMap):
-    battle_map.process_action(get_test_move())
+    battle_map.process_token_action(get_test_move())
     with raises(IllegalMove):
-        battle_map.process_action(get_test_move())
+        battle_map.process_token_action(get_test_move())
 
 
 def test_illegal_move(battle_map: ManagedBattleMap):
-    battle_map.process_action(get_test_move())
+    battle_map.process_token_action(get_test_move())
     with raises(IllegalMove):
-        battle_map.process_action(get_test_move({'action_type': TokenActionType.Moved, 'mark': '7'}))
+        battle_map.process_token_action(get_test_move({'action_type': TokenActionType.Moved, 'mark': '7'}))
 
 
 def test_illegal_remove(battle_map: ManagedBattleMap):
-    battle_map.process_action(get_test_move())
+    battle_map.process_token_action(get_test_move())
     with raises(IllegalMove):
-        battle_map.process_action(get_test_move({'action_type': TokenActionType.Removed, 'mark': '7'}))
+        battle_map.process_token_action(get_test_move({'action_type': TokenActionType.Removed, 'mark': '7'}))

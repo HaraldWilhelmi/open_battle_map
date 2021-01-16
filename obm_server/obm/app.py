@@ -20,7 +20,7 @@ from obm.routers.map_set_list import router as map_set_list_router
 from obm.routers.map_set import router as map_set_router
 from obm.routers.battle_map import router as battle_map_router
 from obm.routers.image_data import router as image_data_router
-from obm.routers.token import router as token_router
+from obm.routers.action_history import router as action_history_router
 from obm.routers.token_image import router as token_image_router
 from obm.routers.backup import router as backup_router
 
@@ -59,9 +59,12 @@ TAGS_META_DATA = [
             + 'of a Battle Background.'
     },
     {
-        'name': 'Token',
+        'name': 'Action History',
         'description':
-            'The Token service grants access to the Tokens on a Battle Map and their actions.'
+            'The Action History service grants access to Actions, which users/players '
+            + 'took on the Battle Map in question. This includes most importantly the '
+            + 'Tokens, which were added, moved, or removed on the map. Other status changes '
+            + 'are also reported by this service.'
     },
     {
         'name': 'Backup',
@@ -102,6 +105,6 @@ app.include_router(map_set_list_router, prefix='/api/map_set_list', tags=['Backg
 app.include_router(map_set_router, prefix='/api/map_set', tags=['Background Set'])
 app.include_router(battle_map_router, prefix='/api/battle_map', tags=['Battle Background'])
 app.include_router(image_data_router, prefix='/api/image_data', tags=['Image Data'])
-app.include_router(token_router, prefix='/api/token', tags=['Token'])
+app.include_router(action_history_router, prefix='/api/action_history', tags=['Action History'])
 app.include_router(token_image_router, prefix='/api/token_image', tags=['Token Image'])
 app.include_router(backup_router, prefix='/api/backup', tags=['Backup'])

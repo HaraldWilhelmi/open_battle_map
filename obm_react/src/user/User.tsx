@@ -1,7 +1,7 @@
 import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import {BattleMapId, TokenActionHistoryId} from '../api/Types';
+import {BattleMapId, ActionHistoryId} from '../api/Types';
 import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
@@ -9,7 +9,8 @@ import Map from './map/Map';
 import FlyingTokenLayer from './FlyingTokenLayer';
 import TokenImages from './TokenImages';
 import Menu from './menu/Menu';
-import './User.css'
+import {initDynamicAnimations} from "./tools/DynamicAnimations";
+import './User.css';
 
 
 export function User() {
@@ -41,7 +42,7 @@ export function User() {
             if ( mapSet === null || mapSet.battle_maps.length === 0) {
                 if ( battleMap !== null ) {
                     dispatch(actions.battleMap.invalidate());
-                    dispatch(actions.tokenActionHistory.invalidate());
+                    dispatch(actions.actionHistory.invalidate());
                 }
                 return undefined;
             }
@@ -66,11 +67,11 @@ export function User() {
             if (battleMap === null) {
                 return undefined;
             }
-            const tokenActionHistoryId: TokenActionHistoryId = {
+            const tokenActionHistoryId: ActionHistoryId = {
                 ...battleMap,
-                since: battleMap.token_action_count
+                since: battleMap.action_count
             };
-            dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
+            dispatch(actions.actionHistory.get(tokenActionHistoryId));
             return undefined;
         },
         [battleMap, dispatch]
@@ -80,13 +81,18 @@ export function User() {
         if ( mapSet !== null && ( battleMap !== null || mapSet.battle_maps.length === 0 ) ) {
             dispatch(actions.mapSet.startSync());
             dispatch(actions.battleMap.startSync());
-            dispatch(actions.tokenActionHistory.startSync());
+            dispatch(actions.actionHistory.startSync());
         }
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
-            dispatch(actions.tokenActionHistory.stopSync());
+            dispatch(actions.actionHistory.stopSync());
         };
+    });
+
+    useEffect(() => {
+        initDynamicAnimations();
+        return undefined;
     });
 
     let mySwitchAdmin = () => {
@@ -107,18 +113,6 @@ export function User() {
     }
     return (
         <div>
-            <svg display="none">
-                <symbol id="token0">
-                    <polygon points="10,23 45,3 80,23" className="background"/>
-                    <circle cx="45" cy="45" r="35" className="background"/>
-                    <circle cx="45" cy="45" r="30"/>
-
-                    <line x1="17" y1="21" x2="45" y2="6" className="outline"/>
-                    <line x1="73" y1="21" x2="45" y2="6" className="outline"/>
-                    <line x1="39" y1="12" x2="45" y2="9" className="outline"/>
-                    <line x1="51" y1="12" x2="45" y2="9" className="outline"/>
-                </symbol>
-            </svg>
             <TokenImages />
             <FlyingTokenLayer>
                 <div className="main-layer">

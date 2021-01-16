@@ -1,4 +1,4 @@
-import {Coordinate} from '../../api/Types';
+import {Coordinate, OFF_MAP_POSITION} from '../../api/Types';
 import {MapProperties, GeometryUpdate, MapMove, MapZoom} from '../../redux/Types';
 
 
@@ -154,4 +154,8 @@ export function getNextNiceScaleExample(maxValue: number): ScaleRuler {
         return {parts: 3, total: 3 * candidate};
     }
     return {parts: 10, total: candidate};
+}
+
+export function isOffMap(position: Coordinate): boolean {
+    return position.x === OFF_MAP_POSITION.x && position.y === OFF_MAP_POSITION.y;
 }

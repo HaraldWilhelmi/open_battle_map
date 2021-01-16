@@ -62,7 +62,7 @@ def test_simple(ctx: DepContext):
     map_set.name = 'Changed1'
     battle_maps[0].name = 'Changed2'
     battle_maps[0].set_background_image(media_type='image/svg+xml', image_data=SOME_SVG)
-    battle_maps[0].process_action(
+    battle_maps[0].process_token_action(
         TokenAction(
             action_type=TokenActionType.Added,
             uuid=uuid4(),

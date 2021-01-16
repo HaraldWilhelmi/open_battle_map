@@ -71,7 +71,7 @@ export interface BattleMapCreate {
 
 export interface BattleMap extends BattleMapUpdate, BattleMapCreate {
     revision: number;
-    token_action_count: number;
+    action_count: number;
 }
 
 
@@ -127,14 +127,28 @@ export interface TokenAction extends TokenState {
 export class TokenActionHistoryExpired extends Error {}
 
 
-export interface TokenActionHistoryId extends BattleMapId {
+export interface PointerAction {
+    position: Coordinate,
+    color: string,
+    uuid: string,
+}
+
+
+export const OFF_MAP_POSITION: Coordinate = {
+    x: -1,
+    y: -1,
+}
+
+
+export interface ActionHistoryId extends BattleMapId {
     since: number,
 }
 
-export interface TokenActionHistory extends TokenActionHistoryId {
+export interface ActionHistory extends ActionHistoryId {
     last_action_index: number,
     battle_map_revision: number,
-    actions: TokenAction[],
+    token_actions: TokenAction[],
+    pointer_actions: PointerAction[],
 }
 
 

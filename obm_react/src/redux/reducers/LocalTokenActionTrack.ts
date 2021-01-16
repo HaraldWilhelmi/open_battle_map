@@ -16,7 +16,7 @@ export const slice = createSlice({
                     ];
                 }
             }
-            console.log('LocalTokenActionTrack failed to forget unknown action ' + action.payload);
+            console.log('LocalTokenActionTrack failed to forget unknown Token Action ' + action.payload);
         },
         reset: () => INITIAL_STATE,
     },

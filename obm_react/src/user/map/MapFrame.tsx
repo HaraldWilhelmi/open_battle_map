@@ -1,19 +1,26 @@
 import {MouseEvent, useEffect, useState, WheelEvent} from 'react';
 import CSS from 'csstype';
 import {useDispatch, useSelector} from 'react-redux';
-import {Coordinate} from '../../api/Types';
-import {GenericDispatch, MapProperties, MapZoom, MouseMode, MouseState, RootState, Tokens} from '../../redux/Types';
+import {Coordinate, OFF_MAP_POSITION, PointerAction} from '../../api/Types';
+import {GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {
     calculateMapFrame,
+    getMapFramePositionFromMapPosition,
     getMapPositionFromPhysicalPosition,
     getRotationFromTarget,
     ZOOM_INCREMENT
 } from '../tools/Map';
+import {handleUserAction} from "../../common/Tools";
+import {postPointerAction} from "../../api/ActionHistory";
 import Measurement from "../components/Measurement";
+import Positioner from "../components/Positioner";
+import Pointer from "../components/Pointer";
 
 
 const INITIAL_MEASUREMENT_POSITION: Coordinate | null = null;
+const INITIAL_POINTER_POSITION: Coordinate | null = null;
+const MIN_POINTER_ACTION_DELAY_MS = 100;
 
 
 interface Props {
@@ -22,18 +29,27 @@ interface Props {
 
 export function MapFrame(props: Props) {
     const [measurementPosition, setMeasurementPosition] = useState(INITIAL_MEASUREMENT_POSITION);
+    const [pointerIsVisible, setPointerIsVisible] = useState(false);
+    const [pointerPosition, setPointerPosition] = useState(INITIAL_POINTER_POSITION);
+    const [lastPointerActionTime, setLastPointerActionTime] = useState(0);
+    const [lastMouseMode, setLastMouseMode] = useState(MouseMode.Default);
+
     const dispatch: GenericDispatch = useDispatch();
 
-    const mapProperties: MapProperties = useSelector(
+    const mapProperties = useSelector(
         (state: RootState) => state.mapProperties
     );
 
-    const mouse: MouseState = useSelector(
+    const mouse = useSelector(
         (state: RootState) => state.mouse
     );
 
-    const tokens: Tokens = useSelector(
+    const tokens = useSelector(
         (state: RootState) => state.tokens
+    );
+
+    const battleMap = useSelector(
+        (state: RootState) => state.battleMap
     );
 
     const doZoom = (event: WheelEvent) => {
@@ -58,6 +74,14 @@ export function MapFrame(props: Props) {
                 dispatch(actions.mouse.stopMeasurement());
             }
         }
+        if ( event.key === 'Escape' ) {
+            if ( mouse.mode === MouseMode.MeasureTo || mouse.mode === MouseMode.MeasureFrom ) {
+                dispatch(actions.mouse.stopMeasurement());
+            }
+            if ( mouse.mode === MouseMode.Pointer ) {
+                dispatch(actions.mouse.stopPointer());
+            }
+        }
     };
 
     useEffect(
@@ -65,7 +89,26 @@ export function MapFrame(props: Props) {
             document.addEventListener('keydown', doKeyboard);
             return () => document.removeEventListener('keydown', doKeyboard);
         }
-    )
+    );
+
+    useEffect(
+        () => {
+            if ( mouse.mode === lastMouseMode ) {
+                return undefined;
+            }
+            if ( lastMouseMode === MouseMode.Pointer && pointerIsVisible ) {
+                const action: PointerAction = {
+                    position: OFF_MAP_POSITION,
+                    color: mouse.pointerColor ?? 'Black',
+                    uuid: mouse.pointerUuid ?? 'x',
+                };
+                handleUserAction(() => postPointerAction(battleMap, action), dispatch);
+            }
+            setLastMouseMode(mouse.mode);
+            return undefined;
+        },
+        [mouse, lastMouseMode, pointerIsVisible, battleMap, dispatch]
+    );
 
     const doClick = (event: MouseEvent) => {
         switch ( mouse.mode ) {
@@ -97,6 +140,10 @@ export function MapFrame(props: Props) {
                 dispatch(actions.mouse.stopMeasurement());
                 break;
             }
+            case MouseMode.Pointer: {
+                dispatch(actions.mouse.stopPointer());
+                break;
+            }
             default: {break}
         }
     }
@@ -121,6 +168,54 @@ export function MapFrame(props: Props) {
         }
     };
 
+    const movePointer = (event: MouseEvent) => {
+        const position = getMouseMapPosition(event);
+        console.log("Mouse: " + JSON.stringify(position));
+        setPointerPosition(position);
+        if ( mouse.mode === MouseMode.Pointer ) {
+            const now = Date.now();
+            if ( now < lastPointerActionTime + MIN_POINTER_ACTION_DELAY_MS ) {
+                return;
+            }
+            const action: PointerAction = {
+                position,
+                color: mouse.pointerColor ?? 'Black',
+                uuid: mouse.pointerUuid ?? 'x',
+            };
+            handleUserAction(() => postPointerAction(battleMap, action), dispatch);
+            setLastPointerActionTime(now);
+        }
+    }
+
+    const doMouseMove = (event: MouseEvent) => {
+        trackDistance(event);
+        movePointer(event);
+    };
+
+    const doMouseEnter = () => {
+        setPointerIsVisible(true);
+    };
+
+    const doMouseLeave = () => {
+        stopTrackDistance();
+        setPointerIsVisible(false);
+        if ( mouse.mode === MouseMode.Pointer ) {
+            const action: PointerAction = {
+                position: OFF_MAP_POSITION,
+                color: mouse.pointerColor ?? 'Black',
+                uuid: mouse.pointerUuid ?? 'x',
+            };
+            handleUserAction(() => postPointerAction(battleMap, action), dispatch);
+        }
+    };
+
+    let myPointer = <div />;
+    if ( mouse.mode === MouseMode.Pointer && pointerIsVisible && pointerPosition !== null ) {
+        const position = getMapFramePositionFromMapPosition(mapProperties, pointerPosition)
+        myPointer = <Positioner position={position}>
+            <Pointer color={mouse.pointerColor ?? 'Black'} fades={true} key={position.x + 10000 * position.y} />
+        </Positioner>;
+    }
 
     const geometry = calculateMapFrame(mapProperties);
 
@@ -139,11 +234,13 @@ export function MapFrame(props: Props) {
             onWheel={doZoom}
             onClick={doClick}
             onDragStart={doClick}
-            onMouseMove={trackDistance}
-            onMouseLeave={stopTrackDistance}
+            onMouseMove={doMouseMove}
+            onMouseEnter={doMouseEnter}
+            onMouseLeave={doMouseLeave}
         >
             {props.children}
             <Measurement position={measurementPosition} />
+            {myPointer}
         </div>
     );
 }

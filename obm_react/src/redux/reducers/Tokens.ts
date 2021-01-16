@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {Coordinate, TokenAction, TokenActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
-import {getAllTokens, postTokenAction} from '../../api/Token';
+import {Coordinate, TokenAction, ActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
+import {getAllTokens, postTokenAction} from '../../api/ActionHistory';
 import {ActingTokenState, FlyingToken, GenericDispatch, MouseMode, RootState, ThunkApi, Tokens} from '../Types';
 import {
     endTokenAction,
@@ -76,12 +76,7 @@ const pickupFromMap = createAsyncThunk<void, FlyingToken, ThunkApi>(
 const pickupFromBox = createAsyncThunk<void, FlyingToken, ThunkApi>(
     'tokens/pickupFromBox',
     async (token: FlyingToken, thunkApi) => {
-        const getState = thunkApi.getState;
         const dispatch = thunkApi.dispatch;
-        const state = getState();
-        if ( state.mouse.mode !== MouseMode.Default ) {
-            return;
-        }
         dispatch(mouseActions.grabToken(null));
         dispatch(slice.actions.pickupFromBox(token));
     }
@@ -110,11 +105,11 @@ const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
         const state = getState();
         const battleMap = state.battleMap;
         if ( battleMap !== null ) {
-            const allTokenStatesResponse = await getAllTokens(battleMap, dispatch);
+            const allTokenStatesResponse = await getAllTokens(battleMap);
             dispatch(localTokenActionTrackActions.reset());
             dispatch(slice.actions.loadTokensFromServer(allTokenStatesResponse.tokens));
-            const tokenActionHistoryId: TokenActionHistoryId = {...battleMap, since: allTokenStatesResponse.next_action_index};
-            dispatch(actions.tokenActionHistory.get(tokenActionHistoryId));
+            const tokenActionHistoryId: ActionHistoryId = {...battleMap, since: allTokenStatesResponse.next_action_index};
+            dispatch(actions.actionHistory.get(tokenActionHistoryId));
             dispatch(mouseActions.releaseToken());
         }
     }
@@ -151,7 +146,7 @@ async function logAction(state: RootState, action: TokenAction, dispatch: Generi
         await postTokenAction(state.battleMap, action);
         dispatch(localTokenActionTrackActions.log(action.uuid));
     } catch (e) {
-        console.log("Warning: Failed to send token action - will reload everything from server!")
+        console.log("Warning: Failed to send token token_action - will reload everything from server!")
         dispatch(loadTokensFromServer());
     }
 }

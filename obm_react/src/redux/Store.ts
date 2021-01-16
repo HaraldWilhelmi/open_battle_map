@@ -11,7 +11,7 @@ import mapPropertiesReducer, {mapPropertiesActions} from './reducers/MapProperti
 import mouseReducer, {mouseActions} from './reducers/Mouse';
 import tokensReducer, {tokensActions} from './reducers/Tokens';
 import localTokenActionTrackReducer, {localTokenActionTrackActions} from "./reducers/LocalTokenActionTrack";
-import tokenActionHistoryReducer, {tokenActionHistoryActions} from "./reducers/TokenActionHistory";
+import actionHistoryReducer, {actionHistoryActions} from "./reducers/ActionHistory";
 
 export const store = configureStore({
     reducer: combineReducers({
@@ -26,7 +26,7 @@ export const store = configureStore({
         mouse: mouseReducer,
         tokens: tokensReducer,
         localTokenActionTrack: localTokenActionTrackReducer,
-        tokenActionHistory: tokenActionHistoryReducer,
+        actionHistory: actionHistoryReducer,
     })
 });
 
@@ -42,7 +42,7 @@ export const actions = {
     mouse: mouseActions,
     tokens: tokensActions,
     localTokenActionTrack: localTokenActionTrackActions,
-    tokenActionHistory: tokenActionHistoryActions,
+    actionHistory: actionHistoryActions,
 };
 
 export default store;

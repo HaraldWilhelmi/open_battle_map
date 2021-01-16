@@ -1,19 +1,19 @@
-import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from 'react-redux';
-import CSS from 'csstype';
 import {GenericDispatch, MapProperties, RootState, ActingTokenState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {getMapFramePositionFromMapPosition} from '../tools/Map';
-import Token from './Token';
 import {TokenActionType, Coordinate} from "../../api/Types";
 import {getTokenIdAsKeyframesName, getTokenWidthOnMap} from "../tools/Token";
+import Positioner from "./Positioner";
+import Animator from "./Animator";
+import Token from './Token';
 
 
 function getKeyFrames(token: ActingTokenState): string {
     switch (token.action_type) {
         case TokenActionType.added: {
-            return `0% { transform: scale(3); opacity: 50%; }
-                    100% { transform: scale(1); opacity: 100%; }`;
+            return `0% { transform: scale(3); opacity: 0.5; }
+                    100% { transform: scale(1); opacity: 1; }`;
         }
         case TokenActionType.moved: {
             const fromPosition: Coordinate = token.fromPosition ?? {x: 0, y: 0};
@@ -23,11 +23,15 @@ function getKeyFrames(token: ActingTokenState): string {
                     100% { transform: translate(0, 0); }`;
         }
         case TokenActionType.removed: {
-           return `0% { transform: scale(1); opacity: 100%;}
-                   100% { transform: scale(3); opacity: 50%;}`;
+           return `0% { transform: scale(1); opacity: 1;}
+                   100% { transform: scale(3); opacity: 0.5;}`;
         }
     }
 }
+
+
+function noop() {}
+
 
 interface Props {
     token: ActingTokenState,
@@ -35,35 +39,6 @@ interface Props {
 
 export function MovingToken(props: Props) {
     const dispatch: GenericDispatch = useDispatch();
-
-    const [keyframesName, setKeyFramesName] = useState('');
-
-    useEffect(
-        () => {
-            const newName = 'animation-' + getTokenIdAsKeyframesName(props.token);
-            setKeyFramesName(newName);
-            const newSheet: HTMLStyleElement = document.createElement('style');
-            document.head.appendChild(newSheet);
-            if ( newSheet.sheet !== null ) {
-                newSheet.sheet.insertRule("@keyframes " + newName + " { " +
-                    getKeyFrames(props.token)
-                + " }");
-            }
-
-            return () => {
-                if ( newSheet !== null ) {
-                    document.head.childNodes.forEach(
-                        (node) => {
-                            if (newSheet.isSameNode(node)) {
-                                document.head.removeChild(node);
-                            }
-                        }
-                    );
-                }
-            }
-        },
-        [setKeyFramesName, props.token]
-    );
 
     const mapProperties: MapProperties = useSelector(
         (state: RootState) => state.mapProperties
@@ -77,10 +52,6 @@ export function MovingToken(props: Props) {
         (state: RootState) => state.mapSet
     );
 
-    if ( keyframesName === '' ) { return <div />; }
-
-    function noop() {}
-
     function endAnimation() {
         dispatch(actions.tokens.endMove(props.token));
     }
@@ -89,21 +60,11 @@ export function MovingToken(props: Props) {
     const tokenDescriptor = mapSet.token_set[props.token.token_type];
     const width = 1.1 * getTokenWidthOnMap(tokenDescriptor, battleMap, mapProperties);
 
-    const positionerStyle: CSS.Properties = {
-        position: 'absolute',
-        transform: 'translate(-50%, -50%)',
-        left: positionOnScreen.x + 'px',
-        top: positionOnScreen.y + 'px',
-        pointerEvents: 'none',
-    };
+    const animationId = 'animation-' + getTokenIdAsKeyframesName(props.token);
+    const keyFrames = getKeyFrames(props.token)
 
-    const animatorStyle: CSS.Properties = {
-        pointerEvents: 'none',
-        animation: keyframesName + ' 0.5s linear',
-    };
-
-    return <div style={positionerStyle} >
-        <div style={animatorStyle} onAnimationEnd={endAnimation}>
+    return <Positioner position={positionOnScreen}>
+        <Animator id={animationId} animation="0.5s linear" keyframes={keyFrames} onAnimationEnd={endAnimation}>
             <Token
                 tokenId={props.token}
                 width={width}
@@ -112,8 +73,8 @@ export function MovingToken(props: Props) {
                 onWheel={noop}
                 pointerEvents={false}
             />
-        </div>
-    </div>
+        </Animator>
+    </Positioner>
 }
 
 export default MovingToken;

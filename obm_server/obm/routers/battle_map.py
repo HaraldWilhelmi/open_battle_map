@@ -23,7 +23,7 @@ class BattleMapInfo(BaseModel):
     map_set_uuid: UUID
     name: str
     revision: int
-    token_action_count: int
+    action_count: int
 
     background_pixels_per_meter: float
     background_media_type: Optional[str]

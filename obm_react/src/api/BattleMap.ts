@@ -28,6 +28,6 @@ export const NO_SUCH_BATTLE_MAP: BattleMap = {
     uuid: 'dummy',
     map_set_uuid: 'dummy',
     revision: 0,
-    token_action_count: 0,
+    action_count: 0,
     background_pixels_per_meter: 100,
 };

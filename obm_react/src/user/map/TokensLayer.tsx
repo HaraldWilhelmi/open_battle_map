@@ -22,10 +22,10 @@ export function TokensLayer() {
     );
     const localTokenActionTrack = useSelector(
         (state: RootState) => state.localTokenActionTrack
-    )
-    const tokenActionHistory = useSelector(
-        (state: RootState) => state.tokenActionHistory
-    )
+    );
+    const actionHistory = useSelector(
+        (state: RootState) => state.actionHistory
+    );
 
     useEffect( // Load tokens form server if Battle Map was switched
         () => {
@@ -44,33 +44,33 @@ export function TokensLayer() {
 
     useEffect( // Reload battle map if we detected an update in the Token Action History
         () => {
-            if ( tokenActionHistory === null ) { return undefined; }
-            if ( tokenActionHistory?.battle_map_revision !== battleMap?.revision ) {
-                if ( tokenActionHistory?.battle_map_revision > battleMap?.revision ) {
+            if ( actionHistory === null ) { return undefined; }
+            if ( actionHistory?.battle_map_revision !== battleMap?.revision ) {
+                if ( actionHistory?.battle_map_revision > battleMap?.revision ) {
                     dispatch(actions.battleMap.get(battleMap))
                 }
             }
             return undefined;
         },
-        [tokenActionHistory, battleMap, dispatch]
+        [actionHistory, battleMap, dispatch]
     )
 
-    useEffect( // Process recent Token Actions
+    useEffect( // Process recent Actions
         () => {
-            if ( tokenActionHistory === null || tokenActionHistory.last_action_index <= lastActionIndex ) {
+            if ( actionHistory === null || actionHistory.last_action_index <= lastActionIndex ) {
                 return undefined;
             }
-            for ( let tokenAction of tokenActionHistory.actions ) {
-                if ( localTokenActionTrack.find(it => it === tokenAction.uuid) !== undefined ) { // Ignore local actions
+            for ( let tokenAction of actionHistory.token_actions ) {
+                if ( localTokenActionTrack.find(it => it === tokenAction.uuid) !== undefined ) { // Ignore local token_actions
                     dispatch(actions.localTokenActionTrack.forget(tokenAction.uuid));
                 } else {
                     dispatch(actions.tokens.startMove(tokenAction));
                 }
             }
-            setLastActionIndex(tokenActionHistory.last_action_index);
+            setLastActionIndex(actionHistory.last_action_index);
             return undefined;
         },
-        [tokenActionHistory, lastActionIndex, localTokenActionTrack, dispatch]
+        [actionHistory, lastActionIndex, localTokenActionTrack, dispatch]
     )
 
     const movingTokens = tokens.actingTokens.map(

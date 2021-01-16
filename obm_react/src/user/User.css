@@ -44,3 +44,19 @@
     stroke: #e0e0e0;
     stroke-width: 5px;
 }
+
+@keyframes laser-pointer-fading {
+    0% { opacity: 1 }
+    10% { opacity: 1 }
+    100% { opacity: 0 }
+}
+
+.laser-pointer {
+    pointer-events: none;
+}
+
+.laser-pointer-fading {
+    pointer-events: none;
+    animation-name: laser-pointer-fading;
+    animation-duration: 100s;
+}
