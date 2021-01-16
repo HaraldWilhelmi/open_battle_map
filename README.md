@@ -134,6 +134,7 @@ Also, I feel guilty that I only wrote so few of them yet.
      into a Map Set.
 
 ## Project History
+ * 2021-01-16: **v0.4** - Laser Pointer feature
  * 2021-01-10: **v0.3** - More tokens and measurement functions.
  * 2021-01-07: **v0.2** - Switched polling from "1 poll per second per client" to "client polls after 0.1
    seconds but answer is delayed up to 30s if nothing happens". 

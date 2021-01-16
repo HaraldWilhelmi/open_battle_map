@@ -50,25 +50,25 @@ def test_simple(battle_map: ManagedBattleMap):
 
     history = battle_map.get_history(0)
     assert len(history) == 1
-    assert history[0].uuid == move.uuid
+    assert history[0].payload.uuid == move.uuid
 
     assert len(battle_map.get_history(1)) == 0
 
 
 def test_overflow(battle_map: ManagedBattleMap):
     test_moves = []
-    for i in range(120):
+    for i in range(320):
         move = get_test_move({'mark': str(i)})
         battle_map.process_token_action(move)
         test_moves.append(move)
 
-    assert battle_map.action_count == 120
-    assert len(battle_map.tokens) == 120
+    assert battle_map.action_count == 320
+    assert len(battle_map.tokens) == 320
 
     history = battle_map.get_history(20)
-    assert len(history) == 100
-    assert history[50].mark == '70'
-    assert history[50].uuid == test_moves[70].uuid
+    assert len(history) == 300
+    assert history[50].payload.mark == '70'
+    assert history[50].payload.uuid == test_moves[70].uuid
 
     with raises(LogsExpired):
         battle_map.get_history(19)
@@ -90,8 +90,8 @@ def test_move(battle_map: ManagedBattleMap):
 
     history = battle_map.get_history(0)
     assert len(history) == 2
-    assert history[1].uuid == move.uuid
-    assert history[1].action_type == TokenActionType.Moved
+    assert history[1].payload.uuid == move.uuid
+    assert history[1].payload.action_type == TokenActionType.Moved
 
 
 def test_remove(battle_map: ManagedBattleMap):
@@ -106,8 +106,8 @@ def test_remove(battle_map: ManagedBattleMap):
 
     history = battle_map.get_history(0)
     assert len(history) == 2
-    assert history[1].uuid == remove.uuid
-    assert history[1].action_type == TokenActionType.Removed
+    assert history[1].payload.uuid == remove.uuid
+    assert history[1].payload.action_type == TokenActionType.Removed
 
 
 def test_duplicated_move(battle_map: ManagedBattleMap):

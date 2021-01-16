@@ -170,7 +170,6 @@ export function MapFrame(props: Props) {
 
     const movePointer = (event: MouseEvent) => {
         const position = getMouseMapPosition(event);
-        console.log("Mouse: " + JSON.stringify(position));
         setPointerPosition(position);
         if ( mouse.mode === MouseMode.Pointer ) {
             const now = Date.now();

@@ -33,6 +33,9 @@ export function Pointer(props: Props) {
             </radialGradient>
         </defs>
         <circle cx="20" cy="20" r="20" fill={'url(#' + gradientId + ')'} style={style} onClick={onClick}/>
+        <circle cx="20" cy="20" r="17" fill="none" stroke="White" strokeWidth="1" />
+        <circle cx="20" cy="20" r="19" fill="none" stroke="Black" strokeWidth="1" />
+        <circle cx="20" cy="20" r="18" fill="none" stroke={props.color} strokeWidth="1" />
     </svg>
 }
 
