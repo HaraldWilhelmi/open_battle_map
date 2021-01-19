@@ -6,9 +6,10 @@ import {RootState, GenericDispatch, Mode} from '../redux/Types';
 import {actions} from '../redux/Store';
 import Messages from '../common/Messages';
 import Map from './map/Map';
+import Menu from './menu/Menu';
 import FlyingTokenLayer from './FlyingTokenLayer';
 import TokenImages from './TokenImages';
-import Menu from './menu/Menu';
+import Keyboard from './Keybooard';
 import {initDynamicAnimations} from "./tools/DynamicAnimations";
 import './User.css';
 
@@ -113,6 +114,7 @@ export function User() {
     }
     return (
         <div>
+            <Keyboard />
             <TokenImages />
             <FlyingTokenLayer>
                 <div className="main-layer">

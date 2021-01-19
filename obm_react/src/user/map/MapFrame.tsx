@@ -64,33 +64,6 @@ export function MapFrame(props: Props) {
         y: event.nativeEvent.offsetY,
     });
 
-
-    const doKeyboard = (event: KeyboardEvent) => {
-        event.stopPropagation();
-        if ( event.key === 'm' ) {
-            if ( mouse.mode === MouseMode.Default ) {
-                dispatch(actions.mouse.startMeasurement());
-            } else if ( mouse.mode === MouseMode.MeasureFrom || mouse.mode === MouseMode.MeasureTo ) {
-                dispatch(actions.mouse.stopMeasurement());
-            }
-        }
-        if ( event.key === 'Escape' ) {
-            if ( mouse.mode === MouseMode.MeasureTo || mouse.mode === MouseMode.MeasureFrom ) {
-                dispatch(actions.mouse.stopMeasurement());
-            }
-            if ( mouse.mode === MouseMode.Pointer ) {
-                dispatch(actions.mouse.stopPointer());
-            }
-        }
-    };
-
-    useEffect(
-        () => {
-            document.addEventListener('keydown', doKeyboard);
-            return () => document.removeEventListener('keydown', doKeyboard);
-        }
-    );
-
     useEffect(
         () => {
             if ( mouse.mode === lastMouseMode ) {
