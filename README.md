@@ -122,16 +122,25 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Roadmap
 
- * January 2021:
-   * Implement some Quick Wins after doing UX-Testing:
-     * Add buttons to turn map
- * February 2021:
-   * Vehicles: Tokens that carry/move tokens placed on them.
-   * Generic tokens without facing
-   * Environment Effect Tokens: Fire, Smoke, Mud
- * Someday:
-   * Custom Token Sets: Collections of custom tokens, which can be loaded
-     into a Map Set.
+### January 2021
+
+ * Add a few more hot keys
+
+### February 2021
+
+ * Vehicles: Tokens that carry/move tokens placed on them.
+ * Generic tokens without facing
+ * Environment Effect Tokens: Fire, Smoke, Mud
+
+### Someday
+
+ * Custom Token Sets: Collections of custom tokens, which can be loaded
+   into a Map Set.
+
+### Postponed or Canceled Features
+
+ * Turn the map: Surprisingly complex feature with little practical value.
+   For now I go on without that one.
 
 ## Project History
  * 2021-01-16: **v0.4** - Laser Pointer feature
