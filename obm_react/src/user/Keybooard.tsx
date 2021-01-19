@@ -35,22 +35,10 @@ export function Keyboard() {
                 }
                 break;
             }
-            case 'w': {
-                mapMove(0, 1);
-                break;
-            }
-            case 's': {
-                mapMove(0, -1);
-                break;
-            }
-            case 'a': {
-                mapMove(1, 0);
-                break;
-            }
-            case 'd': {
-                mapMove(-1, 0);
-                break;
-            }
+            case 'w': { mapMove(0, 1); break; }
+            case 's': { mapMove(0, -1); break; }
+            case 'a': { mapMove(1, 0); break; }
+            case 'd': { mapMove(-1, 0); break; }
         }
     }
 
