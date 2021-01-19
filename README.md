@@ -70,11 +70,69 @@ a docker image do this:
      Amazon (AWS) have a look at:
      
      * https://github.com/HaraldWilhelmi/open_battle_map_cdk
+    
+The procedure to set up the application manually on a Linux VM without Docker
+should pretty clear. Just look at `deploy/docker/Dockerfile` and
+`deploy/docker/bootstrap.sh` to get an idea what needs to be done. Most of the
+stuff is actually about TLS. So, if you don't need HTTPS, or you have already
+a load balancer or reverse proxy in place, which takes are care of that, the
+setup will be almost trivial.
  
-## More features
+## Features
 
- * Press 'm' on the map to do length measurements. Also displays the Gurps range modifier
-   (assuming that 1 m = 1 yd - good enough for game purpose I guess).
+### Basic Usage
+
+ * Use *Upload Background* in the *Work* tab to upload your battle map.
+ * Set scale of your map - pixels per meter in your background map. For Yankees:
+   For game purpose meters and yards are the same...
+ * Click on tokens in the Token Box in the Play tab or on the map to pick them up.
+ * Click twice to place (1) a token and to adjust where it is facing (2). 
+ * New tokens are automatically numbered.
+ * Click on one of the colored laser pointers to show your friends something
+   on the map. Then try to order the laser diode in China, which you need to
+   build a real life version of the black one.
+ * Use the mouse wheel (two-finger spread/contraction on many node books)
+   to zoom in/out on the present mouse position.
+ * Grab the map (hold left mouse button) to move it.
+
+### Hot Keys
+
+ * **m**: Enter measurement mode. Click on the map and move the mouse show
+   distances and map coordinates. Click again to exit. Also displays the
+   Gurps range modifier (assuming that 1 m = 1 yd - good enough for game
+   purpose I guess).
+ * **w / a / s / d**: Moves the map.
+ * **e / q**: Zoomes in/out on the map.
+ * **Escape**: Leave measurement or pointer mode.
+
+## FAQ
+
+### Can I import images to have custom tokens?
+
+Yes, but it is not really comfortable:
+
+ * Export the map set
+ * Unpack the .obm file with tar or WinZip (it is a tar.gz)
+ * Include a SVG symbol in tokens.xhtml for your token.
+   * Use the same CSS styles as the ones used for the other tokens. You can
+    not define your own styles in the file because they are not used
+    on the server. They are only included here for easier testing.
+   * Use the next free ID for your token in the format *token\<token type\>*,
+    e.g. 'token7'.
+ * Add the necessary data for your token in tokens.json.
+ * Pack everything together in a new .obm file.
+ * Import that file to a new Map Set so that you can throw away the whole
+   Map Set if things went awfully bad.
+   
+### Why are custom tokens are so complicated?
+
+There seem to be strange limitations and/or bugs when trying to combine CSS transformations
+with HTML area maps, and the `img` tag. The best workaround was to directly embed
+an SVG into the DOM of the final web page and use SVG symbols from it for the actual
+tokens. With that approach it was possible to make the symbols clickable with
+"pixel accuracy". That greatly improved the general UX, performance and browser
+compatibility. Maybe there will be  a separate export/import function for just
+the Token Set in the future to make the above procedure a bit safer.
 
 ## How to change the code
 
@@ -104,7 +162,7 @@ a docker image do this:
  * Connect to http://localhost:3000 to access the application. The React DEV server is
    configured to proxy the API calls to port 8000. Most of the time it does. Sometimes
    you will see the 'connection reset' errors. That's actually an issue with the React DEV server.
-   It is very easy to overload.:
+   It is very easy to overload.
  * The configuration (Admin Secret!) and the dynamic data can be found in
    `~/open_battle_map_data`.
    
@@ -143,6 +201,7 @@ Also, I feel guilty that I only wrote so few of them yet.
    For now I go on without that one.
 
 ## Project History
+ * 2021-01-19: **v0.5** - Added hotkeys for map move and zoom
  * 2021-01-16: **v0.4** - Laser Pointer feature
  * 2021-01-10: **v0.3** - More tokens and measurement functions.
  * 2021-01-07: **v0.2** - Switched polling from "1 poll per second per client" to "client polls after 0.1
