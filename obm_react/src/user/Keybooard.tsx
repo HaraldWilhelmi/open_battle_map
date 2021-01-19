@@ -1,7 +1,8 @@
 import {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {GenericDispatch, MapMove, MouseMode, RootState} from '../redux/Types';
+import {GenericDispatch, MapMove, MapZoom, MouseMode, RootState} from '../redux/Types';
 import {actions} from '../redux/Store';
+import {ZOOM_INCREMENT} from "./tools/Map";
 
 
 export function Keyboard() {
@@ -39,6 +40,8 @@ export function Keyboard() {
             case 's': { mapMove(0, -1); break; }
             case 'a': { mapMove(1, 0); break; }
             case 'd': { mapMove(-1, 0); break; }
+            case 'e': { zoom(ZOOM_INCREMENT); break; }
+            case 'q': { zoom(1 / ZOOM_INCREMENT); break; }
         }
     }
 
@@ -49,6 +52,11 @@ export function Keyboard() {
             deltaY: y * movementStepPixels,
         };
         dispatch(actions.mapProperties.move(mapMove));
+    }
+
+    const zoom = (zoomFactorRatio: number) => {
+        const mapZoom: MapZoom = {zoomFactorRatio};
+        dispatch(actions.mapProperties.zoom(mapZoom));
     }
 
     useEffect(

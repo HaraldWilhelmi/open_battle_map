@@ -76,9 +76,11 @@ export function calculateMapZoom(mapProperties: MapProperties, mapZoom: MapZoom)
 }
 
 export function getDefaultFocusPoint(mapProperties: MapProperties) {
+    const relevantXOffset = Math.min(mapProperties.xOffset, 0);
+    const relevantYOffset = Math.min(mapProperties.yOffset, 0);
     return {
-        x: mapProperties.visibleWidth / 2 + mapProperties.xOffset,
-        y: mapProperties.visibleHeight / 2 + mapProperties.yOffset,
+        x: mapProperties.visibleWidth / 2 - relevantXOffset,
+        y: mapProperties.visibleHeight / 2 - relevantYOffset,
     }
 }
 
