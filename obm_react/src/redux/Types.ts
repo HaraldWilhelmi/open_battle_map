@@ -8,7 +8,7 @@ import {
     Coordinate,
     TokenState,
     ActionHistory,
-    TokenAction
+    TokenAction, PostPointerActionRequest
 } from '../api/Types';
 
 
@@ -46,6 +46,7 @@ export enum Mode {
     AdminLogin = 'AdminLogin',
     User = 'User',
 }
+
 
 export interface MapProperties {
     naturalWidth: number,
@@ -140,6 +141,7 @@ export interface RootState {
     tokens: Tokens,
     localTokenActionTrack: string[],
     actionHistory: ActionHistory,
+    pointerAction: PostPointerActionRequest | null,
 }
 
 export type GenericDispatch = ThunkDispatch<RootState, null, AnyAction>;

@@ -1,3 +1,5 @@
+import {logResponseJson, logResponseMeta} from "../common/ApiLogs";
+
 export interface UnpackedResponse{
     ok: boolean,
     status: number,
@@ -13,9 +15,11 @@ interface Detail {
 export class ApiError extends Error {}
 
 export async function unpackResponse(response: Response): Promise<UnpackedResponse> {
-    const json: any = await response.json();
+    logResponseMeta(response);
+    const json: any = response.json();
+    logResponseJson(json);
     const jsonAsDetail: Detail = json;
-    return {
+    return  {
         ok: response.ok,
         status: response.status,
         statusText: response.statusText,

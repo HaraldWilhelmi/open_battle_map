@@ -83,11 +83,13 @@ export function User() {
             dispatch(actions.mapSet.startSync());
             dispatch(actions.battleMap.startSync());
             dispatch(actions.actionHistory.startSync());
+            dispatch(actions.pointerAction.startSync());
         }
         return () => {
             dispatch(actions.mapSet.stopSync());
             dispatch(actions.battleMap.stopSync());
             dispatch(actions.actionHistory.stopSync());
+            dispatch(actions.pointerAction.stopSync());
         };
     });
 

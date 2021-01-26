@@ -1,26 +1,29 @@
 import {AnyAction, Reducer} from 'redux';
-import {AsyncThunk, createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {Operation, ReadonlyApi, ReadonlyApiWithId, UpdatableApiWithId} from '../api/Types';
+import {AsyncThunk, createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {Operation, ReadonlyApi, ReadonlyApiWithId, UpdatableApiWithId, WriteOnlyApi} from '../api/Types';
 import {GenericDispatch, RootState, SyncDescriptor, ThunkApi, ThunkRejectReasons, SyncFinisher} from './Types';
 import {syncerActions} from './reducers/Syncer';
 import {messagesActions} from './reducers/Messages';
 import {ApiError} from "../api/UnpackResponse";
 import {internalError} from "../common/Tools";
-
+import {reportApiProblem} from "../common/ApiLogs";
 
 export interface GenericSyncDescriptor<DATA> {
     name: string,
-    getMyOwnState: (state: RootState) => DATA,
+    getMyOwnState: (state: RootState) => DATA | null,
     syncPeriodInMs: number,
 }
 
-export interface ReadonlySyncDescriptor<DATA> extends GenericSyncDescriptor<DATA> {
-    api: ReadonlyApi<DATA>,
+export interface GenericSyncDescriptorWithoutId<DATA> extends GenericSyncDescriptor<DATA>{
     errorHandler?: (
         error: Error,
         operation: Operation,
         dispatch: GenericDispatch
     ) => void,
+}
+
+export interface ReadonlySyncDescriptor<DATA> extends GenericSyncDescriptorWithoutId<DATA> {
+    api: ReadonlyApi<DATA>,
 }
 
 export interface GenericSyncSetupActions {
@@ -43,17 +46,7 @@ export function createReadonlySyncReducer<DATA>(
     descriptor: ReadonlySyncDescriptor<DATA>
 ): ReadonlySyncSetup<DATA> {
     const name = descriptor.name;
-
-    function handleError(
-        error: Error, operation: Operation, dispatch: GenericDispatch,
-    ): ThunkRejectReasons {
-        const handler = descriptor.errorHandler;
-        if ( handler !== undefined ) {
-            handler(error, operation, dispatch);
-        }
-        dispatch(messagesActions.reportError(error.message));
-        return ThunkRejectReasons.ApiError;
-    }
+    const handleError = getErrorHandlerWithoutId(descriptor);
 
     const get = createAsyncThunk<DATA, undefined, ThunkApi>(
         name + '/get',
@@ -120,6 +113,28 @@ export function createReadonlySyncReducer<DATA>(
             get, startSync, stopSync
         },
     }
+}
+
+
+function getErrorHandlerWithoutId<DATA>(descriptor: GenericSyncDescriptorWithoutId<DATA>):
+    (error: Error, operation: Operation, dispatch: GenericDispatch) => ThunkRejectReasons
+{
+    return (error: Error, operation: Operation, dispatch: GenericDispatch) => {
+        const handler = descriptor.errorHandler;
+        if ( handler !== undefined ) {
+            handler(error, operation, dispatch);
+        }
+        return handleGenericError(error, dispatch);
+    }
+}
+
+function handleGenericError(error: Error, dispatch: GenericDispatch): ThunkRejectReasons {
+    if ( error instanceof ApiError ) {
+        dispatch(messagesActions.reportError(error.message));
+        return ThunkRejectReasons.ApiError;
+    }
+    reportApiProblem();
+    internalError(error.toString());
 }
 
 function getStartSyncThunk<DATA>(
@@ -206,12 +221,7 @@ function createSyncWithIdHelper<ID, ID_LIKE extends ID, DATA extends ID_LIKE>(
         if ( handler !== undefined ) {
             handler(error, operation, id, dispatch);
         }
-        if ( error instanceof ApiError ) {
-            dispatch(messagesActions.reportError(error.message));
-            return ThunkRejectReasons.ApiError;
-        } else {
-            internalError(error.toString());
-        }
+        return handleGenericError(error, dispatch);
     }
 
     const get = createAsyncThunk<DATA, ID, ThunkApi>(
@@ -428,5 +438,116 @@ export function createUpdatableSyncWithIdReducer<
     return {
         reducer: slice.reducer,
         actions: {...slice.actions, ...helper, create, update, remove},
+    }
+}
+
+
+export class ImpossibleMerge extends Error {}
+
+
+export interface PushSyncDescriptor<DATA, UPDATE> extends GenericSyncDescriptor<DATA> {
+    api: WriteOnlyApi<DATA>,
+    merge(a: DATA, b: DATA): DATA,
+    getDataFromUpdate(update: UPDATE, state: RootState): DATA,
+    errorHandler?: (
+        error: Error,
+        operation: Operation,
+        dispatch: GenericDispatch
+    ) => void,
+}
+
+interface PushSyncSetupActions<DATA, UPDATE> extends GenericSyncSetupActions {
+    put: AsyncThunk<DATA, UPDATE, ThunkApi>,
+}
+
+interface PushSyncSetup<DATA, UPDATE> {
+    reducer: Reducer<DATA|null>,
+    actions: PushSyncSetupActions<DATA, UPDATE>,
+}
+
+
+export function createPushSyncReducer<DATA, UPDATE>(
+    descriptor: PushSyncDescriptor<DATA, UPDATE>
+): PushSyncSetup<DATA, UPDATE> {
+    const name = descriptor.name;
+    const handleError = getErrorHandlerWithoutId(descriptor);
+
+    const put = createAsyncThunk<DATA, UPDATE, ThunkApi>(
+        name + '/put',
+        async (update: UPDATE, thunkApi) => {
+            const dispatch = thunkApi.dispatch;
+            const getState = thunkApi.getState;
+            const rejectWithValue = thunkApi.rejectWithValue;
+
+            const state = getState();
+            const oldData = descriptor.getMyOwnState(state);
+            const newData = descriptor.getDataFromUpdate(update, state);
+            if ( oldData === null ) {
+                return newData;
+            }
+            try {
+                return descriptor.merge(oldData, newData);
+            }
+            catch(error) {
+                if ( error instanceof ImpossibleMerge ) {
+                    try {
+                        await descriptor.api.create(oldData);
+                        return newData;
+                    }
+                    catch (e) {
+                        return rejectWithValue(handleError(error as Error, Operation.PUT, dispatch));
+                    }
+                } else {
+                    throw error;
+                }
+            }
+        }
+    );
+
+    const sync = createAsyncThunk<DATA | null, SyncFinisher, ThunkApi>(
+        name + '/sync',
+        async (finishSync, thunkApi) => {
+            const dispatch = thunkApi.dispatch;
+            const getState = thunkApi.getState;
+            const rejectWithValue = thunkApi.rejectWithValue;
+
+            const state = getState();
+            const oldData= descriptor.getMyOwnState(state);
+            try {
+                if ( oldData ) {
+                    await descriptor.api.create(oldData);
+                }
+                return null;
+            }
+            catch (error) {
+                return rejectWithValue(handleError(error as Error, Operation.PUT, dispatch));
+            }
+            finally {
+                finishSync();
+            }
+        }
+    );
+
+    const slice = createSlice({
+        name,
+        initialState: null as DATA | null,
+        reducers: {
+            invalidate: () => null,
+        },
+        extraReducers: builder => {
+            builder.addCase(put.fulfilled, (state, action: PayloadAction<DATA>) => action.payload)
+            builder.addCase(sync.fulfilled, () => null)
+            builder.addCase(put.rejected, () => null)
+        },
+    });
+
+    const startSync = getStartSyncThunk(descriptor, sync);
+    const stopSync = getStopSyncThunk(descriptor);
+
+    return {
+        reducer: slice.reducer,
+        actions: {...slice.actions,
+            put, startSync, stopSync
+        },
     }
 }

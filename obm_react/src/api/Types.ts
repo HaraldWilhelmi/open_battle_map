@@ -133,6 +133,11 @@ export interface PointerAction {
     uuid: string,
 }
 
+export interface PostPointerActionRequest extends PointerAction {
+    map_set_uuid: string,
+    battle_map_uuid: string,
+}
+
 
 export const OFF_MAP_POSITION: Coordinate = {
     x: -1,
@@ -165,12 +170,12 @@ export type TokenSet = TokenDescriptor[];
 
 
 
-export interface  GenericApiDescriptor {
+export interface GenericApiDescriptor {
     name: string,
     baseUrl: string,
 }
 
-export interface ReadonlyApiDescriptor extends GenericApiDescriptor {
+export interface GenericApiWithoutIdDescriptor extends GenericApiDescriptor {
     detectSpecialErrors?: (response: UnpackedResponse, operation: Operation) => void,
 }
 
@@ -181,15 +186,22 @@ export interface IdDescriptor<ID, ID_LIKE extends ID> {
     detectSpecialErrors?: (response: UnpackedResponse, operation: Operation, id: ID | undefined) => void,
 }
 
-export interface ApiWithIdDescriptor<ID, ID_LIKE extends  ID>
+export interface GenericApiWithIdDescriptor<ID, ID_LIKE extends  ID>
     extends GenericApiDescriptor, IdDescriptor<ID, ID_LIKE> {}
 
+export interface GenericApiWithoutId extends GenericApiWithoutIdDescriptor {
+    myCheckedUnpack: (response: Response, operation: Operation) => Promise<UnpackedResponse>,
+}
 
-export interface ReadonlyApi<DATA> extends ReadonlyApiDescriptor {
+export interface ReadonlyApi<DATA> extends GenericApiWithoutId {
     get: () => Promise<DATA>,
 }
 
-export interface ReadonlyApiWithId<ID, ID_LIKE extends ID, DATA extends ID_LIKE> extends ApiWithIdDescriptor<ID, ID_LIKE> {
+export interface WriteOnlyApi<CREATE> extends GenericApiWithoutId {
+    create: (data: CREATE) => Promise<void>,
+}
+
+export interface ReadonlyApiWithId<ID, ID_LIKE extends ID, DATA extends ID_LIKE> extends GenericApiWithIdDescriptor<ID, ID_LIKE> {
     get: (id: ID) => Promise<DATA>,
     myCheckedUnpack: (response: Response, operation: Operation, id: ID|undefined) => any,
 }

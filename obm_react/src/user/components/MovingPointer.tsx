@@ -33,11 +33,10 @@ export function MovingPointer(props: Props) {
     const keyframes = getKeyFrames(props.move);
 
     let positionOnScreen = getMapFramePositionFromMapPosition(mapProperties, props.move.position);
-
     return <Positioner position={positionOnScreen}>
         <Animator
             id={'pointer-' + props.move.uuid}
-            animation="0.1s linear"
+            animation="0.05s linear"
             keyframes={keyframes}
         >
             <Pointer color={props.move.color} fades={true} onAnimationEnd={props.finish} />

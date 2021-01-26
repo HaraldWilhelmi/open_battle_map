@@ -117,13 +117,14 @@ class ManagedBattleMap(BattleMap):
         if len(updates) > 0:
             return updates
 
-        waiter = asyncio.create_task(
-            self._history_waiting()
-        )
-        self._all_update_waiters.append(waiter)
-        await waiter
-
-        return self.get_history(since)
+        try:
+            waiter = asyncio.create_task(
+                self._history_waiting()
+            )
+            self._all_update_waiters.append(waiter)
+            await waiter
+        finally:
+            return self.get_history(since)
 
     def _release_waiters(self):
         for waiter in self._all_update_waiters:

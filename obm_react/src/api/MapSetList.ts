@@ -1,9 +1,9 @@
-import {MapSetList, Operation, AdminSecretRequired} from './Types';
+import {MapSetList, AdminSecretRequired} from './Types';
 import {createReadonlyApi} from './Tools';
 import {UnpackedResponse} from "./UnpackResponse";
 
 
-function detectSpecialErrors(response: UnpackedResponse, operation: Operation) {
+function detectSpecialErrors(response: UnpackedResponse) {
     if ( response.status === 401 ) {
         throw new AdminSecretRequired();
     }

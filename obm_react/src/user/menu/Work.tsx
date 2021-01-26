@@ -33,7 +33,7 @@ export function Work() {
 
     let myUploadMapSet = (file: File) => {
         handleUserAction(async () => {
-            await uploadMapSetArchive(mapSet, file, dispatch);
+            await uploadMapSetArchive(mapSet, file);
             await refreshBattleMapSelector();
             await refreshMapBackground();
             await refreshTokens();
@@ -43,7 +43,7 @@ export function Work() {
 
     let myUploadBackground = (file: File) => {
         handleUserAction(async () => {
-            await postImageData(battleMap, file, dispatch);
+            await postImageData(battleMap, file);
             await refreshMapBackground();
             dispatch(actions.mapProperties.reset());
         }, dispatch);

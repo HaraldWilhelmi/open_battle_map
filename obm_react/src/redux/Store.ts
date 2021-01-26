@@ -12,6 +12,7 @@ import mouseReducer, {mouseActions} from './reducers/Mouse';
 import tokensReducer, {tokensActions} from './reducers/Tokens';
 import localTokenActionTrackReducer, {localTokenActionTrackActions} from "./reducers/LocalTokenActionTrack";
 import actionHistoryReducer, {actionHistoryActions} from "./reducers/ActionHistory";
+import pointerActionReducer, {pointerActionActions} from "./reducers/PointerAction";
 
 export const store = configureStore({
     reducer: combineReducers({
@@ -27,6 +28,7 @@ export const store = configureStore({
         tokens: tokensReducer,
         localTokenActionTrack: localTokenActionTrackReducer,
         actionHistory: actionHistoryReducer,
+        pointerAction: pointerActionReducer,
     })
 });
 
@@ -43,6 +45,7 @@ export const actions = {
     tokens: tokensActions,
     localTokenActionTrack: localTokenActionTrackActions,
     actionHistory: actionHistoryActions,
+    pointerAction: pointerActionActions,
 };
 
 export default store;

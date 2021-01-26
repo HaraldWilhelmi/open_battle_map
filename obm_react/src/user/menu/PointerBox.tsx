@@ -5,7 +5,7 @@ import Pointer from "../components/Pointer";
 import {isEasyExitMouseMode} from "../tools/Mouse";
 
 
-export function TokenBox() {
+export function PointerBox() {
     const dispatch: GenericDispatch = useDispatch();
 
     const mouse = useSelector(
@@ -23,6 +23,7 @@ export function TokenBox() {
             color={color}
             onClick={() => selectPointer(color)}
             fades={false}
+            key={color}
         />
     );
 
@@ -36,4 +37,4 @@ export function TokenBox() {
     );
 }
 
-export default TokenBox;
+export default PointerBox;

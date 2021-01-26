@@ -1,7 +1,7 @@
 import {MouseEvent, useEffect, useState, WheelEvent} from 'react';
 import CSS from 'csstype';
 import {useDispatch, useSelector} from 'react-redux';
-import {Coordinate, OFF_MAP_POSITION, PointerAction} from '../../api/Types';
+import {Coordinate, OFF_MAP_POSITION} from '../../api/Types';
 import {GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {
@@ -12,15 +12,12 @@ import {
     ZOOM_INCREMENT
 } from '../tools/Map';
 import {handleUserAction} from "../../common/Tools";
-import {postPointerAction} from "../../api/ActionHistory";
 import Measurement from "../components/Measurement";
 import Positioner from "../components/Positioner";
 import Pointer from "../components/Pointer";
 
 
 const INITIAL_MEASUREMENT_POSITION: Coordinate | null = null;
-const INITIAL_POINTER_POSITION: Coordinate | null = null;
-const MIN_POINTER_ACTION_DELAY_MS = 100;
 
 
 interface Props {
@@ -30,8 +27,8 @@ interface Props {
 export function MapFrame(props: Props) {
     const [measurementPosition, setMeasurementPosition] = useState(INITIAL_MEASUREMENT_POSITION);
     const [pointerIsVisible, setPointerIsVisible] = useState(false);
-    const [pointerPosition, setPointerPosition] = useState(INITIAL_POINTER_POSITION);
-    const [lastPointerActionTime, setLastPointerActionTime] = useState(0);
+    const [pointerPosition, setPointerPosition] = useState(OFF_MAP_POSITION);
+    const [pendingPointerMove, setPendingPointerMove] = useState(false);
     const [lastMouseMode, setLastMouseMode] = useState(MouseMode.Default);
 
     const dispatch: GenericDispatch = useDispatch();
@@ -69,18 +66,31 @@ export function MapFrame(props: Props) {
             if ( mouse.mode === lastMouseMode ) {
                 return undefined;
             }
-            if ( lastMouseMode === MouseMode.Pointer && pointerIsVisible ) {
-                const action: PointerAction = {
-                    position: OFF_MAP_POSITION,
-                    color: mouse.pointerColor ?? 'Black',
-                    uuid: mouse.pointerUuid ?? 'x',
-                };
-                handleUserAction(() => postPointerAction(battleMap, action), dispatch);
+            if ( lastMouseMode === MouseMode.Pointer && pointerPosition !== OFF_MAP_POSITION ) {
+                setPointerPosition(OFF_MAP_POSITION);
+                setPendingPointerMove(true);
             }
             setLastMouseMode(mouse.mode);
             return undefined;
         },
-        [mouse, lastMouseMode, pointerIsVisible, battleMap, dispatch]
+        [mouse, lastMouseMode, pointerPosition, battleMap, dispatch]
+    );
+
+    useEffect(
+        () => {
+            if ( ! pendingPointerMove ) {
+                return undefined;
+            }
+
+            handleUserAction(
+                async () => { dispatch(actions.pointerAction.put(pointerPosition)); },
+                dispatch
+            );
+
+            setPendingPointerMove(false);
+            return undefined;
+        },
+        [pointerPosition, dispatch, pendingPointerMove]
     );
 
     const doClick = (event: MouseEvent) => {
@@ -115,6 +125,10 @@ export function MapFrame(props: Props) {
             }
             case MouseMode.Pointer: {
                 dispatch(actions.mouse.stopPointer());
+                if ( pointerPosition !== OFF_MAP_POSITION ) {
+                    setPointerPosition(OFF_MAP_POSITION);
+                    setPendingPointerMove(true);
+                }
                 break;
             }
             default: {break}
@@ -142,20 +156,15 @@ export function MapFrame(props: Props) {
     };
 
     const movePointer = (event: MouseEvent) => {
-        const position = getMouseMapPosition(event);
-        setPointerPosition(position);
-        if ( mouse.mode === MouseMode.Pointer ) {
-            const now = Date.now();
-            if ( now < lastPointerActionTime + MIN_POINTER_ACTION_DELAY_MS ) {
-                return;
+        if ( mouse.mode === MouseMode.Pointer && pointerIsVisible ) {
+            const position = getMouseMapPosition(event);
+            setPointerPosition(position);
+            setPendingPointerMove(true);
+        } else {
+            if ( pointerPosition !== OFF_MAP_POSITION ) {
+                setPointerPosition(OFF_MAP_POSITION);
+                setPendingPointerMove(true);
             }
-            const action: PointerAction = {
-                position,
-                color: mouse.pointerColor ?? 'Black',
-                uuid: mouse.pointerUuid ?? 'x',
-            };
-            handleUserAction(() => postPointerAction(battleMap, action), dispatch);
-            setLastPointerActionTime(now);
         }
     }
 
@@ -171,13 +180,9 @@ export function MapFrame(props: Props) {
     const doMouseLeave = () => {
         stopTrackDistance();
         setPointerIsVisible(false);
-        if ( mouse.mode === MouseMode.Pointer ) {
-            const action: PointerAction = {
-                position: OFF_MAP_POSITION,
-                color: mouse.pointerColor ?? 'Black',
-                uuid: mouse.pointerUuid ?? 'x',
-            };
-            handleUserAction(() => postPointerAction(battleMap, action), dispatch);
+        if ( pointerPosition !== OFF_MAP_POSITION ) {
+            setPointerPosition(OFF_MAP_POSITION);
+            setPendingPointerMove(true);
         }
     };
 

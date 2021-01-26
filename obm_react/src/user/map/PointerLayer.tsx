@@ -28,13 +28,13 @@ export function PointerLayer() {
 
     useEffect( // Reset pointer list if battle map was switched
         () => {
-            if ( battleMap === null ) {
+            if (battleMap === null) {
                 if (pointerList.length > 0) {
                     setPointerList(INITIAL_POINTER_LIST);
                     setMapSetUuid('');
                     setBattleMapUuid('');
                 }
-            } else if ( battleMap.uuid !== battleMapUuid
+            } else if (battleMap.uuid !== battleMapUuid
                 || battleMap.map_set_uuid !== mapSetUuid
             ) {
                 if (pointerList.length > 0) {
@@ -50,19 +50,19 @@ export function PointerLayer() {
 
     useEffect( // Process recent Actions
         () => {
-            if ( actionHistory === null || actionHistory.last_action_index <= lastActionIndex ) {
+            if (actionHistory === null || actionHistory.last_action_index <= lastActionIndex) {
                 return undefined;
             }
             let updatedList: PointerMove[] | null = null;
-            for ( let action of actionHistory.pointer_actions ) {
-                if ( action.uuid !== mouse.pointerUuid ) {
-                    if ( updatedList === null ) {
+            for (let action of actionHistory.pointer_actions) {
+                if (action.uuid !== mouse.pointerUuid) {
+                    if (updatedList === null) {
                         updatedList = [...pointerList];
                     }
                     updatedList = updatePointerList(updatedList, action);
                 }
             }
-            if ( updatedList !== null ) {
+            if (updatedList !== null) {
                 setPointerList(updatedList);
             }
             setLastActionIndex(actionHistory.last_action_index);
@@ -73,15 +73,15 @@ export function PointerLayer() {
 
     function updatePointerList(list: PointerMove[], action: PointerAction) {
         const index = list.findIndex((x) => x.uuid === action.uuid);
-        if ( index >= 0 ) {
+        if (index >= 0) {
             const fromPosition = list[index].position;
             list[index].position = action.position;
             list[index].fromPosition = fromPosition;
-            if ( isOffMap(action.position) ) {
+            if (isOffMap(action.position)) {
                 list.splice(index, 1);
             }
         } else {
-            if ( ! isOffMap(action.position) ) {
+            if (!isOffMap(action.position)) {
                 const newAction: PointerMove = {...action, fromPosition: action.position};
                 list.push(newAction);
             }
@@ -91,14 +91,18 @@ export function PointerLayer() {
 
     function removePointer(uuid: string): void {
         const index = pointerList.findIndex((x) => x.uuid === uuid);
-        if ( index >= 0 ) {
-            const newList = [...pointerList.slice(0, index), ...pointerList.slice(index+1)];
+        if (index >= 0) {
+            const newList = [...pointerList.slice(0, index), ...pointerList.slice(index + 1)];
             setPointerList(newList);
         }
     }
 
     const movingPointers = pointerList.map(
-        x => <MovingPointer move={x} key={x.uuid} finish={() => removePointer(x.uuid)}/>
+        p => <MovingPointer
+            move={p}
+            key={p.uuid + '/' + p.position.x + '/' + p.position.y}
+            finish={() => removePointer(p.uuid)}
+        />
     );
 
     return <div className="token-container">

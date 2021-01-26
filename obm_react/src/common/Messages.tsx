@@ -3,7 +3,6 @@ import {MessageCategory} from '../redux/Types';
 import {RootState} from '../redux/Types';
 import './Messages.css';
 
-interface Props {}
 
 function cssForCategory(category: MessageCategory) {
     switch(category) {
@@ -12,7 +11,7 @@ function cssForCategory(category: MessageCategory) {
     }
 }
 
-const Messages = (props: Props) => {
+const Messages = () => {
     let items = useSelector((state: RootState) => state.messages);
     let messages = items.map(
         (item, index) => (

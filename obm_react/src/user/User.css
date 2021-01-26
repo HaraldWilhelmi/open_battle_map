@@ -53,10 +53,12 @@
 
 .laser-pointer {
     pointer-events: none;
+    transform: translate(0, 0);
 }
 
 .laser-pointer-fading {
     pointer-events: none;
     animation-name: laser-pointer-fading;
     animation-duration: 100s;
+    transform: translate(0, 0);
 }
