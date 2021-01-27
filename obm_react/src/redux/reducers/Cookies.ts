@@ -23,7 +23,11 @@ export const slice = createSlice({
             if ( adminSecret === undefined ) {
                 cookies.remove(CookieNames.obm_admin_secret);
             } else {
-                cookies.set(CookieNames.obm_admin_secret, action.payload, {maxAge: 31622400});
+                cookies.set(
+                    CookieNames.obm_admin_secret,
+                    action.payload,
+                    {maxAge: 31622400, sameSite: 'strict'}
+                );
             }
             return newState;
         },
