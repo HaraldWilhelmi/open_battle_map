@@ -1,7 +1,8 @@
-import {MapSetId, MapSetUpdate, MapSetCreate, MapSet, Operation, AdminSecretRequired} from '../../api/Types';
+import {MapSetId, MapSetCreate, MapSet, AdminSecretRequired} from '../../api/Types';
 import {mapSetApi} from '../../api/MapSet';
+import {Operation} from "../../api/ApiTools";
 import {GenericDispatch, Mode, RootState} from '../Types';
-import {createUpdatableSyncWithIdReducer} from '../Tools';
+import {createUpdatableSyncReducer} from '../ReduxTools';
 import {modeActions} from './Mode';
 
 function errorHandler(
@@ -15,12 +16,13 @@ function errorHandler(
     }
 }
 
-const setup = createUpdatableSyncWithIdReducer<MapSetId, MapSetUpdate, MapSetCreate, MapSet>({
+const setup = createUpdatableSyncReducer<MapSet, MapSetId, MapSetId, MapSetCreate>({
     name: 'mapSet',
+    syncPeriodInMs: 60 * 1000,
     api: mapSetApi,
+    getInitialState: (id: MapSetId) => mapSetApi.get(id),
     getMyOwnState: (state: RootState) => state.mapSet,
     errorHandler,
-    syncPeriodInMs: 60 * 1000,
 });
 
 export const mapSetActions = setup.actions;

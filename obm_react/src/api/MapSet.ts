@@ -1,26 +1,31 @@
-import {
-    MapSetId, MapSetUpdate, MapSetCreate, MapSet, Operation,
-    AdminSecretRequired, MapSetNotFound
-} from './Types';
-import {createUpdatableApiWithId} from './Tools';
+import {MapSetId, MapSetUpdate, MapSetCreate, MapSet, AdminSecretRequired, MapSetNotFound} from './Types';
+import {createUpdatableApi, Operation} from './ApiTools';
 import {UnpackedResponse} from "./UnpackResponse";
+import {Result} from "../common/Result";
 
 
-function detectSpecialErrors(response: UnpackedResponse, _op: Operation, _id: MapSetId|undefined) {
+function detectSpecialErrors(response: UnpackedResponse, _op: Operation, _id: MapSetId|undefined): Result<void> {
     if ( response.status === 404 ) {
-        throw new MapSetNotFound();
+        return  new MapSetNotFound();
     }
     if ( response.status === 401 ) {
-        throw new AdminSecretRequired();
+        return new AdminSecretRequired();
     }
 }
 
 
-export const mapSetApi = createUpdatableApiWithId<MapSetId, MapSetUpdate, MapSetCreate, MapSet>({
+function getUpdateRequestBody(mapSet: MapSet): string {
+    const request: MapSetUpdate = {...mapSet};
+    return JSON.stringify(request);
+}
+
+
+export const mapSetApi = createUpdatableApi<MapSet, MapSetId, MapSetCreate>({
     name: 'Map Set',
     baseUrl: '/api/map_set',
-    isIdOf: (id: MapSetId, idLike: MapSetId) => id.uuid === idLike.uuid,
-    getIdOf: (idLike: MapSetId) => { return {uuid: idLike.uuid}; },
+    matchesContextOf: (id: MapSetId, idLike: MapSetId) => id.uuid === idLike.uuid,
+    getContextOf: (idLike: MapSetId) => { return {uuid: idLike.uuid}; },
     getFetchUri: (id: MapSetId) => '/' + id.uuid,
-    detectSpecialErrors: detectSpecialErrors,
+    detectSpecialErrors,
+    getUpdateRequestBody,
 });

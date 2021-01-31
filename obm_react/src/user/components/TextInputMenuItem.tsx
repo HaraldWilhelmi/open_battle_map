@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import React, {useState, useEffect, ChangeEvent, FormEvent} from 'react';
 import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import FormControl from 'react-bootstrap/FormControl';
@@ -25,11 +25,11 @@ export function TextInputMenuItem(props: Props) {
         [props.initialValue]
     );
 
-    let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let onChange = (event: ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
     };
 
-    let onSubmit = (event: React.FormEvent) => {
+    let onSubmit = (event: FormEvent) => {
         event.preventDefault();
         props.doIt(value);
         setValue(props.initialValue === undefined ? '' : props.initialValue);

@@ -1,7 +1,9 @@
+import {internalError} from "../../common/Tools";
+
 const SHEET_ID = 'dynamic-animation-style-sheet';
 
 
-export function initDynamicAnimations() {
+function initDynamicAnimations() {
     if ( document.getElementById(SHEET_ID) ) {
         return;
     }
@@ -12,12 +14,15 @@ export function initDynamicAnimations() {
 
 
 function getStyleSheet(): CSSStyleSheet {
-    const styleElement = document.getElementById(SHEET_ID) as HTMLStyleElement;
-    if (styleElement?.sheet === null) {
-        throw Error('Dynamic Animations not initialized!');
-    } else {
-        return styleElement.sheet;
+    let styleElement = document.getElementById(SHEET_ID) as HTMLStyleElement;
+    if ( ! styleElement?.sheet ) {
+        initDynamicAnimations();
+        styleElement = document.getElementById(SHEET_ID) as HTMLStyleElement;
     }
+    if ( ! styleElement?.sheet ) {
+        internalError("Failed to initialize Dynamic Animation!");
+    }
+    return styleElement.sheet;
 }
 
 
@@ -38,5 +43,5 @@ export function removeKeyFrames(name: string): void {
             }
         }
     }
-    throw Error("Tried to delete CSS rule '" + name + "', but failed to find it!");
+    internalError("Tried to delete CSS rule '" + name + "', but failed to find it!");
 }

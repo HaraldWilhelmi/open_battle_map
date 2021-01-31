@@ -34,7 +34,7 @@ export const slice = createSlice({
         startMeasurement: (state) => ({
             ...state, mode: MouseMode.MeasureFrom, cursorStyle: 'crosshair', lastSeen: null
         }),
-        selectMeasurementPostion: (state, action: PayloadAction<Coordinate>) => ({
+        selectMeasurementPosition: (state, action: PayloadAction<Coordinate>) => ({
             ...state, mode: MouseMode.MeasureTo, lastSeen: action.payload
         }),
         stopMeasurement: (state) => ({

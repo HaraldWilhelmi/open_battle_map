@@ -18,20 +18,12 @@ function Admin() {
 
     useEffect(
         () => {
-            dispatch(actions.mapSetList.startSync());
+            dispatch(actions.mapSetList.startSync(undefined));
             return () => {
                 dispatch(actions.mapSetList.stopSync());
             };
-        }
-    );
-
-    useEffect(
-        () => {
-            if ( mapSetList === null ) {
-                dispatch(actions.mapSetList.get());
-            }
         },
-        [mapSetList, dispatch]
+        [dispatch]
     );
 
     if ( mapSetList === null ) {

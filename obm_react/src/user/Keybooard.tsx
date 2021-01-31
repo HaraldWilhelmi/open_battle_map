@@ -33,6 +33,7 @@ export function Keyboard() {
                 }
                 if (mouse.mode === MouseMode.Pointer) {
                     dispatch(actions.mouse.stopPointer());
+                    dispatch(actions.pointerAction.stopSync());
                 }
                 break;
             }

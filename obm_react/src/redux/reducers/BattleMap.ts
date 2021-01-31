@@ -1,12 +1,14 @@
 import {battleMapApi} from '../../api/BattleMap';
 import {RootState} from '../Types';
-import {createUpdatableSyncWithIdReducer} from '../Tools';
+import {createUpdatableSyncReducer} from '../ReduxTools';
+import {BattleMapId} from "../../api/Types";
 
-const setup = createUpdatableSyncWithIdReducer({
+const setup = createUpdatableSyncReducer({
     name: 'battleMap',
     api: battleMapApi,
-    getMyOwnState: (state: RootState) => state.battleMap,
     syncPeriodInMs: 60 * 1000,
+    getMyOwnState: (state: RootState) => state.battleMap,
+    getInitialState: async (battleMapId: BattleMapId) => battleMapApi.get(battleMapId),
 });
 
 export const battleMapActions = setup.actions;

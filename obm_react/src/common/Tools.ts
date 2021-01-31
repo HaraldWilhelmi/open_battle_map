@@ -4,7 +4,7 @@ import {actions} from '../redux/Store';
 
 export function internalError(message: string): never {
     const e = new Error(message);
-    console.log('INTERNAL ERROR: ' + message);
+    console.error('INTERNAL ERROR: ' + message);
     console.log(e.stack);
     throw  e;
 }

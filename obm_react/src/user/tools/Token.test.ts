@@ -7,7 +7,6 @@ const NO_TOKENS: Tokens = {
     placedTokens: [],
     actingTokens: [],
     flyingToken: null,
-    flyingTokenIsNew: false,
 };
 
 const SAMPLE_ACTION: TokenAction = {

@@ -1,3 +1,5 @@
+import {ChangeEvent} from "react";
+
 //
 // This component is slightly magical:
 //
@@ -21,6 +23,7 @@
 //    onChange event ...).
 //
 
+
 interface Props {
     label: string,
     accept: string,
@@ -29,7 +32,7 @@ interface Props {
 }
 
 export function UploadMenuItem(props: Props) {
-    let onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let onChange = (event: ChangeEvent<HTMLInputElement>) => {
         if ( event?.target?.files?.[0] ) {
             let file = event.target.files[0];
             props.doIt(file);

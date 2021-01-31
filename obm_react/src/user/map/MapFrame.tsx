@@ -1,7 +1,7 @@
 import {MouseEvent, useEffect, useState, WheelEvent} from 'react';
 import CSS from 'csstype';
 import {useDispatch, useSelector} from 'react-redux';
-import {Coordinate, OFF_MAP_POSITION} from '../../api/Types';
+import {Coordinate} from '../../api/Types';
 import {GenericDispatch, MapZoom, MouseMode, RootState} from '../../redux/Types';
 import {actions} from '../../redux/Store';
 import {
@@ -11,13 +11,13 @@ import {
     getRotationFromTarget,
     ZOOM_INCREMENT
 } from '../tools/Map';
-import {handleUserAction} from "../../common/Tools";
 import Measurement from "../components/Measurement";
 import Positioner from "../components/Positioner";
 import Pointer from "../components/Pointer";
+import {hidePointer, movePointer, switchOffPointer} from "../tools/Pointer";
 
 
-const INITIAL_MEASUREMENT_POSITION: Coordinate | null = null;
+const NULL_COORDINATE: Coordinate | null = null;
 
 
 interface Props {
@@ -25,11 +25,8 @@ interface Props {
 }
 
 export function MapFrame(props: Props) {
-    const [measurementPosition, setMeasurementPosition] = useState(INITIAL_MEASUREMENT_POSITION);
-    const [pointerIsVisible, setPointerIsVisible] = useState(false);
-    const [pointerPosition, setPointerPosition] = useState(OFF_MAP_POSITION);
-    const [pendingPointerMove, setPendingPointerMove] = useState(false);
-    const [lastMouseMode, setLastMouseMode] = useState(MouseMode.Default);
+    const [measurementPosition, setMeasurementPosition] = useState(NULL_COORDINATE);
+    const [pointerPosition, setPointerPosition] = useState(NULL_COORDINATE);
 
     const dispatch: GenericDispatch = useDispatch();
 
@@ -45,8 +42,13 @@ export function MapFrame(props: Props) {
         (state: RootState) => state.tokens
     );
 
-    const battleMap = useSelector(
-        (state: RootState) => state.battleMap
+    useEffect(
+        () => {
+            if ( mouse.mode !== MouseMode.Pointer && pointerPosition ) {
+                setPointerPosition(null);
+            }
+            return undefined;
+        }, [mouse, pointerPosition]
     );
 
     const doZoom = (event: WheelEvent) => {
@@ -60,38 +62,6 @@ export function MapFrame(props: Props) {
         x: event.nativeEvent.offsetX,
         y: event.nativeEvent.offsetY,
     });
-
-    useEffect(
-        () => {
-            if ( mouse.mode === lastMouseMode ) {
-                return undefined;
-            }
-            if ( lastMouseMode === MouseMode.Pointer && pointerPosition !== OFF_MAP_POSITION ) {
-                setPointerPosition(OFF_MAP_POSITION);
-                setPendingPointerMove(true);
-            }
-            setLastMouseMode(mouse.mode);
-            return undefined;
-        },
-        [mouse, lastMouseMode, pointerPosition, battleMap, dispatch]
-    );
-
-    useEffect(
-        () => {
-            if ( ! pendingPointerMove ) {
-                return undefined;
-            }
-
-            handleUserAction(
-                async () => { dispatch(actions.pointerAction.put(pointerPosition)); },
-                dispatch
-            );
-
-            setPendingPointerMove(false);
-            return undefined;
-        },
-        [pointerPosition, dispatch, pendingPointerMove]
-    );
 
     const doClick = (event: MouseEvent) => {
         switch ( mouse.mode ) {
@@ -116,7 +86,7 @@ export function MapFrame(props: Props) {
             }
             case MouseMode.MeasureFrom: {
                 const mapFrom = getMouseMapPosition(event);
-                dispatch(actions.mouse.selectMeasurementPostion(mapFrom));
+                dispatch(actions.mouse.selectMeasurementPosition(mapFrom));
                 break;
             }
             case MouseMode.MeasureTo: {
@@ -124,11 +94,7 @@ export function MapFrame(props: Props) {
                 break;
             }
             case MouseMode.Pointer: {
-                dispatch(actions.mouse.stopPointer());
-                if ( pointerPosition !== OFF_MAP_POSITION ) {
-                    setPointerPosition(OFF_MAP_POSITION);
-                    setPendingPointerMove(true);
-                }
+                switchOffPointer(dispatch);
                 break;
             }
             default: {break}
@@ -155,40 +121,36 @@ export function MapFrame(props: Props) {
         }
     };
 
-    const movePointer = (event: MouseEvent) => {
-        if ( mouse.mode === MouseMode.Pointer && pointerIsVisible ) {
+    const ourMovePointer = (event: MouseEvent) => {
+        if ( mouse.mode === MouseMode.Pointer ) {
             const position = getMouseMapPosition(event);
             setPointerPosition(position);
-            setPendingPointerMove(true);
-        } else {
-            if ( pointerPosition !== OFF_MAP_POSITION ) {
-                setPointerPosition(OFF_MAP_POSITION);
-                setPendingPointerMove(true);
-            }
+            movePointer(position, dispatch);
         }
     }
 
     const doMouseMove = (event: MouseEvent) => {
         trackDistance(event);
-        movePointer(event);
+        ourMovePointer(event);
     };
 
-    const doMouseEnter = () => {
-        setPointerIsVisible(true);
+    const doMouseEnter = (event: MouseEvent) => {
+        ourMovePointer(event);
     };
 
     const doMouseLeave = () => {
         stopTrackDistance();
-        setPointerIsVisible(false);
-        if ( pointerPosition !== OFF_MAP_POSITION ) {
-            setPointerPosition(OFF_MAP_POSITION);
-            setPendingPointerMove(true);
+        if ( mouse.mode === MouseMode.Pointer ) {
+            if ( pointerPosition ) {
+                setPointerPosition(null);
+            }
+            hidePointer(dispatch);
         }
     };
 
     let myPointer = <div />;
-    if ( mouse.mode === MouseMode.Pointer && pointerIsVisible && pointerPosition !== null ) {
-        const position = getMapFramePositionFromMapPosition(mapProperties, pointerPosition)
+    if ( pointerPosition ) {
+        const position = getMapFramePositionFromMapPosition(mapProperties, pointerPosition);
         myPointer = <Positioner position={position}>
             <Pointer color={mouse.pointerColor ?? 'Black'} fades={true} key={position.x + 10000 * position.y} />
         </Positioner>;

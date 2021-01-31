@@ -1,8 +1,8 @@
 import {useDispatch, useSelector} from 'react-redux';
-import {GenericDispatch, RootState} from '../../redux/Types';
-import {actions} from '../../redux/Store';
+import {GenericDispatch, MouseMode, RootState} from '../../redux/Types';
 import Pointer from "../components/Pointer";
 import {isEasyExitMouseMode} from "../tools/Mouse";
+import {changePointerColor, switchOnPointer} from "../tools/Pointer";
 
 
 export function PointerBox() {
@@ -13,8 +13,10 @@ export function PointerBox() {
     );
 
     const selectPointer = (color: string) => {
-        if ( isEasyExitMouseMode(mouse.mode) ) {
-            dispatch(actions.mouse.startPointer(color));
+        if ( mouse.mode === MouseMode.Pointer ) {
+            changePointerColor(color, dispatch);
+        } else if ( isEasyExitMouseMode(mouse.mode) ) {
+            switchOnPointer(color, dispatch);
         }
     }
 

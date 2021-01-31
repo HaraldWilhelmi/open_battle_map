@@ -1,6 +1,9 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {v4 as uuidV4} from "uuid";
-import {SyncDescriptor, SyncState, SyncStateItem, ThunkApi, Timer} from '../Types';
+import {SyncDescriptor, SyncState, SyncStateItem, ThunkApi, ThunkRejectReasons, Timer} from '../Types';
+import {randomInt} from "crypto";
+import {messagesActions} from "./Messages";
+import {reportApiProblem} from "../../common/ApiLogs";
 
 interface TimerUpdate {
     syncKey: string,
@@ -10,6 +13,8 @@ interface TimerUpdate {
 interface AddSyncer extends TimerUpdate {
     uuid: string,
 }
+
+const MIN_BACKOFF_PERIOD = 60 * 1000;
 
 const INITIAL_STATE: SyncState = {};
 const DEBUG = false;
@@ -59,21 +64,26 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
     async (descriptor: SyncDescriptor<any>, thunkApi) => {
         const dispatch = thunkApi.dispatch;
         const getState = thunkApi.getState;
+        const rejectWithValue = thunkApi.rejectWithValue;
         const delay = descriptor.syncPeriodInMs;
         const syncKey = descriptor.syncKey;
 
         const uuid = uuidV4();
         if ( DEBUG ) {
-            console.log('Syncer ' + syncKey + ' started - ' + uuid);
+            console.log('Syncer ' + syncKey + ' starting - ' + uuid);
         }
         const syncerState = getState().syncer;
         if ( syncKey in syncerState && syncerState[syncKey].isActive ) {
-            const message = 'Syncer "' + syncKey + '" already active!"';
-            console.log(message);
-            throw Error(message);
+            if ( DEBUG ) {
+                console.log('Syncer "' + syncKey + '" already active!"');
+            }
+            return rejectWithValue(ThunkRejectReasons.SyncAlreadyStarted);
         }
 
-        function finishSync() {
+        function finishSync(backOff: boolean = false) {
+             if ( DEBUG ) {
+                 console.log('Syncer ' + syncKey + ' finished run - ' + uuid);
+             }
             const myStateAfter = getState().syncer[syncKey];
             if ( ! myStateAfter.isActive || myStateAfter.uuid !== uuid ) {
                 if ( DEBUG ) {
@@ -81,8 +91,15 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
                 }
                 return false;
             }
+            let actualDelay = delay;
+            if ( backOff ) {
+                actualDelay += MIN_BACKOFF_PERIOD + randomInt(MIN_BACKOFF_PERIOD);
+                const message = 'Syncer ' + syncKey + ' failed - waiting for ' + actualDelay + ' ms before retrying.';
+                reportApiProblem(new Error(message));
+                dispatch(messagesActions.reportError(message));
+            }
             dispatch(slice.actions.stopSync(syncKey));
-            const timer = window.setTimeout(doSync, delay);
+            const timer = window.setTimeout(doSync, actualDelay);
             dispatch(slice.actions.setTimer({syncKey, timer}));
             if ( DEBUG ) {
                 console.log('Syncer ' + syncKey + ' has run - ' + uuid);
@@ -93,8 +110,12 @@ const add = createAsyncThunk<void, SyncDescriptor<any>, ThunkApi>(
 
         function doSync() {
             dispatch(slice.actions.startSync(syncKey));
+             if ( DEBUG ) {
+                 console.log('Syncer ' + syncKey + ' started run - ' + uuid);
+             }
             dispatch(descriptor.syncThunk(finishSync));
         }
+
         const timer = window.setTimeout(doSync, delay);
         dispatch(slice.actions.add({syncKey, timer, uuid}));
     }

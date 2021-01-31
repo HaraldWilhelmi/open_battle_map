@@ -1,7 +1,8 @@
 import {pointerActionApi} from '../../api/ActionHistory';
 import {RootState} from '../Types';
-import {createPushSyncReducer, ImpossibleMerge} from '../Tools';
-import {Coordinate, PostPointerActionRequest} from "../../api/Types";
+import {createPushSyncReducer, ImpossibleMerge} from '../ReduxTools';
+import {Coordinate, OFF_MAP_POSITION, PostPointerActionRequest} from "../../api/Types";
+import {Result} from "../../common/Result";
 
 
 function getDataFromUpdate(position: Coordinate, state: RootState): PostPointerActionRequest {
@@ -15,25 +16,40 @@ function getDataFromUpdate(position: Coordinate, state: RootState): PostPointerA
 }
 
 
-function merge(a: PostPointerActionRequest, b: PostPointerActionRequest): PostPointerActionRequest {
+function merge(a: PostPointerActionRequest, b: PostPointerActionRequest): Result<PostPointerActionRequest> {
     if (
         a.map_set_uuid !== b.map_set_uuid
         || a.battle_map_uuid !== b.battle_map_uuid
         || a.uuid !== b.uuid
     ) {
-        throw new ImpossibleMerge();
+        return new ImpossibleMerge();
     }
     return b;
 }
 
 
-const setup = createPushSyncReducer<PostPointerActionRequest, Coordinate>({
+function isSame(a: PostPointerActionRequest | null, b: PostPointerActionRequest | null): boolean {
+    if ( a === b ) {
+        return true;
+    }
+    return a?.map_set_uuid === b?.map_set_uuid
+        && a?.battle_map_uuid === b?.battle_map_uuid
+        && a?.uuid === b?.uuid
+        && a?.position.x === b?.position.x
+        && a?.position.y === b?.position.y;
+}
+
+
+const setup = createPushSyncReducer({
     name: 'pointerAction',
-    api: pointerActionApi,
-    getMyOwnState: (state: RootState) => state.pointerAction,
     syncPeriodInMs: 20,
+    api: pointerActionApi,
+    getInitialState: async () => null,
+    getMyOwnState: (state: RootState) => state.pointerAction,
+    getFlushData: (state: RootState) => getDataFromUpdate(OFF_MAP_POSITION, state),
     getDataFromUpdate,
     merge,
+    isSame,
 });
 
 export const pointerActionActions = setup.actions;

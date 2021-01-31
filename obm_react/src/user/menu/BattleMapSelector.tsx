@@ -1,19 +1,23 @@
 import {ChangeEvent} from "react";
 import {useDispatch, useSelector} from 'react-redux';
 import {actions} from '../../redux/Store';
-import {RootState, GenericDispatch} from '../../redux/Types';
-import {MapSet, BattleMap, BattleMapId} from '../../api/Types';
+import {GenericDispatch, MouseMode, RootState} from '../../redux/Types';
+import {BattleMapId} from '../../api/Types';
 import {handleUserAction} from "../../common/Tools";
+import {switchOffPointer} from "../tools/Pointer";
 
 
 export function BattleMapSelector() {
     const dispatch: GenericDispatch = useDispatch();
-    let mapSet: MapSet | null = useSelector(
+    const mapSet = useSelector(
         (state: RootState) => state.mapSet
     );
-    let battleMap: BattleMap | null = useSelector(
+    const battleMap = useSelector(
         (state: RootState) => state.battleMap
     );
+    const mouse = useSelector(
+        (state: RootState) => state.mouse
+    )
 
     let selectedValue = 'nada';
     let options = [<option value={selectedValue} key="Dummy">No Battle Maps</option>];
@@ -35,6 +39,9 @@ export function BattleMapSelector() {
             const id: BattleMapId = {uuid: event.target.value, map_set_uuid: mapSet.uuid};
             handleUserAction(
                 async () => {
+                    if ( mouse.mode === MouseMode.Pointer ) {
+                        switchOffPointer(dispatch);
+                    }
                     dispatch(actions.battleMap.get(id));
                     dispatch(actions.mapProperties.reset());
                 },

@@ -4,12 +4,10 @@ import {
     AllTokenStatesResponse,
     ActionHistory,
     ActionHistoryId,
-    Operation,
     TokenActionHistoryExpired,
-    PostPointerActionRequest
 } from './Types';
-import {createReadonlyApiWithId, createWriteOnlyApi} from "./Tools";
-import {UnpackedResponse, unpackCheckedResponse} from "./UnpackResponse";
+import {createReadOnlyApi, createWriteOnlyApi} from "./ApiTools";
+import {unpackCheckedResponse} from "./UnpackResponse";
 import {logRequest} from "../common/ApiLogs";
 
 
@@ -36,9 +34,10 @@ export async function postTokenAction(battleMapId: BattleMapId, action: TokenAct
 }
 
 
-export const pointerActionApi = createWriteOnlyApi<PostPointerActionRequest>({
+export const pointerActionApi = createWriteOnlyApi({
     name: 'Pointer Action',
     baseUrl: '/api/action_history/log_pointer_action',
+    getContextOf: () => undefined,
 });
 
 
@@ -51,21 +50,19 @@ export async function getAllTokens(battleMapId: BattleMapId): Promise<AllTokenSt
 }
 
 
-function detectSpecialErrors(response: UnpackedResponse, _operation: Operation, _id: ActionHistoryId|undefined): void {
-    if ( response.status === 410 ) {
-        throw new TokenActionHistoryExpired();
-    }
-}
-
-
-export const actionHistoryApi = createReadonlyApiWithId<ActionHistoryId, ActionHistory, ActionHistory>({
+export const actionHistoryApi = createReadOnlyApi<ActionHistory, ActionHistoryId>({
     name: 'Action History',
     baseUrl: '/api/action_history/log',
-    isIdOf: (id: ActionHistoryId, idLike: ActionHistoryId) =>
-        id.uuid === idLike.uuid && id.map_set_uuid === idLike.map_set_uuid,
-    getIdOf: (idLike: ActionHistory) => {
-        return {uuid: idLike.uuid, map_set_uuid: idLike.map_set_uuid, since: idLike.last_action_index + 1};
-    },
-    getFetchUri: (id: ActionHistoryId) => '/' + id.map_set_uuid + '/' + id.uuid + '/' + id.since,
-    detectSpecialErrors,
+
+    matchesContextOf: (id, data) =>
+        id.uuid === data.uuid && id.map_set_uuid === data.map_set_uuid,
+    getContextOf: (data) =>
+        ({uuid: data.uuid, map_set_uuid: data.map_set_uuid, since: data.last_action_index + 1}),
+    getFetchUri: (id: ActionHistoryId) =>
+        '/' + id.map_set_uuid + '/' + id.uuid + '/' + id.since,
+    detectSpecialErrors: (response, _operation, _id) => {
+        if (response.status === 410) {
+            return new TokenActionHistoryExpired();
+        }
+    }
 });

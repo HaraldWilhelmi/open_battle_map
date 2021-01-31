@@ -152,6 +152,8 @@ export enum ThunkRejectReasons {
     InconsistentUpdate = 'Inconsistent Update',
     InconsistentRemove = 'Inconsistent Remove',
     ApiError = 'API Error',
+    SyncAlreadyStarted = 'Sync already started',
+    NullTokenDropped = 'Internal Error: Null token dropped',
 }
 
 export interface ThunkApi {
@@ -160,7 +162,7 @@ export interface ThunkApi {
     rejectValue: ThunkRejectReasons,
 }
 
-export type SyncFinisher = () => boolean;
+export type SyncFinisher = (backOff?: boolean) => boolean;
 
 export interface SyncDescriptor<DATA> {
     syncKey: string,

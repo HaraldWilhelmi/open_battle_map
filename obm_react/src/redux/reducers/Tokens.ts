@@ -1,7 +1,16 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {Coordinate, TokenAction, ActionHistoryId, TokenActionType, TokenState} from '../../api/Types';
+import {Coordinate, TokenAction, TokenActionType, TokenState} from '../../api/Types';
 import {getAllTokens, postTokenAction} from '../../api/ActionHistory';
-import {ActingTokenState, FlyingToken, GenericDispatch, MouseMode, RootState, ThunkApi, Tokens} from '../Types';
+import {
+    ActingTokenState,
+    FlyingToken,
+    GenericDispatch,
+    MouseMode,
+    RootState,
+    ThunkApi,
+    ThunkRejectReasons,
+    Tokens
+} from '../Types';
 import {
     endTokenAction,
     getFreeMarkForToken,
@@ -12,6 +21,8 @@ import {
 import {mouseActions} from "./Mouse";
 import {localTokenActionTrackActions} from "./LocalTokenActionTrack";
 import {actions} from "../Store";
+import {handleUserAction} from "../../common/Tools";
+import {reportApiProblem} from "../../common/ApiLogs";
 
 
 const INITIAL_STATE: Tokens = {
@@ -108,8 +119,6 @@ const loadTokensFromServer = createAsyncThunk<void, undefined, ThunkApi>(
             const allTokenStatesResponse = await getAllTokens(battleMap);
             dispatch(localTokenActionTrackActions.reset());
             dispatch(slice.actions.loadTokensFromServer(allTokenStatesResponse.tokens));
-            const tokenActionHistoryId: ActionHistoryId = {...battleMap, since: allTokenStatesResponse.next_action_index};
-            dispatch(actions.actionHistory.get(tokenActionHistoryId));
             dispatch(mouseActions.releaseToken());
         }
     }
@@ -142,13 +151,20 @@ const placeOnMap = createAsyncThunk<void, number | null, ThunkApi>(
 );
 
 async function logAction(state: RootState, action: TokenAction, dispatch: GenericDispatch) {
-    try {
-        await postTokenAction(state.battleMap, action);
-        dispatch(localTokenActionTrackActions.log(action.uuid));
-    } catch (e) {
-        console.log("Warning: Failed to send token token_action - will reload everything from server!")
-        dispatch(loadTokensFromServer());
-    }
+    handleUserAction(
+        async () => {
+            try {
+                dispatch(localTokenActionTrackActions.log(action.uuid));
+                await postTokenAction(state.battleMap, action);
+            } catch (e) {
+                reportApiProblem(e);
+                dispatch(actions.messages.reportError("Warning: Failed to send token token_action - will reload everything from server!"));
+                dispatch(loadTokensFromServer());
+                throw e;
+            }
+        }, dispatch
+    );
+
 }
 
 const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
@@ -156,10 +172,11 @@ const dropIntoBox = createAsyncThunk<void, undefined, ThunkApi>(
     async (_: undefined, thunkApi) => {
         const getState = thunkApi.getState;
         const dispatch = thunkApi.dispatch;
+        const rejectWithValue = thunkApi.rejectWithValue;
         const state = getState();
         const token = state.tokens.flyingToken;
         if (token === null) {
-            throw new Error('This should never happen!')
+            return rejectWithValue(ThunkRejectReasons.NullTokenDropped);
         }
         dispatch(slice.actions.dropIntoBox());
         dispatch(mouseActions.releaseToken());

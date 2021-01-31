@@ -1,11 +1,3 @@
-import {UnpackedResponse} from "./UnpackResponse";
-
-export enum Operation {
-    GET = 'fetch',
-    PUT = 'create',
-    POST = 'update',
-    DELETE = 'delete',
-}
 
 export class MapSetNotFound extends Error {
     constructor() {
@@ -167,54 +159,3 @@ export interface TokenDescriptor {
 }
 
 export type TokenSet = TokenDescriptor[];
-
-
-
-export interface GenericApiDescriptor {
-    name: string,
-    baseUrl: string,
-}
-
-export interface GenericApiWithoutIdDescriptor extends GenericApiDescriptor {
-    detectSpecialErrors?: (response: UnpackedResponse, operation: Operation) => void,
-}
-
-export interface IdDescriptor<ID, ID_LIKE extends ID> {
-    isIdOf: (id: ID, idLike: ID_LIKE) => boolean,
-    getIdOf: (idLike: ID_LIKE) => ID,
-    getFetchUri: (id: ID) => string,
-    detectSpecialErrors?: (response: UnpackedResponse, operation: Operation, id: ID | undefined) => void,
-}
-
-export interface GenericApiWithIdDescriptor<ID, ID_LIKE extends  ID>
-    extends GenericApiDescriptor, IdDescriptor<ID, ID_LIKE> {}
-
-export interface GenericApiWithoutId extends GenericApiWithoutIdDescriptor {
-    myCheckedUnpack: (response: Response, operation: Operation) => Promise<UnpackedResponse>,
-}
-
-export interface ReadonlyApi<DATA> extends GenericApiWithoutId {
-    get: () => Promise<DATA>,
-}
-
-export interface WriteOnlyApi<CREATE> extends GenericApiWithoutId {
-    create: (data: CREATE) => Promise<void>,
-}
-
-export interface ReadonlyApiWithId<ID, ID_LIKE extends ID, DATA extends ID_LIKE> extends GenericApiWithIdDescriptor<ID, ID_LIKE> {
-    get: (id: ID) => Promise<DATA>,
-    myCheckedUnpack: (response: Response, operation: Operation, id: ID|undefined) => any,
-}
-
-export interface UpdatableApiWithId<
-    ID,
-    UPDATE extends ID,
-    CREATE,
-    DATA extends UPDATE & CREATE
->
-    extends ReadonlyApiWithId<ID, UPDATE, DATA>
-{
-    create: (data: CREATE) => Promise<DATA>,
-    update: (data: UPDATE) => Promise<void>,
-    remove: (id: ID) => Promise<void>,
-}
