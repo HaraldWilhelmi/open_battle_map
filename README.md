@@ -180,10 +180,6 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Roadmap
 
-### January 2021
-
- * Add a few more hot keys
-
 ### February 2021
 
  * Vehicles: Tokens that carry/move tokens placed on them.
@@ -201,6 +197,7 @@ Also, I feel guilty that I only wrote so few of them yet.
    For now I go on without that one.
 
 ## Project History
+ * 2021-02-02: **v0.6** - Fixed a few bugs with pointer feature and reworked API/redux interaction
  * 2021-01-19: **v0.5** - Added hotkeys for map move and zoom
  * 2021-01-16: **v0.4** - Laser Pointer feature
  * 2021-01-10: **v0.3** - More tokens and measurement functions.
