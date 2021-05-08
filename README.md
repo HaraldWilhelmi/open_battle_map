@@ -180,14 +180,13 @@ Also, I feel guilty that I only wrote so few of them yet.
 
 ## Roadmap
 
-### February 2021
+Presently I do active development - bug fixing only.
+I have a new hobby someone even pays many for now.
 
+### Someday
  * Vehicles: Tokens that carry/move tokens placed on them.
  * Generic tokens without facing
  * Environment Effect Tokens: Fire, Smoke, Mud
-
-### Someday
-
  * Custom Token Sets: Collections of custom tokens, which can be loaded
    into a Map Set.
 
