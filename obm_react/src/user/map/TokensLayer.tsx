@@ -35,6 +35,7 @@ export function TokensLayer() {
             if (battleMap.uuid !== battleMapUuid || battleMap.map_set_uuid !== mapSetUuid) {
                 setMapSetUuid(battleMap.map_set_uuid);
                 setBattleMapUuid(battleMap.uuid);
+                setLastActionIndex(0);
                 dispatch(actions.tokens.loadTokensFromServer());
             }
             return undefined;
@@ -47,7 +48,7 @@ export function TokensLayer() {
             if ( actionHistory === null ) { return undefined; }
             if ( actionHistory?.battle_map_revision !== battleMap?.revision ) {
                 if ( actionHistory?.battle_map_revision > battleMap?.revision ) {
-                    dispatch(actions.battleMap.get(battleMap))
+                    dispatch(actions.battleMap.get(battleMap));
                 }
             }
             return undefined;
@@ -58,6 +59,9 @@ export function TokensLayer() {
     useEffect( // Process recent Actions
         () => {
             if ( actionHistory === null || actionHistory.last_action_index <= lastActionIndex ) {
+                return undefined;
+            }
+            if ( actionHistory.map_set_uuid !== mapSetUuid || actionHistory.uuid !== battleMap.uuid ) {
                 return undefined;
             }
             for ( let tokenAction of actionHistory.token_actions ) {

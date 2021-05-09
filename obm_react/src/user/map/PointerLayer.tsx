@@ -33,6 +33,7 @@ export function PointerLayer() {
                     setPointerList(INITIAL_POINTER_LIST);
                     setMapSetUuid('');
                     setBattleMapUuid('');
+                    setLastActionIndex(0);
                 }
             } else if (battleMap.uuid !== battleMapUuid
                 || battleMap.map_set_uuid !== mapSetUuid
@@ -42,6 +43,7 @@ export function PointerLayer() {
                 }
                 setMapSetUuid(battleMap.map_set_uuid);
                 setBattleMapUuid(battleMap.uuid);
+                setLastActionIndex(0);
             }
             return undefined;
         },
@@ -51,6 +53,9 @@ export function PointerLayer() {
     useEffect( // Process recent Actions
         () => {
             if (actionHistory === null || actionHistory.last_action_index <= lastActionIndex) {
+                return undefined;
+            }
+            if ( actionHistory.map_set_uuid !== mapSetUuid || actionHistory.uuid !== battleMap.uuid ) {
                 return undefined;
             }
             let updatedList: PointerMove[] | null = null;
