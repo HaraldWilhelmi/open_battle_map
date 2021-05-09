@@ -42,6 +42,7 @@ def get_new_certificate():
         info('Got new certificate.')
         return process.stdout
     else:
+        info(process.stderr)
         info('No new certificate.')
         return None
 
