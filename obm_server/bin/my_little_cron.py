@@ -76,5 +76,5 @@ def rotate_logs():
 while True:
     sleep(MIN_SLEEP_SECONDS + randrange(MIN_SLEEP_SECONDS))
     if environ.get('TLS_DOMAIN') != 'unset':
-        renew_certificate()
+        try_to_renew_cert()
     rotate_logs()
